@@ -1410,7 +1410,6 @@ formatted_*
 **/benchmark
 **/model_zoo
 *ckpt*
-log*
 *.puml.png
 *.puml.eps
 *.puml.svg
