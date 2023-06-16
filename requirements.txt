@@ -1,0 +1,6 @@
+timm
+torch>=1.7.0
+torchvision
+vit-pytorch
+yapf==0.29.0
+tqdm

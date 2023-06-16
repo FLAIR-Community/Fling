@@ -1,7 +1,7 @@
-from torchvision import datasets, transforms
-from functools import reduce
 import os
+
 import numpy as np
+from torchvision import datasets, transforms
 
 
 class DatasetConstructor:
@@ -81,20 +81,3 @@ class DatasetConstructor:
 
         else:
             raise ValueError(f'Dataset: {self.dataset} not implemented.')
-
-
-def calculate_mean_std(train_dataset, test_dataset):
-    if train_dataset[0][0].shape[0] == 1:
-        res = []
-        res_std = []
-        for i in range(len(train_dataset)):
-            sample = train_dataset[i][0]
-            res.append(sample.mean())
-            res_std.append(sample.std())
-
-        for i in range(len(test_dataset)):
-            sample = test_dataset[i][0]
-            res.append(sample.mean())
-            res_std.append(sample.std())
-
-        return reduce(lambda x, y: x + y, res) / len(res), reduce(lambda x, y: x + y, res_std) / len(res)

@@ -1,7 +1,8 @@
 import random
-from torch.utils import data
 import numpy as np
-from utils.nlp_dataset import NLPDataset
+
+from torch.utils import data
+from .nlp_dataset import NLPDataset
 
 support_sampling_method = ['iid', 'dirichlet', 'sequential']
 

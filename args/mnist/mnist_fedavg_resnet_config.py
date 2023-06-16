@@ -1,5 +1,4 @@
 import argparse
-from utils.utils import seed_everything
 
 
 def args_parser():
@@ -26,26 +25,24 @@ def args_parser():
     parser.add_argument('--optimizer', type=str, default='sgd', help='optimizer type')
 
     # model
-    parser.add_argument('--model', type=str, default='swin', help='model name')
-    parser.add_argument('--input_channel', type=int, default=3, help='input channel')
-    parser.add_argument('--class_number', type=int, default=200, help='class channel')
+    parser.add_argument('--model', type=str, default='cnn', help='model name')
+    parser.add_argument('--input_channel', type=int, default=1, help='input channel')
+    parser.add_argument('--class_number', type=int, default=10, help='class channel')
 
     # dataset
-    parser.add_argument('--dataset', type=str, default='imagenet-tiny', help="name of dataset")
+    parser.add_argument('--dataset', type=str, default='mnist', help="name of dataset")
     parser.add_argument('--data_path', type=str, default='./data', help='data path')
     parser.add_argument('--resize', type=int, default=-1, help='resize the input image, -1 means no resizing')
 
     # logging and evaluation
     parser.add_argument('--test_freq', type=int, default=3, help="rounds of testing")
-    parser.add_argument('--logging_path', type=str, default='./logging/imagenet_tiny_swin_avg_iid', help='logging path')
+    parser.add_argument('--logging_path', type=str, default='./logging/mnist_cnn_avg_iid', help='logging path')
 
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
-    from utils.simulator import Simulator
+    from pipeline import general_model_serial_pipeline
     args = args_parser()
-    seed_everything(args.seed)
-    simulator = Simulator(args)
-    simulator.run()
+    general_model_serial_pipeline(args, seed=0)

@@ -1,7 +1,7 @@
-from utils.compressor import *
+from utils.compress_utils import *
 
 
-class ClientPool:
+class ParameterServerGroup:
     """
     A container to hold clients.
     """

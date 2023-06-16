@@ -1,5 +1,4 @@
 import argparse
-from utils.utils import seed_everything
 
 
 def args_parser():
@@ -50,8 +49,7 @@ def args_parser():
 
 
 if __name__ == '__main__':
-    from utils.personalized_simulator import Simulator
+    from pipeline import personalized_model_serial_pipeline
+
     args = args_parser()
-    seed_everything(args.seed)
-    simulator = Simulator(args)
-    simulator.run()
+    personalized_model_serial_pipeline(args, seed=0)

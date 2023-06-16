@@ -1,7 +1,12 @@
+import os
 import pickle
-import torch
-import numpy as np
 import random
+import time
+import warnings
+from functools import reduce
+
+import numpy as np
+import torch
 import torch.nn as nn
 import torch.optim as optim
 
@@ -52,3 +57,54 @@ def seed_everything(seed):
     random.seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
+
+
+def calculate_mean_std(train_dataset, test_dataset):
+    if train_dataset[0][0].shape[0] == 1:
+        res = []
+        res_std = []
+        for i in range(len(train_dataset)):
+            sample = train_dataset[i][0]
+            res.append(sample.mean())
+            res_std.append(sample.std())
+
+        for i in range(len(test_dataset)):
+            sample = test_dataset[i][0]
+            res.append(sample.mean())
+            res_std.append(sample.std())
+
+        return reduce(lambda x, y: x + y, res) / len(res), reduce(lambda x, y: x + y, res_std) / len(res)
+
+
+class Logger:
+
+    def __init__(self, path):
+        self.path = os.path.join(path, 'txt_file.txt')
+        if os.path.exists(path):
+            warnings.warn(f'Logging directory exists. Current directory: {path}')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(self.path, 'w') as f:
+            f.write('Created at ' + time.asctime(time.localtime(time.time())) + '\n')
+
+    def logging(self, s):
+        print(s)
+        with open(self.path, mode='a') as f:
+            f.write('[' + time.asctime(time.localtime(time.time())) + ']    ' + s + '\n')
+
+
+def save_config_file(config: dict, path: str) -> None:
+    """
+    Overview:
+        save configuration to python file
+    Arguments:
+        - config (:obj:`dict`): Config dict
+        - path (:obj:`str`): Path of target yaml
+    """
+    config_string = str(config)
+    from yapf.yapflib.yapf_api import FormatCode
+    config_string, _ = FormatCode(config_string)
+    config_string = config_string.replace('inf,', 'float("inf"),')
+    with open(path, "w") as f:
+        f.write('exp_config = ' + config_string)
+

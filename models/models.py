@@ -4,8 +4,7 @@ from torch import nn
 from vit_pytorch import ViT
 import platform
 
-from models.cifar_resnet import CifarRes
-from models.lorp_resnet import LorpRes
+from models.resnet import CifarRes
 from models.swin_transformer import SwinTransformer
 from models.gpt import GPT, GPTConfig
 
@@ -72,17 +71,8 @@ class ModelConstructor:
         elif self.args.model == 'resnet101':
             return torchvision.models.resnet.resnet101(num_classes=self.args.class_number)
 
-        elif self.args.model == 'cifarres':
+        elif self.args.model == 'resnet_cifar':
             return CifarRes(num_classes=self.args.class_number)
-
-        elif self.args.model == 'lorpres':
-            return LorpRes(
-                self.args.r,
-                self.args.conv_type,
-                self.args.bias,
-                self.args.lorp_res,
-                num_classes=self.args.class_number
-            )
 
         elif self.args.model == 'gpt':
             model_args = dict(
