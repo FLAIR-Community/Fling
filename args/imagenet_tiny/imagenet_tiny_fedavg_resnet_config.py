@@ -36,7 +36,9 @@ def args_parser():
 
     # logging and evaluation
     parser.add_argument('--test_freq', type=int, default=3, help="rounds of testing")
-    parser.add_argument('--logging_path', type=str, default='./logging/imagenet_tiny_resnet_cifar_avg_iid', help='logging path')
+    parser.add_argument(
+        '--logging_path', type=str, default='./logging/imagenet_tiny_resnet_cifar_avg_iid', help='logging path'
+    )
 
     args = parser.parse_args()
     return args

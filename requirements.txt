@@ -4,3 +4,5 @@ torchvision
 vit-pytorch
 yapf==0.29.0
 tqdm
+easydict
+numpy

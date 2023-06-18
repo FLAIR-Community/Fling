@@ -2,9 +2,6 @@ import random
 import numpy as np
 
 from torch.utils import data
-from .nlp_dataset import NLPDataset
-
-support_sampling_method = ['iid', 'dirichlet', 'sequential']
 
 
 class MyDataset(data.Dataset):
@@ -20,16 +17,15 @@ class MyDataset(data.Dataset):
         return len(self.indexes)
 
 
-def sample(method, dataset, client_number, args, alpha=1.):
-    assert method in support_sampling_method
-    if method == 'iid':
-        return iid_sampling(dataset, client_number)
-    elif method == 'dirichlet':
+def data_sampling(dataset, args):
+    if args.data.sample_method.name == 'iid':
+        return iid_sampling(dataset, args.client_num)
+    elif args.data.sample_method.name == 'dirichlet':
         data_labels = np.stack([dataset[i][1] for i in range(len(dataset))], axis=0)
-        indexes = dirichlet_sampling(data_labels, client_number, alpha=alpha)
-        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(client_number)]
-    elif method == 'sequential':
-        return sequential_sampling(dataset, client_number, args)
+        indexes = dirichlet_sampling(data_labels, args.client_num, alpha=args.data.sample_method.alpha)
+        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client_num)]
+    else:
+        raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
 
 
 def iid_sampling(dataset, client_number):
@@ -41,14 +37,6 @@ def iid_sampling(dataset, client_number):
     dict_users[client_number - 1] = all_index
 
     return [MyDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
-
-
-def sequential_sampling(dataset, client_number, args):
-    len_per_client = dataset.shape[0] // client_number
-    return [
-        NLPDataset(dataset[i * len_per_client:(i + 1) * len_per_client], args.batch_size, args.block_size, args.device)
-        for i in range(client_number)
-    ]
 
 
 def dirichlet_sampling(dataset, client_number, alpha):

@@ -1,172 +1,59 @@
 import os
 import tqdm
-import numpy as np
-
 import torch
-from torch.utils import data
-from torch.utils.tensorboard import SummaryWriter
 
 from component.client import Client
 from component.server import Server
 from component.group import ParameterServerGroup
-from utils.data_utils import DatasetConstructor, sample
-from utils import Logger, get_params_number, seed_everything
+from utils.data_utils import DatasetConstructor, data_sampling
+from utils import Logger, seed_everything, compile_config, client_sampling, VariableMonitor
 
 
 def general_model_serial_pipeline(args, seed=0):
     seed_everything(seed)
-    client_pool = ParameterServerGroup(args)
-    tb_logger = SummaryWriter(args.logging_path)
+    args = compile_config(args)
+
+    # Construct logger.
     logger = Logger(args.logging_path)
 
-    # load dataset
+    # Load dataset.
     train_set = DatasetConstructor(args).get_dataset()
     test_set = DatasetConstructor(args).get_dataset(train=False)
-    if 'dataloader_type' in args.__dict__.keys() and args.dataloader_type == 'nlp':
-        test_set = sample(
-            args.sample_method, test_set, args.client_num, alpha=args.alpha, args=args
-        )[0]
+    # Split dataset into clients.
+    train_sets = data_sampling(train_set, args)
 
-    # split dataset into clients. alpha affects the distribution for dirichlet non-iid sampling.
-    # If you don't use dirichlet, this parameter can be omitted.
-    train_sets = sample(
-        args.sample_method, train_set, args.client_num, alpha=args.alpha, args=args
-    )
-
-    # if you need all clients to test locally use next line to split test sets
-    # test_sets = sample(args.sample_method, test_set, args.client_num)
-
-    # initialize clients, assemble datasets
+    # Initialize clients, assemble datasets.
+    group = ParameterServerGroup(args, logger)
+    group.server = Server(args, args.device, test_dataset=test_set)
     for i in range(args.client_num):
-        client_pool.append(Client(train_sets[i], args=args, client_id=i, test_dataset=None))
-    print(client_pool[0].model)
-    logger.logging('All clients initialized.')
-    logger.logging('Parameter number in each model: {:.2f}M'.format(get_params_number(client_pool[0].model) / 1e6))
-
-    # global initialization
-    if args.fed_dict == 'all':
-        glob_dict = client_pool[0].model.state_dict()
-    elif args.fed_dict == 'except_bn':
-        state_dict = client_pool[0].model.state_dict()
-        glob_dict = {}
-        for key in state_dict:
-            if 'downsample.1' not in key and 'bn' not in key:
-                glob_dict[key] = state_dict[key]
-    else:
-        glob_dict = client_pool[0].get_state_dict(args.fed_dict)
-    if args.resume:
-        glob_dict = torch.load('./model_checkpoints/model.ckpt')
-
-    dataloader = data.DataLoader(test_set, batch_size=args.batch_size, shuffle=True)
-    server = Server(args, args.device, dataloader)
-    server.add_attr(name='glob_dict', item=glob_dict)
-    client_pool.server = server
-
-    # set fed keys in each client and init compression settings
-    client_pool.set_fed_keys()
-    client_pool.sync()
-    train_accuracies = []
-    train_losses = []
-    test_accuracies = []
-    test_losses = []
-    trans_costs = []
+        group.append(Client(train_sets[i], args=args, client_id=i))
+    group.initialize()
 
     # training loop
-    for i in range(args.start_round, args.glob_eps):
-        # A communication begins.
-        train_acc = 0
-        train_loss = 0
-        total_client = 0
-        print('Starting round: ' + str(i))
+    for i in range(args.glob_eps):
+        train_monitor = VariableMonitor(['train_acc', 'train_loss'])
+        logger.logging('Starting round: ' + str(i))
 
         # Random sample participated clients in each communication round.
-        participated_clients = np.array(range(args.client_num))
-        participated_clients = sorted(
-            list(
-                np.random.choice(
-                    participated_clients,
-                    int(args.client_sample_rate * participated_clients.shape[0]),
-                    replace=False
-                )
-            )
-        )
+        participated_clients = client_sampling(range(args.client_num), args.client_sample_rate)
 
         # Adjust learning rate.
         cur_lr = args.lr * (args.decay_factor ** i)
         for j in tqdm.tqdm(participated_clients):
-            # Local training in each client.
-            total_client += 1
-            client = client_pool[j]
-            acc, loss = client.train(
-                lr=cur_lr,
-                momentum=args.momentum,
-                optimizer=args.optimizer,
-                loss=args.loss,
-                local_eps=args.loc_eps
-            )
+            train_monitor.append(group.clients[j].train(lr=cur_lr))
 
-            train_acc += acc
-            train_loss += loss
-            # if you need to test locally use next codes
-            # if i % args.test_freq == 0:
-            #    acc, loss = client.test(loss=args.loss)
-            #    test_acc += acc
-            #    test_loss += loss
-
-        # Test before aggregation.
-        if i % args.test_freq == 0:
-            res_dict = server.test(model=client_pool[0].model, loss=args.loss)
-            test_loss, test_acc = res_dict['loss'], res_dict['acc']
-            logger.logging(
-                'epoch:{}, before_test_acc: {:.4f}, before_test_loss: {:.4f}'.format(i, test_acc, test_loss)
-            )
-            for k in res_dict:
-                tb_logger.add_scalar('before_test/{}'.format(k), res_dict[k], i)
-            # Log the differences for features in different clients.
-            # bias_dict = server.check_bias(client_pool=client_pool)
-            # for k in bias_dict:
-            #     tb_logger.add_scalar('bias_check/{}'.format(k), bias_dict[k], i)
         # Aggregation and sync.
-        trans_cost = client_pool.aggregate(i, tb_logger=tb_logger)
+        trans_cost = group.aggregate(i, tb_logger=logger)
 
         # Logging
-        train_accuracies.append(train_acc / total_client)
-        train_losses.append(train_loss / total_client)
-        trans_costs.append(trans_cost)
-        logger.logging(
-            'epoch:{}, train_acc: {:.4f}, train_loss: {:.4f}, trans_cost: {:.4f}M'.format(
-                i, train_accuracies[-1], train_losses[-1], trans_costs[-1] / 1e6
-            )
-        )
-        tb_logger.add_scalar('train/acc', train_accuracies[-1], i)
-        tb_logger.add_scalar('train/loss', train_losses[-1], i)
-        tb_logger.add_scalar('train/lr', cur_lr, i)
+        mean_train_variables = train_monitor.variable_mean()
+        for k in mean_train_variables:
+            logger.add_scalar('train/{}'.format(k), mean_train_variables[k], i)
+        logger.add_scalar('train/trans_cost', trans_cost / 1e6)
+        logger.add_scalar('train/lr', cur_lr, i)
 
         if i % args.test_freq == 0:
-            res_dict = server.test(model=client_pool[0].model, loss=args.loss)
-            test_loss, test_acc = res_dict['loss'], res_dict['acc']
-            test_losses.append(test_loss)
-            test_accuracies.append(test_acc)
-            logger.logging(
-                'epoch:{}, test_acc: {:.4f}, test_loss: {:.4f}'.format(i, test_accuracies[-1], test_losses[-1])
-            )
-
+            res_dict = group.server.test(model=group.clients[0].model, loss=args.loss)
             for k in res_dict:
-                tb_logger.add_scalar('test/{}'.format(k), res_dict[k], i)
-
-            if not os.path.exists('./model_checkpoints'):
-                os.makedirs('./model_checkpoints')
-            torch.save(client_pool.server['glob_dict'], './model_checkpoints/model.ckpt')
-
-            # if you want to test all the training set, use following code.
-            # BE AWARE: the
-            # test_acc, test_loss = server.test(model=client_pool[0].model,
-            #                                   loss=args.loss,
-            #                                   test_loader=data.DataLoader(train_set, batch_size=32, shuffle=True))
-            # logger.logging('epoch:{}, test_acc: {:.4f}, test_loss: {:.4f}'
-            #                .format(i, test_acc, test_loss))
-
-    np.savez(
-        'results', np.array(train_accuracies), np.array(train_losses), np.array(test_accuracies),
-        np.array(test_losses)
-    )
+                logger.add_scalar('test/{}'.format(k), res_dict[k], i)
+            torch.save(group.server['glob_dict'], os.path.join(args.logging_path, 'model.ckpt'))
