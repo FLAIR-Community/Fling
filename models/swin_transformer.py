@@ -13,6 +13,8 @@ from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 WindowProcess = None
 WindowProcessReverse = None
 
+from utils.registry_utils import MODEL_REGISTRY
+
 
 class Mlp(nn.Module):
 
@@ -510,6 +512,7 @@ class PatchEmbed(nn.Module):
         return flops
 
 
+@MODEL_REGISTRY.register('swin')
 class SwinTransformer(nn.Module):
     r""" Swin Transformer
         A PyTorch impl of : `Swin Transformer: Hierarchical Vision Transformer using Shifted Windows`  -

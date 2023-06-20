@@ -3,6 +3,7 @@ import copy
 from easydict import EasyDict
 
 from args.default_config import default_exp_args
+from utils import seed_everything
 
 
 def save_config_file(config: dict, path: str) -> None:
@@ -21,7 +22,8 @@ def save_config_file(config: dict, path: str) -> None:
         f.write('exp_config = ' + config_string)
 
 
-def compile_config(new_config):
+def compile_config(new_config, seed):
+    seed_everything(seed)
     result_config = EasyDict(deep_merge_dicts(new_config, default_exp_args))
     save_config_file(result_config, os.path.join(result_config.other.logging_path, 'total_config.py'))
     return result_config

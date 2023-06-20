@@ -1,10 +1,10 @@
+import math
 import pickle
 import random
 from functools import reduce
 
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 
 
@@ -15,18 +15,6 @@ def get_optimizer(name, lr, momentum, weights):
         return optim.Adam(params=weights, lr=lr)
     else:
         print('Unrecognized optimizer: ' + name)
-        assert False
-
-
-def get_loss(name):
-    if name == 'CrossEntropyLoss':
-        return nn.CrossEntropyLoss()
-    elif name == 'MSE':
-        return nn.MSELoss()
-    elif name == 'gpt':
-        return lambda x, y: x[1]
-    else:
-        print('Unrecognized loss: ' + name)
         assert False
 
 
@@ -100,3 +88,27 @@ def get_finetune_parameters(model, finetune_args):
         if key in use_keys:
             res.append(param)
     return res
+
+
+class LRScheduler:
+    def __init__(self, args):
+        self.args = args.learn.scheduler
+        self.lr = self.args.learn.optimizer.lr
+
+    def get_lr(self, train_round):
+        if self.args.name == 'fix':
+            return self.lr
+        elif self.args.name == 'linear':
+            return self.lr - self.args.decay_coefficient * train_round
+        elif self.args.name == 'exp':
+            return self.lr * (self.args.decay_coefficient ** train_round)
+        elif self.args.name == 'cos':
+            min_lr = self.args.min_lr
+            if train_round > self.args.decay_round:
+                return min_lr
+            decay_ratio = train_round / self.args.decay_round
+            assert 0 <= decay_ratio <= 1
+            coefficient = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))
+            return min_lr + coefficient * (self.lr - min_lr)
+        else:
+            raise ValueError(f'Unrecognized lr scheduler: {self.args.name}')

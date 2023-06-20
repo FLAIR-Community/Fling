@@ -2,34 +2,35 @@ import os
 import tqdm
 import torch
 
-from component.client import Client
-from component.server import Server
-from component.group import ParameterServerGroup
-from utils.data_utils import DatasetConstructor, data_sampling
-from utils import Logger, seed_everything, compile_config, client_sampling, VariableMonitor
+from component.client import get_client
+from component.server import get_server
+from component.group import get_group
+from dataset import get_dataset
+from utils.data_utils import data_sampling
+from utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler
 
 
 def personalized_model_serial_pipeline(args, seed=0):
-    seed_everything(seed)
-    args = compile_config(args)
+    args = compile_config(args, seed=seed)
 
     # Construct logger.
     logger = Logger(args.logging_path)
 
     # Load dataset.
-    train_set = DatasetConstructor(args).get_dataset()
-    test_set = DatasetConstructor(args).get_dataset(train=False)
+    train_set = get_dataset(args, train=True)
+    test_set = get_dataset(args, train=False)
     # Split dataset into clients.
     train_sets = data_sampling(train_set, args)
 
     # Initialize clients, assemble datasets.
-    group = ParameterServerGroup(args, logger)
-    group.server = Server(args, args.device, test_dataset=test_set)
+    group = get_group(args, logger)
+    group.server = get_server(args, test_dataset=test_set)
     for i in range(args.client_num):
-        group.append(Client(train_sets[i], args=args, client_id=i))
+        group.append(get_client(train_sets[i], args=args, client_id=i))
     group.initialize()
 
     # training loop
+    lr_scheduler = LRScheduler(args)
     for i in range(args.glob_eps):
         train_monitor = VariableMonitor(['train_acc', 'train_loss'])
         logger.logging('Starting round: ' + str(i))
@@ -38,7 +39,7 @@ def personalized_model_serial_pipeline(args, seed=0):
         participated_clients = client_sampling(range(args.client_num), args.client_sample_rate)
 
         # Adjust learning rate.
-        cur_lr = args.lr * (args.decay_factor ** i)
+        cur_lr = lr_scheduler.get_lr(train_round=i)
         for j in tqdm.tqdm(participated_clients):
             train_monitor.append(group.clients[j].train(lr=cur_lr))
 

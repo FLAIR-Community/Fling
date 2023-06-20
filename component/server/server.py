@@ -1,15 +1,19 @@
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from utils import get_loss, VariableMonitor
+from utils import VariableMonitor
+from utils.registry_utils import SERVER_REGISTRY
 
 
+@SERVER_REGISTRY.register('base_server')
 class Server:
 
-    def __init__(self, args, device, test_dataset):
+    def __init__(self, args, test_dataset):
         self.args = args
         self.glob_dict = None
 
+        device = args.learn.device
         self.device = device if device >= 0 else 'cpu'
         self.test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
 
@@ -18,7 +22,7 @@ class Server:
         for k in grad:
             state_dict[k] = state_dict[k] + lr * grad[k]
 
-    def test(self, model, loss, test_loader=None):
+    def test(self, model, test_loader=None):
         if test_loader is not None:
             old_loader = self.test_loader
             self.test_loader = test_loader
@@ -27,7 +31,7 @@ class Server:
         model.to(self.device)
 
         monitor = VariableMonitor(['acc', 'loss'])
-        criterion = get_loss(loss)
+        criterion = nn.CrossEntropyLoss()
 
         with torch.no_grad():
             for _, (batch_x, batch_y) in enumerate(self.test_loader):

@@ -1,7 +1,9 @@
 from utils import get_params_number
 from utils.compress_utils import *
+from utils.registry_utils import GROUP_REGISTRY
 
 
+@GROUP_REGISTRY.register('base_group')
 class ParameterServerGroup:
     """
     A container to hold clients.

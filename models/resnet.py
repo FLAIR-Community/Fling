@@ -1,5 +1,7 @@
 import torch.nn as nn
 
+from utils.registry_utils import MODEL_REGISTRY
+
 
 class ResBlock(nn.Module):
 
@@ -28,6 +30,7 @@ class ResBlock(nn.Module):
         return x
 
 
+@MODEL_REGISTRY('cifar_resnet')
 class CifarRes(nn.Module):
 
     def __init__(self, num_classes=10):

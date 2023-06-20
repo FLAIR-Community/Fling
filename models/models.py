@@ -7,6 +7,7 @@ import platform
 from models.resnet import CifarRes
 from models.swin_transformer import SwinTransformer
 from models.gpt import GPT, GPTConfig
+from utils.registry_utils import MODEL_REGISTRY
 
 
 class ModelConstructor:
@@ -111,6 +112,7 @@ class ModelConstructor:
             print('Unrecognized model name: ' + self.args.model)
 
 
+@MODEL_REGISTRY.register('cnn')
 class CNNModel(nn.Module):
 
     def __init__(self, class_number, input_channel=3):
@@ -130,6 +132,7 @@ class CNNModel(nn.Module):
         return x
 
 
+@MODEL_REGISTRY.register('mlp')
 class MLPModel(nn.Module):
 
     def __init__(self, input_dim, class_number, hidden_units=1024):

@@ -3,11 +3,14 @@ import random
 
 import torch
 from torch.utils.data import DataLoader
+import torch.nn as nn
 
-from models.models import ModelConstructor
-from utils import get_optimizer, get_loss, VariableMonitor, get_finetune_parameters
+from models import get_model
+from utils import get_optimizer, VariableMonitor, get_finetune_parameters
+from utils.registry_utils import CLIENT_REGISTRY
 
 
+@CLIENT_REGISTRY.register('base_client')
 class Client:
     """
     Overview:
@@ -18,10 +21,11 @@ class Client:
     If users want to define a new client class, it is recommended to inherit this class.
     """
 
-    def __init__(self, train_dataset, args, client_id, test_frac=0):
+    def __init__(self, args, train_dataset, client_id):
         """
         Initializing train dataset, test dataset(for personalized settings), constructing model and other configurations.
         """
+        test_frac = args.client.test_frac
         self.args = args
         # If test_frac > 0, it means that a fraction of the given dataset will be separated for testing.
         if test_frac == 0:
@@ -47,7 +51,7 @@ class Client:
             self.test_dataloader = DataLoader(real_test, batch_size=args.batch_size, shuffle=True)
 
         # Model construction.
-        self.model = ModelConstructor(args).get_model()
+        self.model = get_model(args)
         self.device = args.device if args.device >= 0 else 'cpu'
         # Specify a unique client id.
         self.client_id = client_id
@@ -87,7 +91,7 @@ class Client:
         op = get_optimizer(
             name=self.args.learn.optimizer.name, lr=lr, momentum=self.args.learn.optimizer.momentum, weights=weights
         )
-        criterion = get_loss(self.args.learn.loss)
+        criterion = nn.CrossEntropyLoss()
 
         monitor = VariableMonitor(['acc', 'loss'])
 
@@ -134,7 +138,7 @@ class Client:
 
         # Get optimizer and loss.
         op = get_optimizer(name=self.args.learn.optimizer, lr=lr, momentum=self.args.learn.momentum, weights=weights)
-        criterion = get_loss(self.args.learn.loss)
+        criterion = nn.CrossEntropyLoss()
 
         # Main loop.
         if finetune_eps is None:
@@ -175,7 +179,7 @@ class Client:
         self.model.eval()
         self.model.to(self.device)
 
-        criterion = get_loss(self.args.learn.loss)
+        criterion = nn.CrossEntropyLoss()
         monitor = VariableMonitor(['acc', 'loss'])
 
         # Main test loop.

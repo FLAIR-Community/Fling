@@ -15,6 +15,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from utils.registry_utils import MODEL_REGISTRY
+
 
 # @torch.jit.script # good to enable when not using torch.compile, disable when using (our default)
 def new_gelu(x):
@@ -134,6 +136,7 @@ class GPTConfig:
     bias: bool = True  # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
 
 
+@MODEL_REGISTRY.register('gpt')
 class GPT(nn.Module):
 
     def __init__(self, config):
