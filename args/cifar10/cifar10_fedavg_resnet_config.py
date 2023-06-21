@@ -2,7 +2,7 @@ from easydict import EasyDict
 
 
 exp_args = dict(
-    data=dict(dataset='cifar10', data_path='./data', sample_method=dict(name='iid')),
+    data=dict(dataset='cifar10', data_path='./data/CIFAR10', sample_method=dict(name='iid')),
     learn=dict(
         device='cuda:0',
         local_eps=8,
@@ -14,7 +14,7 @@ exp_args = dict(
     model=dict(
         name='cifar_resnet',
         input_channel=3,
-        class_numer=10,
+        class_number=10,
     ),
     client=dict(
         name='base_client',
@@ -31,5 +31,5 @@ exp_args = dict(
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
-    from pipeline import general_model_serial_pipeline
+    from fling.pipeline import general_model_serial_pipeline
     general_model_serial_pipeline(exp_args, seed=0)

@@ -13,12 +13,12 @@ default_exp_args = dict(
     model=dict(
         name='cifar_resnet',
         input_channel=3,
-        class_numer=10,
+        class_number=10,
     ),
     client=dict(
         name='base_client',
         client_num=30,
-        client_sample_rate=1,
+        sample_rate=1,
         test_frac=0,
     ),
     server=dict(name='base_server'),

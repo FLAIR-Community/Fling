@@ -3,7 +3,7 @@ from easydict import EasyDict
 exp_args = dict(
     data=dict(
         dataset='cifar10',
-        data_path='./data',
+        data_path='./data/CIFAR10',
         sample_method=dict(
             name='dirichlet',
             alpha=0.2
@@ -24,7 +24,7 @@ exp_args = dict(
     model=dict(
         name='cifar_resnet',
         input_channel=3,
-        class_numer=10,
+        class_number=10,
     ),
     client=dict(
         name='base_client',
@@ -46,6 +46,6 @@ exp_args = dict(
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
-    from pipeline import personalized_model_serial_pipeline
+    from fling.pipeline import personalized_model_serial_pipeline
 
     personalized_model_serial_pipeline(exp_args, seed=0)
