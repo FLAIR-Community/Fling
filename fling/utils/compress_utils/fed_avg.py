@@ -4,7 +4,7 @@ from functools import reduce
 # fed avg method
 def fed_avg(clients, server):
     total_samples = sum([client.sample_num for client in clients])
-    server['glob_dict'] = {
+    server.glob_dict = {
         k: reduce(
             lambda x, y: x + y,
             [client.sample_num / total_samples * client.model.state_dict()[k] for client in clients]

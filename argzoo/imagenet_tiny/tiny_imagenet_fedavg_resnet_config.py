@@ -1,8 +1,7 @@
 from easydict import EasyDict
 
-
 exp_args = dict(
-    data=dict(dataset='cifar10', data_path='./data/CIFAR10', sample_method=dict(name='iid')),
+    data=dict(dataset='tiny_imagenet', data_path='./data/tiny_imagenet', sample_method=dict(name='iid')),
     learn=dict(
         device='cuda:0',
         local_eps=8,
@@ -14,18 +13,12 @@ exp_args = dict(
     model=dict(
         name='cifar_resnet',
         input_channel=3,
-        class_number=10,
+        class_number=200,
     ),
-    client=dict(
-        name='base_client',
-        client_num=30
-    ),
+    client=dict(name='base_client', client_num=30),
     server=dict(name='base_server'),
-    group=dict(
-        name='base_group',
-        aggregation_method='fedavg'
-    ),
-    other=dict(test_freq=3, logging_path='./logging/cifar10_fedavg_resnet_iid')
+    group=dict(name='base_group', aggregation_method='avg'),
+    other=dict(test_freq=3, logging_path='./logging/tiny_imagenet_fedavg_resnet_iid')
 )
 
 exp_args = EasyDict(exp_args)

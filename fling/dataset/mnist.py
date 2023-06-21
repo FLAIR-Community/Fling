@@ -7,6 +7,7 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('mnist')
 class MNISTDataset(Dataset):
+
     def __init__(self, cfg, train):
         super(MNISTDataset, self).__init__()
         self.train = train

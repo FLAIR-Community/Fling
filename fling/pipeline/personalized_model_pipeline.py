@@ -43,32 +43,22 @@ def personalized_model_serial_pipeline(args, seed=0):
         for j in tqdm.tqdm(participated_clients):
             train_monitor.append(group.clients[j].train(lr=cur_lr))
 
-        if i % args.test_freq == 0:
-            test_monitor = VariableMonitor(['acc', 'loss'])
-            for j in range(args.client.client_num):
-                test_monitor.append(group.clients[j].test())
-            mean_test_variables = test_monitor.variable_mean()
-            for k in mean_test_variables:
-                logger.add_scalar('test_before_aggregation/{}'.format(k), mean_test_variables[k], i)
-
         # Aggregation and sync.
         trans_cost = group.aggregate(i, tb_logger=logger)
 
         # Logging
         mean_train_variables = train_monitor.variable_mean()
-        for k in mean_train_variables:
-            logger.add_scalar('train/{}'.format(k), mean_train_variables[k], i)
-        logger.add_scalar('train/trans_cost', trans_cost / 1e6)
-        logger.add_scalar('train/lr', cur_lr, i)
+        logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
+        extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
+        logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
-        if i % args.test_freq == 0:
-            test_monitor = VariableMonitor(['acc', 'loss'])
+        if i % args.other.test_freq == 0:
+            test_monitor = VariableMonitor(['test_acc', 'test_loss'])
             for j in range(args.client.client_num):
                 test_monitor.append(group.clients[j].test())
             mean_test_variables = test_monitor.variable_mean()
-            for k in mean_test_variables:
-                logger.add_scalar('test_after_aggregation/{}'.format(k), mean_test_variables[k], i)
-            torch.save(group.server['glob_dict'], os.path.join(args.logging_path, 'model.ckpt'))
+            logger.add_scalars_dict(prefix='test', dic=mean_test_variables, rnd=i)
+            torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))
 
     # Finetune.
     finetune_results = [

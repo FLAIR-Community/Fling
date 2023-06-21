@@ -23,7 +23,7 @@ def data_sampling(dataset, args):
     elif args.data.sample_method.name == 'dirichlet':
         data_labels = np.stack([dataset[i][1] for i in range(len(dataset))], axis=0)
         indexes = dirichlet_sampling(data_labels, args.client.client_num, alpha=args.data.sample_method.alpha)
-        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client_num)]
+        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
     else:
         raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
 

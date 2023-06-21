@@ -4,7 +4,7 @@ from torchvision import transforms
 def get_data_transform(cfg, train):
     transform_names = cfg.keys()
     results = []
-    results.append(transforms.ToTensor)
+    results.append(transforms.ToTensor())
     for k in transform_names:
         transform_args = cfg[k]
         name = k
@@ -21,9 +21,7 @@ def get_data_transform(cfg, train):
             if train:
                 results.append(
                     transforms.ColorJitter(
-                        transform_args.brightness,
-                        transform_args.contrast,
-                        transform_args.saturation
+                        transform_args.brightness, transform_args.contrast, transform_args.saturation
                     )
                 )
         elif name == 'horizontal_flip':

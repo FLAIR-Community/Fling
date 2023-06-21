@@ -49,13 +49,11 @@ def general_model_serial_pipeline(args, seed=0):
 
         # Logging
         mean_train_variables = train_monitor.variable_mean()
-        for k in mean_train_variables:
-            logger.add_scalar('train/{}'.format(k), mean_train_variables[k], i)
-        logger.add_scalar('train/trans_cost', trans_cost / 1e6)
-        logger.add_scalar('train/lr', cur_lr, i)
+        logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
+        extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
+        logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
-        if i % args.test_freq == 0:
-            res_dict = group.server.test(model=group.clients[0].model)
-            for k in res_dict:
-                logger.add_scalar('test/{}'.format(k), res_dict[k], i)
-            torch.save(group.server['glob_dict'], os.path.join(args.logging_path, 'model.ckpt'))
+        if i % args.other.test_freq == 0:
+            test_result = group.server.test(model=group.clients[0].model)
+            logger.add_scalars_dict(prefix='test', dic=test_result, rnd=i)
+            torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))

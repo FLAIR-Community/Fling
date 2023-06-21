@@ -17,6 +17,9 @@ def get_model(args):
             torch.set_float32_matmul_precision('high')
             model = torch.compile(model)
         else:
-            warnings.warn('Using PyTorch >= 2.0, but current platform is: '
-                          + platform.system() + '  Give up compiling...')
-        return model
+            warnings.warn(
+                'Using PyTorch >= 2.0, but current platform is: ' + platform.system() + '  Give up compiling...'
+            )
+    else:
+        warnings.warn(f'Using PyTorch version: {torch.__version__}, skip compiling...')
+    return model

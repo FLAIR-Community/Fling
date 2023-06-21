@@ -7,6 +7,7 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('tiny_imagenet')
 class TinyImagenetDataset(Dataset):
+
     def __init__(self, cfg, train):
         super(TinyImagenetDataset, self).__init__()
         self.train = train

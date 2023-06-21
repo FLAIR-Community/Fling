@@ -17,12 +17,20 @@ class Logger(SummaryWriter):
 
     def __init__(self, path):
         super(Logger, self).__init__(path)
-        self.txt_logger_path = os.path.join(path, 'base_logger_output.txt')
+        self.txt_logger_path = os.path.join(path, 'txt_logger_output.txt')
 
     def logging(self, s):
         print(s)
         with open(self.txt_logger_path, mode='a') as f:
             f.write('[' + time.asctime(time.localtime(time.time())) + ']    ' + s + '\n')
+
+    def add_scalars_dict(self, prefix: str, dic, rnd):
+        str_repr = []
+        for k in dic.keys():
+            self.add_scalar(f'{prefix}/{k}', dic[k], rnd)
+            str_repr.append('{}: {:.2f}'.format(k, dic[k]))
+        txt_info = f'[{prefix.upper()}]\t'
+        self.logging(txt_info + '\t'.join(str_repr))
 
 
 class VariableMonitor:

@@ -7,6 +7,7 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('cifar100')
 class CIFAR100Dataset(Dataset):
+
     def __init__(self, cfg, train):
         super(CIFAR100Dataset, self).__init__()
         self.train = train

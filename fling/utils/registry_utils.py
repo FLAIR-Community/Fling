@@ -25,11 +25,7 @@ class Registry(dict):
         super(Registry, self).__init__(*args, **kwargs)
         self.__trace__ = dict()
 
-    def register(
-            self,
-            module_name=None,
-            force_overwrite=False
-    ):
+    def register(self, module_name=None, force_overwrite=False):
         # used as decorator
         def register_fn(fn):
             if module_name is None:

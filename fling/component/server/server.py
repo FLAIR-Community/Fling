@@ -30,21 +30,22 @@ class Server:
         model.eval()
         model.to(self.device)
 
-        monitor = VariableMonitor(['acc', 'loss'])
+        monitor = VariableMonitor(['test_acc', 'test_loss'])
         criterion = nn.CrossEntropyLoss()
 
         with torch.no_grad():
             for _, (batch_x, batch_y) in enumerate(self.test_loader):
                 batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
-                o = self.model(batch_x)
+                o = model(batch_x)
                 loss = criterion(o, batch_y)
                 y_pred = torch.argmax(o, dim=-1)
 
                 monitor.append(
                     {
-                        'acc': torch.mean((y_pred == batch_y).float).item(),
-                        'loss': loss.item()
-                    }, weight=batch_y.shape[0]
+                        'test_acc': torch.mean((y_pred == batch_y).float()).item(),
+                        'test_loss': loss.item()
+                    },
+                    weight=batch_y.shape[0]
                 )
         model.to('cpu')
 

@@ -28,7 +28,7 @@ class ParameterServerGroup:
         if self.args.group.aggregation_parameters.name == 'all':
             fed_keys = self.clients[0].model.state_dict().keys()
         elif self.args.group.aggregation_parameters.name == 'contain':
-            keywords = self.args.group.keywords
+            keywords = self.args.group.aggregation_parameters.keywords
             fed_keys = []
             for kw in keywords:
                 for k in self.clients[0].model.state_dict():
@@ -36,7 +36,7 @@ class ParameterServerGroup:
                         fed_keys.append(k)
             fed_keys = list(set(fed_keys))
         elif self.args.group.aggregation_parameters.name == 'except':
-            keywords = self.args.group.keywords
+            keywords = self.args.group.aggregation_parameters.keywords
             fed_keys = []
             for kw in keywords:
                 for k in self.clients[0].model.state_dict():
@@ -47,6 +47,7 @@ class ParameterServerGroup:
             raise ValueError(f'Unrecognized aggregation_parameters.name: {self.args.group.aggregation_parameters.name}')
 
         # Step 2.
+        self.logger.logging(f'Weights for federated training: {fed_keys}')
         glob_dict = {k: self.clients[0].model.state_dict()[k] for k in fed_keys}
         self.server.glob_dict = glob_dict
         self.set_fed_keys()
@@ -74,7 +75,7 @@ class ParameterServerGroup:
         aggregate: applying an aggregation method to update the global model
         :return: None
         """
-        if self.args.aggr_method == 'avg':
+        if self.args.group.aggregation_method == 'avg':
             trans_cost = fed_avg(self.clients, self.server)
             self.sync()
         else:

@@ -4,7 +4,7 @@ import warnings
 
 from easydict import EasyDict
 
-from args.default_config import default_exp_args
+from argzoo.default_config import default_exp_args
 from fling.utils import seed_everything
 
 

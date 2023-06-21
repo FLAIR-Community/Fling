@@ -6,6 +6,7 @@ from functools import reduce
 import numpy as np
 import torch
 import torch.optim as optim
+import torch.nn as nn
 
 
 def get_optimizer(name, lr, momentum, weights):
@@ -91,6 +92,7 @@ def get_finetune_parameters(model, finetune_args):
 
 
 class LRScheduler:
+
     def __init__(self, args):
         self.args = args.learn.scheduler
         self.lr = args.learn.optimizer.lr
@@ -112,3 +114,11 @@ class LRScheduler:
             return min_lr + coefficient * (self.lr - min_lr)
         else:
             raise ValueError(f'Unrecognized lr scheduler: {self.args.name}')
+
+
+def get_activation(name, **kwargs):
+    func_dict = {'relu': nn.ReLU, 'tanh': nn.Tanh, 'leaky_relu': nn.LeakyReLU}
+    try:
+        return func_dict[name](**kwargs)
+    except KeyError:
+        raise ValueError(f'Unrecognized activation function name: {name}')

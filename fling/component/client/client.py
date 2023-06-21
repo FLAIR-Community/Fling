@@ -91,7 +91,7 @@ class Client:
         )
         criterion = nn.CrossEntropyLoss()
 
-        monitor = VariableMonitor(['acc', 'loss'])
+        monitor = VariableMonitor(['train_acc', 'train_loss'])
 
         # Main training loop.
         for epoch in range(self.args.learn.local_eps):
@@ -104,9 +104,10 @@ class Client:
 
                 monitor.append(
                     {
-                        'acc': torch.mean((y_pred == batch_y).float).item(),
-                        'loss': loss.item()
-                    }, weight=batch_y.shape[0]
+                        'train_acc': torch.mean((y_pred == batch_y).float()).item(),
+                        'train_loss': loss.item()
+                    },
+                    weight=batch_y.shape[0]
                 )
                 op.zero_grad()
                 loss.backward()
@@ -132,19 +133,21 @@ class Client:
 
         # Get weights to be finetuned.
         # For calculating train loss and train acc.
-        weights = get_finetune_parameters(self.model, finetune_args=self.args.learn.finetune_parameters)
+        weights = get_finetune_parameters(self.model, finetune_args=finetune_args)
 
         # Get optimizer and loss.
-        op = get_optimizer(name=self.args.learn.optimizer, lr=lr, momentum=self.args.learn.momentum, weights=weights)
+        op = get_optimizer(
+            name=self.args.learn.optimizer.name, lr=lr, momentum=self.args.learn.optimizer.momentum, weights=weights
+        )
         criterion = nn.CrossEntropyLoss()
 
         # Main loop.
         if finetune_eps is None:
-            finetune_eps = self.args.learn.loc_epoch
+            finetune_eps = self.args.learn.local_eps
         for epoch in range(finetune_eps):
             self.model.train()
             self.model.to(self.device)
-            train_variable_monitor = VariableMonitor(['train_acc', 'test_acc'])
+            train_variable_monitor = VariableMonitor(['finetune_acc', 'finetune_loss'])
             for _, (batch_x, batch_y) in enumerate(self.train_dataloader):
                 batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
                 o = self.model(batch_x)
@@ -155,15 +158,15 @@ class Client:
                 op.step()
                 train_variable_monitor.append(
                     {
-                        'train_acc': torch.mean((y_pred == batch_y).float).item(),
-                        'train_loss': loss.item()
+                        'finetune_acc': torch.mean((y_pred == batch_y).float()).item(),
+                        'finetune_loss': loss.item()
                     },
                     weight=batch_y.shape[0]
                 )
 
             # Test model every epoch.
             mean_monitor_variables = train_variable_monitor.variable_mean()
-            mean_monitor_variables.update(self.test)
+            mean_monitor_variables.update(self.test())
             info.append(mean_monitor_variables)
 
         self.model = model_bak
@@ -178,7 +181,7 @@ class Client:
         self.model.to(self.device)
 
         criterion = nn.CrossEntropyLoss()
-        monitor = VariableMonitor(['acc', 'loss'])
+        monitor = VariableMonitor(['test_acc', 'test_loss'])
 
         # Main test loop.
         with torch.no_grad():
@@ -190,9 +193,10 @@ class Client:
 
                 monitor.append(
                     {
-                        'acc': torch.mean((y_pred == batch_y).float).item(),
-                        'loss': loss.item()
-                    }, weight=batch_y.shape[0]
+                        'test_acc': torch.mean((y_pred == batch_y).float()).item(),
+                        'test_loss': loss.item()
+                    },
+                    weight=batch_y.shape[0]
                 )
 
         # Calculate the mean metrics.
