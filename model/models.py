@@ -4,9 +4,9 @@ from torch import nn
 from vit_pytorch import ViT
 import platform
 
-from models.resnet import CifarRes
-from models.swin_transformer import SwinTransformer
-from models.gpt import GPT, GPTConfig
+from model.resnet import CifarRes
+from model.swin_transformer import SwinTransformer
+from model.gpt import GPT, GPTConfig
 from utils.registry_utils import MODEL_REGISTRY
 
 

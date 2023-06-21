@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 
-from models import get_model
+from model import get_model
 from utils import get_optimizer, VariableMonitor, get_finetune_parameters
 from utils.registry_utils import CLIENT_REGISTRY
 

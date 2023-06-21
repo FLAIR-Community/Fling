@@ -1,50 +1,35 @@
-import argparse
+from easydict import EasyDict
 
 
-def args_parser():
-    parser = argparse.ArgumentParser()
-    # federated arguments
-    parser.add_argument('--loc_eps', type=int, default=8, help="rounds of training")
-    parser.add_argument('--glob_eps', type=int, default=40, help="global training round")
-    parser.add_argument('--client_num', type=int, default=30, help="number of client")
-    parser.add_argument('--client_sample_rate', type=float, default=1, help="client_sample_rate")
-    parser.add_argument('--decay_factor', type=float, default=1, help="decay factor of learning rate")
-    parser.add_argument('--aggr_method', type=str, default='avg', help='aggregation method')
-    parser.add_argument('--fed_dict', type=str, default='all', help='only keys in this will use fed-learning')
-    parser.add_argument('--sample_method', type=str, default='iid', help="method for sampling")
-    parser.add_argument('--alpha', type=float, default=0.2, help="alpha for dirichlet distribution")
+exp_args = dict(
+    data=dict(dataset='cifar10', data_path='./data', sample_method=dict(name='iid')),
+    learn=dict(
+        device='cuda:0',
+        local_eps=8,
+        global_eps=40,
+        batch_size=32,
+        loss='CrossEntropyLoss',
+        optimizer=dict(name='sgd', lr=0.02, momentum=0.9)
+    ),
+    model=dict(
+        name='cifar_resnet',
+        input_channel=3,
+        class_numer=10,
+    ),
+    client=dict(
+        name='base_client',
+        client_num=30
+    ),
+    server=dict(name='base_server'),
+    group=dict(
+        name='base_group',
+        aggregation_method='fedavg'
+    ),
+    other=dict(test_freq=3, logging_path='./logging/cifar10_fedavg_resnet_iid')
+)
 
-    # training arguments
-    parser.add_argument('--batch_size', type=int, default=64, help="batch_size")
-    parser.add_argument('--lr', type=float, default=0.02, help="learning rate")
-    parser.add_argument('--momentum', type=float, default=0.9, help="SGD momentum")
-    parser.add_argument('--resume', type=bool, default=False, help="whether to resume")
-    parser.add_argument('--start_round', type=int, default=0, help='round to start with')
-    parser.add_argument('--device', type=int, default=0, help="GPU ID, -1 for CPU")
-    parser.add_argument('--loss', type=str, default='CrossEntropyLoss', help='loss type')
-    parser.add_argument('--optimizer', type=str, default='sgd', help='optimizer type')
-
-    # model
-    parser.add_argument('--model', type=str, default='resnet_cifar', help='model name')
-    parser.add_argument('--input_channel', type=int, default=3, help='input channel')
-    parser.add_argument('--class_number', type=int, default=10, help='class channel')
-
-    # dataset
-    parser.add_argument('--dataset', type=str, default='cifar10', help="name of dataset")
-    parser.add_argument('--data_path', type=str, default='./data', help='data path')
-    parser.add_argument('--resize', type=int, default=-1, help='resize the input image, -1 means no resizing')
-
-    # logging and evaluation
-    parser.add_argument('--test_freq', type=int, default=3, help="rounds of testing")
-    parser.add_argument(
-        '--logging_path', type=str, default='./logging/cifar10_resnet_cifar_avg_iid', help='logging path'
-    )
-
-    args = parser.parse_args()
-    return args
-
+exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
     from pipeline import general_model_serial_pipeline
-    args = args_parser()
-    general_model_serial_pipeline(args, seed=0)
+    general_model_serial_pipeline(exp_args, seed=0)
