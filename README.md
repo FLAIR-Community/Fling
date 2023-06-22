@@ -31,13 +31,13 @@ This config is a simplified version for conducting FedAvg on the dataset MNIST a
 
 **Other tutorials:**
 
-配置文件各字段含义
+[Fling 整体框架](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_zh.md)
 
-Fling 整体框架
+[配置文件各字段含义](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_zh.md)
 
-如何自定义联邦学习算法
+[如何自定义联邦学习算法](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_zh.md)
 
-如何添加新数据集
+[如何添加新数据集](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)
 
 ## Feature
 
