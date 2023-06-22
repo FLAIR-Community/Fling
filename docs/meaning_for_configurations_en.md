@@ -1,3 +1,10 @@
+# Meanings for Each Configuration Key
+
+## An Example
+
+In this document, we provide a simple configuration file and explain the meanings of each key.
+
+```
 default_exp_args = dict(
     # Configurations about data.
     data=dict(
@@ -92,3 +99,43 @@ default_exp_args = dict(
         logging_path='./logging/default_experiment'
     )
 )
+```
+
+## Other usages
+
+- Beside "fix", the key `learn.scheduler` has a variety of types. For example, we can define a scheduler using cosine function:
+
+```
+scheduler=dict(
+    # Cosine learning rate scheduler.
+    name='cos'
+    # The `min_lr` is the lower bound of learning rate.
+    min_lr=1e-6,
+    # This means that the learning rate will decay progressively for 30 global epochs and finally reaches `min_lr`.
+    decay_round=30
+)
+```
+
+For other types schedulers, please refer to `fling.utils.LRScheduler`.
+
+- Beside "all", the key `learn.finetune_parameters` has other usages. For example, if you only want to fine-tune parameters whose names **contain** keywords "fc" or "bn", you can write:
+
+```
+finetune_parameters=dict(
+    # This means to only fine-tune parameters whose names have keywords listed in `keywords`
+    name='contain',
+    keywords=['fc', 'bn']
+)
+```
+
+On the opposite, if you want to fine-tune parameters whose names **except** keywords "fc" or "bn", you can write:
+
+```
+finetune_parameters=dict(
+    # This means to only fine-tune parameters except those whose names have keywords listed in `keywords`
+    name='except',
+    keywords=['fc', 'bn']
+)
+```
+
+The setting for `group.aggregation_parameters` is similar.

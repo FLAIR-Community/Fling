@@ -7,7 +7,6 @@ exp_args = dict(
         local_eps=8,
         global_eps=40,
         batch_size=32,
-        loss='CrossEntropyLoss',
         optimizer=dict(name='sgd', lr=0.02, momentum=0.9),
         finetune_parameters=dict(name='contain', keywords=['fc']),
     ),

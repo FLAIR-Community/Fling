@@ -21,23 +21,33 @@ pip install -e .
 
 ## Quick Start
 
-After successfully install Fling, users can start the first Fling experiment by using the following command:
+After successfully install Fling, users can start the first Fling experiment by using the following command. An example for generic federated learning:
 
 ```bash
 python argzoo/mnist/mnist_fedavg_cnn_toy_config.py
 ```
 
-This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds. For other algorithms and datasets, users can refer to `argzoo/` or customize your own configurations.
+This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds.
+
+An example for personalized federated learning:
+
+```bash
+python argzoo/mnist/mnist_fedper_cnn_toy_config.py
+```
+
+This config is a simplified version for conducting FedPer on the dataset MNIST and iterate for 4 communication rounds.
+
+For other algorithms and datasets, users can refer to `argzoo/` or customize your own configuration files.
 
 **Other tutorials:**
 
-[Fling 整体框架](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_zh.md)
+[Overall Framework of Fling](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_en.md) | [Fling 整体框架](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_zh.md)
 
-[配置文件各字段含义](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_zh.md)
+[Meaning for Each Configuration Key](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_en.md) | [配置文件各字段含义](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_zh.md)
 
-[如何自定义联邦学习算法](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_zh.md)
+[How to Add a New FL Algorithm](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_en.md) | [如何自定义联邦学习算法](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_zh.md)
 
-[如何添加新数据集](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)
+[How to Add a New Dataset](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_en.md) | [如何添加新数据集](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)
 
 ## Feature
 

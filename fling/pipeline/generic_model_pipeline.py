@@ -11,7 +11,7 @@ from fling.utils.data_utils import data_sampling
 from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler
 
 
-def general_model_serial_pipeline(args, seed=0):
+def generic_model_serial_pipeline(args, seed=0):
     args = compile_config(args, seed)
 
     # Construct logger.

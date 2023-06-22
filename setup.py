@@ -37,7 +37,7 @@ setup(
     license='Apache License, Version 2.0',
     keywords='Federated Learning Framework',
     packages=[
-        *find_packages(include=('fling', "ding.fling")),
+        *find_packages(include=('fling', 'fling.*')),
         *find_packages(include=('argzoo', 'argzoo.*')),
     ],
     package_data={

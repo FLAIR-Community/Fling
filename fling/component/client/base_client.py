@@ -5,29 +5,29 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 
-from fling.model import get_model
 from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
 from fling.utils.registry_utils import CLIENT_REGISTRY
+from .client_template import ClientTemplate
 
 
 @CLIENT_REGISTRY.register('base_client')
-class Client:
+class BaseClient(ClientTemplate):
     """
     Overview:
     This class is the base implementation of client in Federated Learning.
     Typically, a client need to have these functions.
     ``train``: A client need to define the local training process.
     ``test``: A client need to define how to test the local model given a dataset.
-    ``finetune``: A client need to define how to finetune the local model (usually used in Personalized Federated Learning)
+    ``finetune``: A client need to define how to finetune the local model (usually used in Personalized FL)
     If users want to define a new client class, it is recommended to inherit this class.
     """
 
     def __init__(self, args, train_dataset, client_id):
         """
-        Initializing train dataset, test dataset(for personalized settings), constructing model and other configurations.
+        Initializing train dataset, test dataset(for personalized settings).
         """
+        super(BaseClient, self).__init__(args, train_dataset, client_id)
         test_frac = args.client.test_frac
-        self.args = args
         # If test_frac > 0, it means that a fraction of the given dataset will be separated for testing.
         if test_frac == 0:
             # ``self.sample_num`` refers to the number of local training number.
@@ -50,33 +50,6 @@ class Client:
 
             self.train_dataloader = DataLoader(real_train, batch_size=args.learn.batch_size, shuffle=True)
             self.test_dataloader = DataLoader(real_test, batch_size=args.learn.batch_size, shuffle=True)
-
-        # Model construction.
-        self.model = get_model(args)
-        self.device = args.learn.device
-        # Specify a unique client id.
-        self.client_id = client_id
-        # This attribute will not be set until ``self.set_fed_keys(self, keys)`` is called.
-        # Only weights in ``self.fed_keys`` will be collaboratively trained using Federated Learning.
-        self.fed_keys = []
-
-    def set_fed_keys(self, keys):
-        """
-        Set the attribute ``self.fed_keys``.
-        Only weights in ``self.fed_keys`` will be collaboratively trained using Federated Learning.
-        """
-        self.fed_keys = keys
-
-    def update_model(self, dic):
-        """
-        Using the ``dic`` to update the state_dict of the local model of this client.
-        For keys not existed in ``dic``, the value will be retained.
-        """
-        dic = copy.deepcopy(dic)
-        state_dict = self.model.state_dict()
-        state_dict.update(dic)
-
-        self.model.load_state_dict(state_dict)
 
     def train_step(self, batch_data, criterion, monitor, optimizer):
         batch_x, batch_y = batch_data['x'], batch_data['y']
@@ -208,10 +181,3 @@ class Client:
         self.model.to('cpu')
 
         return mean_monitor_variables
-
-    def get_state_dict(self, keys):
-        """
-        Get the state dict of local model.
-        """
-        state_dict = self.model.state_dict()
-        return {k: state_dict[k] for k in keys}
