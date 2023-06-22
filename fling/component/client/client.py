@@ -14,7 +14,8 @@ from fling.utils.registry_utils import CLIENT_REGISTRY
 class Client:
     """
     Overview:
-    This class is the base implementation of client in Federated Learning. Typically, a client need to have these functions.
+    This class is the base implementation of client in Federated Learning.
+    Typically, a client need to have these functions.
     ``train``: A client need to define the local training process.
     ``test``: A client need to define how to test the local model given a dataset.
     ``finetune``: A client need to define how to finetune the local model (usually used in Personalized Federated Learning)
@@ -77,6 +78,40 @@ class Client:
 
         self.model.load_state_dict(state_dict)
 
+    def train_step(self, batch_data, criterion, monitor, optimizer):
+        batch_x, batch_y = batch_data['x'], batch_data['y']
+        o = self.model(batch_x)
+        loss = criterion(o, batch_y)
+        y_pred = torch.argmax(o, dim=-1)
+
+        monitor.append(
+            {
+                'train_acc': torch.mean((y_pred == batch_y).float()).item(),
+                'train_loss': loss.item()
+            },
+            weight=batch_y.shape[0]
+        )
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    def test_step(self, batch_data, criterion, monitor):
+        batch_x, batch_y = batch_data['x'], batch_data['y']
+        o = self.model(batch_x)
+        loss = criterion(o, batch_y)
+        y_pred = torch.argmax(o, dim=-1)
+
+        monitor.append(
+            {
+                'test_acc': torch.mean((y_pred == batch_y).float()).item(),
+                'test_loss': loss.item()
+            },
+            weight=batch_y.shape[0]
+        )
+
+    def preprocess_data(self, data):
+        return {'x': data[0].to(self.device), 'y': data[1].to(self.device)}
+
     def train(self, lr):
         """
         Local training.
@@ -95,23 +130,10 @@ class Client:
 
         # Main training loop.
         for epoch in range(self.args.learn.local_eps):
-            for _, (batch_x, batch_y) in enumerate(self.train_dataloader):
-                batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
+            for _, data in enumerate(self.train_dataloader):
+                preprocessed_data = self.preprocess_data(data)
                 # Update total sample number.
-                o = self.model(batch_x)
-                loss = criterion(o, batch_y)
-                y_pred = torch.argmax(o, dim=-1)
-
-                monitor.append(
-                    {
-                        'train_acc': torch.mean((y_pred == batch_y).float()).item(),
-                        'train_loss': loss.item()
-                    },
-                    weight=batch_y.shape[0]
-                )
-                op.zero_grad()
-                loss.backward()
-                op.step()
+                self.train_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor, optimizer=op)
 
         # Calculate the mean metrics.
         mean_monitor_variables = monitor.variable_mean()
@@ -147,25 +169,14 @@ class Client:
         for epoch in range(finetune_eps):
             self.model.train()
             self.model.to(self.device)
-            train_variable_monitor = VariableMonitor(['finetune_acc', 'finetune_loss'])
-            for _, (batch_x, batch_y) in enumerate(self.train_dataloader):
-                batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
-                o = self.model(batch_x)
-                loss = criterion(o, batch_y)
-                y_pred = torch.argmax(o, dim=-1)
-                op.zero_grad()
-                loss.backward()
-                op.step()
-                train_variable_monitor.append(
-                    {
-                        'finetune_acc': torch.mean((y_pred == batch_y).float()).item(),
-                        'finetune_loss': loss.item()
-                    },
-                    weight=batch_y.shape[0]
-                )
+            monitor = VariableMonitor(['train_acc', 'train_loss'])
+            for _, data in enumerate(self.train_dataloader):
+                preprocessed_data = self.preprocess_data(data)
+                # Update total sample number.
+                self.train_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor, optimizer=op)
 
             # Test model every epoch.
-            mean_monitor_variables = train_variable_monitor.variable_mean()
+            mean_monitor_variables = monitor.variable_mean()
             mean_monitor_variables.update(self.test())
             info.append(mean_monitor_variables)
 
@@ -185,19 +196,10 @@ class Client:
 
         # Main test loop.
         with torch.no_grad():
-            for _, (batch_x, batch_y) in enumerate(self.test_dataloader):
-                batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
-                o = self.model(batch_x)
-                loss = criterion(o, batch_y)
-                y_pred = torch.argmax(o, dim=-1)
-
-                monitor.append(
-                    {
-                        'test_acc': torch.mean((y_pred == batch_y).float()).item(),
-                        'test_loss': loss.item()
-                    },
-                    weight=batch_y.shape[0]
-                )
+            for _, data in enumerate(self.test_dataloader):
+                preprocessed_data = self.preprocess_data(data)
+                # Update total sample number.
+                self.test_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor)
 
         # Calculate the mean metrics.
         mean_monitor_variables = monitor.variable_mean()

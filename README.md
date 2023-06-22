@@ -1,19 +1,75 @@
-# README
 
-This is a base framework implementation for federated learning.
+## Fling
+**Fling** is a research platform for Federated Learning using PyTorch. 
 
-## Features
+Its goal is to **simulate the distributed learning process of Federated Learning on single or multiple machines**, providing a **fair testing platform** for the performance of various federated learning algorithms on different datasets. It is mainly based on the Python language and uses the PyTorch framework as the backend module for deep learning, supporting a variety of federated learning algorithms and commonly used federated learning datasets.
 
-- This framework serves as a simulator for a single computer to run federated learning.
-- Only 1 GPU training is supported now.
-- This framework is easy to extend.
+- Generic Federated Learning methods, such as FedAvg.
+- Personalized Federated Learning methods, such as FedPer.
+
+## Installation
+
+Firstly, it is recommended to install PyTorch manually with a suitable version (specifically 1.1.0 or higher). However, using PyTorch version 2.0.0 or later is preferred due to its better computational efficiency. Instructions for installation can be found at this [link](https://pytorch.org/get-started/locally/).
+
+After the first step, you can simply install the latest version of Fling with the following command by using Git:
+
+```bash
+git clone https://github.com/kxzxvbk/Fling
+cd Fling
+pip install -e .
+```
 
 ## Quick Start
 
-- Use a single command to start the training process.
+After successfully install Fling, users can start the first Fling experiment by using the following command:
 
-  ```
-  python run.py
-  ```
+```bash
+python argzoo/mnist/mnist_fedavg_cnn_toy_config.py
+```
 
-- To change configs, you can both write a arg-file and use the command line. A template for arg-file can be seen at 'args/test_arg.py'
+This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds. For other algorithms and datasets, users can refer to `argzoo/` or customize your own configurations.
+
+**Other tutorials:**
+
+配置文件各字段含义
+
+Fling 整体框架
+
+如何自定义联邦学习算法
+
+如何添加新数据集
+
+## Feature
+
+- Support for a variety of algorithms and datasets.
+- Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
+
+## Currently Supported Algorithms
+
+#### Generic Federated Learning
+
+**FedAvg:** [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf)
+
+#### **Personalized Federated Learning**
+
+**FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
+
+## Acknowledgments
+
+Special thanks to [@shonnyx](https://github.com/shonnyx), 
+
+
+## Citation
+```latex
+@misc{Fling,
+    title={Fling: Framework for Federated Learning},
+    author={Fling Contributors},
+    publisher = {GitHub},
+    howpublished = {\url{https://github.com/kxzxvbk/Fling}},
+    year={2023},
+}
+```
+
+## License
+Fling is released under the Apache 2.0 license.
+
