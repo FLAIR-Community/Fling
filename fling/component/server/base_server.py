@@ -8,7 +8,7 @@ from .server_template import ServerTemplate
 
 
 @SERVER_REGISTRY.register('base_server')
-class Server(ServerTemplate):
+class BaseServer(ServerTemplate):
 
     def __init__(self, args, test_dataset):
         super(Server, self).__init__(args, test_dataset)
