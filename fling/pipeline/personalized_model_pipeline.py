@@ -44,7 +44,7 @@ def personalized_model_serial_pipeline(args, seed=0):
             train_monitor.append(group.clients[j].train(lr=cur_lr))
 
         # Aggregation and sync.
-        trans_cost = group.aggregate(i, tb_logger=logger)
+        trans_cost = group.aggregate(i)
 
         # Logging
         mean_train_variables = train_monitor.variable_mean()

@@ -1,22 +1,27 @@
 import copy
+from typing import Iterable, Callable
+from torch.optim.optimizer import Optimizer
 
 from fling.model import get_model
+from fling.utils import VariableMonitor
 
 
 class ClientTemplate:
-    """
+    r"""
     Overview:
-    This class is the base implementation of client in Federated Learning.
-    Typically, a client need to have these functions.
-    ``train``: A client need to define the local training process.
-    ``test``: A client need to define how to test the local model given a dataset.
-    ``finetune``: A client need to define how to finetune the local model (usually used in Personalized Federated Learning)
-    If users want to define a new client class, it is recommended to inherit this class.
+        Template of client in Federated Learning.
     """
 
-    def __init__(self, args, train_dataset, client_id):
-        """
-        Initializing train dataset, test dataset(for personalized settings), constructing model and other configurations.
+    def __init__(self, args: dict, train_dataset: Iterable, client_id: int) -> None:
+        r"""
+        Overview:
+            Initialization for a client.
+        Arguments:
+            - args: dict type arguments.
+            - train_dataset: private dataset.
+            - client_id: unique id for this client.
+        Returns:
+            - None
         """
         # Model construction.
         self.args = args
@@ -28,17 +33,26 @@ class ClientTemplate:
         # Only weights in ``self.fed_keys`` will be collaboratively trained using Federated Learning.
         self.fed_keys = []
 
-    def set_fed_keys(self, keys):
-        """
-        Set the attribute ``self.fed_keys``.
-        Only weights in ``self.fed_keys`` will be collaboratively trained using Federated Learning.
+    def set_fed_keys(self, keys: Iterable) -> None:
+        r"""
+        Overview:
+            Set `self.fed_dict` to determine which parameters should be aggregated.
+        Arguments:
+            - keys: sequence that contains the keys of parameters that need to be aggregated.
+        Returns:
+            - None
         """
         self.fed_keys = keys
 
-    def update_model(self, dic):
-        """
-        Using the ``dic`` to update the state_dict of the local model of this client.
-        For keys not existed in ``dic``, the value will be retained.
+    def update_model(self, dic: dict) -> None:
+        r"""
+        Overview:
+            Update the state_dict of the local model of this client.
+            For keys not existed in the argument `dic`, the value will be retained.
+        Arguments:
+            - dic: dict type parameters for updating local model.
+        Returns:
+            - None
         """
         dic = copy.deepcopy(dic)
         state_dict = self.model.state_dict()
@@ -46,27 +60,88 @@ class ClientTemplate:
 
         self.model.load_state_dict(state_dict)
 
-    def get_state_dict(self, keys):
-        """
-        Get the state dict of local model.
+    def get_state_dict(self, keys: Iterable) -> dict:
+        r"""
+        Overview:
+            Get the parameter diction of local model.
+        Arguments:
+            - keys: sequence that contains the keys of parameters that are acquired.
+        Returns:
+            - partial_dict: the acquired diction of parameters.
         """
         state_dict = self.model.state_dict()
-        return {k: state_dict[k] for k in keys}
+        partial_dict = {k: state_dict[k] for k in keys}
+        return partial_dict
 
-    def train_step(self, batch_data, criterion, monitor, optimizer):
+    def train_step(self, batch_data: dict, criterion: Callable, monitor: VariableMonitor, optimizer: Optimizer) -> None:
+        r"""
+        Overview:
+            A step of local training given one data batch.
+        Arguments:
+            - batch_data: dict type data for updating local model.
+            - criterion: loss function.
+            - monitor: variable monitor for results generated in each step.
+            - optimizer: optimizer for training local model
+        Returns:
+            - None
+        """
         raise NotImplementedError
 
-    def test_step(self, batch_data, criterion, monitor):
+    def test_step(self, batch_data: dict, criterion: Callable, monitor: VariableMonitor) -> None:
+        r"""
+        Overview:
+            A step of local testing given one data batch.
+        Arguments:
+            - batch_data: dict type data for testing local model.
+            - criterion: loss function.
+            - monitor: variable monitor for results generated in each step.
+        Returns:
+            - None
+        """
         raise NotImplementedError
 
-    def preprocess_data(self, data):
+    def preprocess_data(self, data: Iterable) -> dict:
+        r"""
+        Overview:
+            Pre-process the data batch generated from dataset.
+        Arguments:
+            - data: raw data generated from dataset.
+        Returns:
+            - Data after pre-processing.
+        """
         raise NotImplementedError
 
-    def train(self, lr):
+    def train(self, lr: float, device: str) -> dict:
+        r"""
+        Overview:
+            The local training process of a client.
+        Arguments:
+            - lr: learning rate of the training.
+            - device: device for operating this function.
+        Returns:
+            - A diction containing training results.
+        """
         raise NotImplementedError
 
-    def finetune(self, lr, finetune_args, finetune_eps=None):
+    def finetune(self, lr: float, finetune_args: dict, device: str, finetune_eps: int) -> list:
+        r"""
+        Overview:
+            The local fine-tuning process of a client.
+        Arguments:
+            - lr: learning rate of the training.
+            - finetune_args: arguments for fine-tuning.
+            - device: device for operating this function.
+            - finetune_eps: epochs for finetuning.
+        Returns:
+            - A list of dictions containing fine-tuning results.
+        """
         raise NotImplementedError
 
-    def test(self):
+    def test(self) -> dict:
+        r"""
+        Overview:
+            The local testing process of a client.
+        Returns:
+            - A diction containing testing results.
+        """
         raise NotImplementedError

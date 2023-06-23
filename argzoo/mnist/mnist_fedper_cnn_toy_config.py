@@ -8,6 +8,7 @@ exp_args = dict(
         global_eps=4,
         batch_size=32,
         optimizer=dict(name='sgd', lr=0.02, momentum=0.9),
+        # Only fine-tune parameters whose name contain the keyword "fc".
         finetune_parameters=dict(name='contain', keywords=['fc']),
     ),
     model=dict(
@@ -20,6 +21,7 @@ exp_args = dict(
     group=dict(
         name='base_group',
         aggregation_method='avg',
+        # Only aggregate parameters whose name does not contain the keyword "fc".
         aggregation_parameters=dict(
             name='except',
             keywords=['fc'],

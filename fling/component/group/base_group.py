@@ -1,28 +1,44 @@
 from fling.utils import get_params_number
 from fling.utils.compress_utils import *
 from fling.utils.registry_utils import GROUP_REGISTRY
+from fling.utils import VariableMonitor
+from fling.component.client import ClientTemplate
 
 
 @GROUP_REGISTRY.register('base_group')
 class ParameterServerGroup:
-    """
-    A container to hold clients.
+    r"""
+    Overview:
+        Base implementation of the group in federated learning.
     """
 
-    def __init__(self, args, logger):
+    def __init__(self, args: dict, logger: VariableMonitor) -> None:
+        r"""
+        Overview:
+            Lazy initialization of group.
+            To complete the initialization process, please call `self.initialization()` after server and all clients
+        are initialized.
+        Arguments:
+            - args: arguments in dict type.
+            - logger: logger for this group
+        Returns:
+            - None
+        """
         self.clients = []
         self.server = None
-        self.method = None
         self.args = args
         self.logger = logger
 
-    def initialize(self):
-        """
+    def initialize(self) -> None:
+        r"""
         Overview:
-        In this function, several things will be done:
-        1) ``fed_key`` in each client is determined.
-        2) ``glob_dict`` in the server is determined, which is exactly a state dict with all keys in ``fed_keys``.
-        3) Each client local model will be updated by ``glob_dict``.
+            In this function, several things will be done:
+            1) Set ``fed_key`` in each client is determined, determine which parameters shoul be included for federated
+        learning.
+            2) ``glob_dict`` in the server is determined, which is exactly a state dict with all keys in ``fed_keys``.
+            3) Each client local model will be updated by ``glob_dict``.
+        Returns:
+            - None
         """
         # Step 1.
         if self.args.group.aggregation_parameters.name == 'all':
@@ -62,43 +78,61 @@ class ParameterServerGroup:
             'Parameter number in each model: {:.2f}M'.format(get_params_number(self.clients[0].model) / 1e6)
         )
 
-    def append(self, item):
+    def append(self, client: ClientTemplate) -> None:
+        r"""
+        Overview:
+            Append a client into the group.
+        Arguments:
+            - client: client to be added.
+        Returns:
+            - None
         """
-        append: add a client into the container
-        :param item: the client to be added
-        :return: None
-        """
-        self.clients.append(item)
+        self.clients.append(client)
 
-    def aggregate(self, train_round, tb_logger):
-        """
-        aggregate: applying an aggregation method to update the global model
-        :return: None
+    def aggregate(self, train_round: int) -> int:
+        r"""
+        Overview:
+            Aggregate all client models.
+        Arguments:
+            - train_round: current global epochs.
+        Returns:
+            - trans_cost: uplink communication cost.
         """
         if self.args.group.aggregation_method == 'avg':
             trans_cost = fed_avg(self.clients, self.server)
             self.sync()
         else:
-            print('Unrecognized compression method: ' + self.method)
+            print('Unrecognized compression method: ' + self.args.group.aggregation_method)
             assert False
         return trans_cost
 
-    def flush(self):
-        """
-        flush all the clients
-        :return: None
+    def flush(self) -> None:
+        r"""
+        Overview:
+            Reset this group and clear all server and clients.
+        Returns:
+            - None
         """
         self.clients = []
+        self.server = None
 
-    def sync(self):
-        """
-        given a global state_dict, require all clients' model is set equal as server
-        :return: None
+    def sync(self) -> None:
+        r"""
+        Overview:
+            Synchronize all local models, making their parameters same as global model.
+        Returns:
+            - None
         """
         state_dict = self.server.glob_dict
         for client in self.clients:
             client.update_model(state_dict)
 
-    def set_fed_keys(self):
+    def set_fed_keys(self) -> None:
+        r"""
+        Overview:
+            Set `fed_keys` of each client, deterimine which parameters should be included for federated learning
+        Returns:
+            - None
+        """
         for client in self.clients:
             client.set_fed_keys(self.server.glob_dict.keys())

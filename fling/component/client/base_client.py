@@ -85,10 +85,13 @@ class BaseClient(ClientTemplate):
     def preprocess_data(self, data):
         return {'x': data[0].to(self.device), 'y': data[1].to(self.device)}
 
-    def train(self, lr):
+    def train(self, lr, device=None):
         """
         Local training.
         """
+        if device is not None:
+            device_bak = self.device
+            self.device = device
         self.model.train()
         self.model.to(self.device)
 
@@ -114,12 +117,18 @@ class BaseClient(ClientTemplate):
         # Put the model to cpu after training to save GPU memory.
         self.model.to('cpu')
 
+        if device is not None:
+            self.device = device_bak
+
         return mean_monitor_variables
 
-    def finetune(self, lr, finetune_args, finetune_eps=None):
+    def finetune(self, lr, finetune_args, device=None, finetune_eps=None):
         """
         Finetune function. In this function, the local model will not be changed, but will return the finetune results.
         """
+        if device is not None:
+            device_bak = self.device
+            self.device = device
         model_bak = copy.deepcopy(self.model)
         self.model.train()
         self.model.to(self.device)
@@ -154,6 +163,8 @@ class BaseClient(ClientTemplate):
             info.append(mean_monitor_variables)
 
         self.model = model_bak
+        if device is not None:
+            self.device = device_bak
 
         return info
 
