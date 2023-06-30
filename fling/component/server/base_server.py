@@ -11,7 +11,7 @@ from .server_template import ServerTemplate
 class BaseServer(ServerTemplate):
 
     def __init__(self, args, test_dataset):
-        super(Server, self).__init__(args, test_dataset)
+        super(BaseServer, self).__init__(args, test_dataset)
         self.test_loader = DataLoader(test_dataset, batch_size=args.learn.batch_size, shuffle=True)
 
     def apply_grad(self, grad, lr=1.):

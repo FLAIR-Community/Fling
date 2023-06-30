@@ -63,7 +63,7 @@ class ServerTemplate:
         """
         raise NotImplementedError
 
-    def test(self, model: nn.Module, test_loader: DataLoader = None) -> test:
+    def test(self, model: nn.Module, test_loader: DataLoader = None) -> dict:
         r"""
         Overview:
             The local testing process of a client.

@@ -20,8 +20,6 @@ default_exp_args = dict(
         global_eps=40,
         # Batch size for local training, testing and fine-tuning.
         batch_size=32,
-        # TODO
-        loss='CrossEntropyLoss',
         # Optimizer used in local training.
         optimizer=dict(
             # Name for optimizer.
