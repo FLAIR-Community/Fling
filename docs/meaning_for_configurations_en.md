@@ -46,7 +46,7 @@ default_exp_args = dict(
         # What parameters should be fine-tuned.
         finetune_parameters=dict(
             # For default case, every parameter should be fine-tuned.
-            name='all'
+            name='all'  # Options: "all", "except", "contain" 
         ),
     ),
     # Configurations about models.
@@ -86,7 +86,7 @@ default_exp_args = dict(
         # What parameters in each client should be aggregated.
         aggregation_parameters=dict(
             # For default case, every parameter should be aggregated.
-            name='all'
+            name='all'  # Options: "all", "except", "contain" 
         ),
     ),
     # Other configurations.
