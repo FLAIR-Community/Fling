@@ -1,4 +1,4 @@
-<img src="[https://github.com/kxzxvbk/Fling/README.assets/fling.png" style="zoom: 50%;" />
+<img src="[https://github.com/kxzxvbk/Fling/README.assets/fling.png" style="zoom: 35%;" />
 
 ## Fling
 
