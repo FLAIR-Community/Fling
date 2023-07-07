@@ -32,13 +32,14 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     train_set = get_dataset(args, train=True)
     test_set = get_dataset(args, train=False)
     # Split dataset into clients.
-    train_sets = data_sampling(train_set, args)
+    train_sets = data_sampling(train_set, args, seed, train=True)
+    test_sets = data_sampling(test_set, args, seed, train=False)
 
     # Initialize group, clients and server.
     group = get_group(args, logger)
     group.server = get_server(args, test_dataset=test_set)
     for i in range(args.client.client_num):
-        group.append(get_client(train_sets[i], args=args, client_id=i))
+        group.append(get_client(train_sets[i], args=args, client_id=i, test_dataset=test_sets[i]))
     group.initialize()
 
     # Setup lr_scheduler.
@@ -60,14 +61,14 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
         for j in tqdm.tqdm(participated_clients):
             train_monitor.append(group.clients[j].train(lr=cur_lr))
 
-        # Aggregate parameters in each client.
-        trans_cost = group.aggregate(i)
+        # # Aggregate parameters in each client.
+        # trans_cost = group.aggregate(i)
 
-        # Logging for train variables.
-        mean_train_variables = train_monitor.variable_mean()
-        logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
-        extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
-        logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
+        # # Logging for train variables.
+        # mean_train_variables = train_monitor.variable_mean()
+        # logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
+        # extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
+        # logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
         # Testing
         if i % args.other.test_freq == 0:
@@ -84,6 +85,14 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
 
             # Saving model checkpoints.
             torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))
+
+        # Aggregate parameters in each client.
+        trans_cost = group.aggregate(i)
+        # Logging for train variables.
+        mean_train_variables = train_monitor.variable_mean()
+        logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
+        extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
+        logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
     # Fine-tuning
     # Fine-tune model on each client and collect all the results.

@@ -1,24 +1,26 @@
 from easydict import EasyDict
 
 exp_args = dict(
-    data=dict(dataset='cifar10', data_path='./data/CIFAR10', sample_method=dict(name='dirichlet', alpha=0.5)),
+    data=dict(dataset='cifar10', data_path='./data/CIFAR10', sample_method=dict(name='dirichlet', alpha=0.5, train_num=500, test_num=100)),
     learn=dict(
         device='cuda:0',
-        local_eps=8,
-        global_eps=40,
-        batch_size=32,
-        optimizer=dict(name='sgd', lr=0.02, momentum=0.9),
+        local_eps=5,
+        local_p_eps=2,
+        global_eps=200,
+        batch_size=100,
+        optimizer=dict(name='sgd', lr=0.1, momentum=0.9),
         # Only fine-tune parameters whose name contain the keyword "fc".
         finetune_parameters=dict(name='contain', keywords=['lora_A', 'lora_B']),
     ),
     model=dict(
-        name='lora_resnet',
+        name='lora_resnet8',
         input_channel=3,
         class_number=10,
-        r=0.2,
+        Conv_r=1,
+        Linear_r=3,
         lora_alpha=1,
     ),
-    client=dict(name='fedlora_client', client_num=30, test_frac=0.2),
+    client=dict(name='fedlora_client', client_num=40, test_frac=0),
     server=dict(name='base_server'),
     group=dict(
         name='base_group',
@@ -29,7 +31,7 @@ exp_args = dict(
             keywords=['lora_A', 'lora_B'],
         ),
     ),
-    other=dict(test_freq=3, logging_path='./logging/cifar10_fedlora_resnet_dirichlet_05')
+    other=dict(test_freq=1, logging_path='./logging/cifar10_fedlora_resnet_dirichlet_05')
 )
 
 exp_args = EasyDict(exp_args)

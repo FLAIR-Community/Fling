@@ -17,12 +17,19 @@ class MyDataset(data.Dataset):
         return len(self.indexes)
 
 
-def data_sampling(dataset, args):
+def data_sampling(dataset, args, seed, train=True):
+    sample_num = args.data.sample_method.train_num if train else args.data.sample_method.test_num
     if args.data.sample_method.name == 'iid':
         return iid_sampling(dataset, args.client.client_num)
-    elif args.data.sample_method.name == 'dirichlet':
+    elif args.data.sample_method.name == 'dirichlet_sampling':
         data_labels = np.stack([dataset[i][1] for i in range(len(dataset))], axis=0)
         indexes = dirichlet_sampling(data_labels, args.client.client_num, alpha=args.data.sample_method.alpha)
+        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
+    elif args.data.sample_method.name == 'dirichlet':
+        indexes = dirichlet_noniid(dataset.dataset, args.client.client_num, args.data.sample_method.alpha, sample_num, seed)
+        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
+    elif args.data.sample_method.name == 'pathological_noniid':
+        indexes = pathological_noniid(dataset.dataset, args.client.client_num, args.data.sample_method.alpha, sample_num, seed)
         return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
     else:
         raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
@@ -60,3 +67,62 @@ def dirichlet_sampling(dataset, client_number, alpha):
     client_indexes = [np.concatenate(idc) for idc in client_indexes]
 
     return client_indexes
+
+def pathological_noniid(dataset, num_users, alpha, sample_num, seed):
+    num_indices = len(dataset.targets)
+    labels = np.array(dataset.targets)
+    num_classes = len(np.unique(labels))
+    idxs_classes = [[] for _ in range(num_classes)]
+
+    # if sample_num is not specified, then the dataset is divided equally among each client
+    if sample_num == 0:
+        sample_num = num_indices // num_users
+
+    for i in range(num_indices):
+        idxs_classes[labels[i]].append(i)
+
+    client_indexes = [[] for _ in range(num_users)]
+    random_state = np.random.RandomState(seed)
+
+    class_idxs = [i for i in range(num_classes)]
+    for i in range(num_users):
+        class_idx = random_state.choice(class_idxs, alpha, replace=False)
+        for j in class_idx:
+            selected = random_state.choice(idxs_classes[j], int(sample_num / alpha), replace=False)
+            client_indexes[i] += list(selected)
+        client_indexes[i] = np.array(client_indexes[i])
+    return client_indexes
+
+def dirichlet_noniid(dataset, num_users, alpha, sample_num, seed):
+    num_indices = len(dataset.targets)
+    labels = np.array(dataset.targets)
+    num_classes = len(np.unique(labels))
+    idxs_classes = [[] for _ in range(num_classes)]
+
+    # if sample_num is not specified, then the dataset is divided equally among each client
+    if sample_num == 0:
+        sample_num = num_indices // num_users
+
+    for i in range(num_indices):
+        idxs_classes[labels[i]].append(i)
+
+    client_indexes = [[] for _ in range(num_users)]
+    random_state = np.random.RandomState(seed)
+    q = random_state.dirichlet(np.repeat(alpha, num_classes), num_users)
+
+    for i in range(num_users):
+        # make sure that each client have sample_num samples
+        temp_sample = sample_num
+
+        # partition each class for clients
+        for j in range(num_classes):
+            select_num = int(sample_num * q[i][j] + 0.5)
+            select_num = select_num if temp_sample - select_num >= 0 else temp_sample
+            temp_sample -= select_num
+            assert select_num >= 0
+            selected = random_state.choice(idxs_classes[j], select_num, replace=False)
+            client_indexes[i] += list(selected)
+        client_indexes[i] = np.array(client_indexes[i])
+    return client_indexes
+
+
