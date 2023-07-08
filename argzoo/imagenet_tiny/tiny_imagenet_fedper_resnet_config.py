@@ -18,7 +18,7 @@ exp_args = dict(
         input_channel=3,
         class_number=200,
     ),
-    client=dict(name='base_client', client_num=30, test_frac=0.2),
+    client=dict(name='base_client', client_num=30, val_frac=0.2),
     server=dict(name='base_server'),
     group=dict(
         name='base_group',

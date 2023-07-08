@@ -27,9 +27,9 @@ class BaseClient(ClientTemplate):
         Initializing train dataset, test dataset(for personalized settings).
         """
         super(BaseClient, self).__init__(args, train_dataset, test_dataset, client_id)
-        test_frac = args.client.test_frac
-        # If test_frac > 0, it means that a fraction of the given dataset will be separated for validating.
-        if test_frac == 0:
+        val_frac = args.client.val_frac
+        # If val_frac > 0, it means that a fraction of the given dataset will be separated for validating.
+        if val_frac == 0:
             # ``self.sample_num`` refers to the number of local training number.
             self.sample_num = len(train_dataset)
             self.train_dataloader = DataLoader(train_dataset, batch_size=args.learn.batch_size, shuffle=True)
@@ -42,8 +42,8 @@ class BaseClient(ClientTemplate):
             indexes = real_train.indexes
             random.shuffle(indexes)
             # Randomly sampling a part to be test dataset.
-            train_index = indexes[:int((1 - test_frac) * len(train_dataset))]
-            test_index = indexes[int((1 - test_frac) * len(train_dataset)):]
+            train_index = indexes[:int((1 - val_frac) * len(train_dataset))]
+            test_index = indexes[int((1 - val_frac) * len(train_dataset)):]
             real_train.indexes = train_index
             real_test.indexes = test_index
             # ``self.sample_num`` refers to the number of local training number.

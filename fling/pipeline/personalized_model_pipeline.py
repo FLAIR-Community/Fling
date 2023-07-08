@@ -61,14 +61,6 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
         for j in tqdm.tqdm(participated_clients):
             train_monitor.append(group.clients[j].train(lr=cur_lr))
 
-        # # Aggregate parameters in each client.
-        # trans_cost = group.aggregate(i)
-
-        # # Logging for train variables.
-        # mean_train_variables = train_monitor.variable_mean()
-        # logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
-        # extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
-        # logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
         # Testing
         if i % args.other.test_freq == 0:

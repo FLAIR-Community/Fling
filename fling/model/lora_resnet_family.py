@@ -314,21 +314,21 @@ class ResNet(nn.Module):
         return self._forward_impl(x, mode=mode)
 
 @MODEL_REGISTRY.register('lora_resnet18')
-def resnet18(**kwargs: Any) -> ResNet:  # 18 = 2 + 2 * (2 + 2 + 2 + 2)
+def lora_resnet18(**kwargs: Any) -> ResNet:  # 18 = 2 + 2 * (2 + 2 + 2 + 2)
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
 @MODEL_REGISTRY.register('lora_resnet10')
-def resnet10(**kwargs: Any) -> ResNet:  # 10 = 2 + 2 * (1 + 1 + 1 + 1)
+def lora_resnet10(**kwargs: Any) -> ResNet:  # 10 = 2 + 2 * (1 + 1 + 1 + 1)
     return ResNet(BasicBlock, [1, 1, 1, 1], **kwargs)
 
 @MODEL_REGISTRY.register('lora_resnet8')
-def resnet8(**kwargs: Any) -> ResNet:  # 8 = 2 + 2 * (1 + 1 + 1)
+def lora_resnet8(**kwargs: Any) -> ResNet:  # 8 = 2 + 2 * (1 + 1 + 1)
     return ResNet(BasicBlock, [1, 1, 1], **kwargs)
 
 @MODEL_REGISTRY.register('lora_resnet6')
-def resnet6(**kwargs: Any) -> ResNet:  # 6 = 2 + 2 * (1 + 1)
+def lora_resnet6(**kwargs: Any) -> ResNet:  # 6 = 2 + 2 * (1 + 1)
     return ResNet(BasicBlock, [1, 1], **kwargs)
 
 @MODEL_REGISTRY.register('lora_resnet4')
-def resnet4(**kwargs: Any) -> ResNet:  # 4 = 2 + 2 * (1)
+def lora_resnet4(**kwargs: Any) -> ResNet:  # 4 = 2 + 2 * (1)
     return ResNet(BasicBlock, [1], **kwargs)

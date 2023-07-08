@@ -60,7 +60,7 @@ class FedLoraClient(BaseClient):
         monitor = VariableMonitor(['train_acc', 'train_loss'])
 
         # Main training loop for lora
-        for epoch in range(self.args.learn.local_p_eps):
+        for epoch in range(self.args.learn.local_lora_eps):
             for _, data in enumerate(self.train_dataloader):
                 preprocessed_data = self.preprocess_data(data)
                 # Update total sample number.
@@ -68,7 +68,7 @@ class FedLoraClient(BaseClient):
 
         monitor = VariableMonitor(['train_acc', 'train_loss'])
         # Main training loop for non-lora
-        for epoch in range(self.args.learn.local_eps - self.args.learn.local_p_eps):
+        for epoch in range(self.args.learn.local_eps - self.args.learn.local_lora_eps):
             for _, data in enumerate(self.train_dataloader):
                 preprocessed_data = self.preprocess_data(data)
                 # Update total sample number.

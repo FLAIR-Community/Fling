@@ -59,9 +59,9 @@ default_exp_args = dict(
         # The ratio of clients participated in each global epoch. For instance, if `sample_rate=0.5`,
         # only half of all clients will join federated learning in each global epoch.
         sample_rate=1,
-        # The fraction ratio of test samples in total samples. For instance, if `test_frac=0.2`, this means
+        # The fraction ratio of test samples in total samples. For instance, if `val_frac=0.2`, this means
         # 20% of total data samples will be regarded as local test dataset, and 80% for training dataset.
-        test_frac=0,
+        val_frac=0,
     ),
     # Configurations about server.
     server=dict(

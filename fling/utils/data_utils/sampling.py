@@ -21,14 +21,10 @@ def data_sampling(dataset, args, seed, train=True):
     sample_num = args.data.sample_method.train_num if train else args.data.sample_method.test_num
     if args.data.sample_method.name == 'iid':
         return iid_sampling(dataset, args.client.client_num)
-    elif args.data.sample_method.name == 'dirichlet_sampling':
-        data_labels = np.stack([dataset[i][1] for i in range(len(dataset))], axis=0)
-        indexes = dirichlet_sampling(data_labels, args.client.client_num, alpha=args.data.sample_method.alpha)
-        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
     elif args.data.sample_method.name == 'dirichlet':
         indexes = dirichlet_noniid(dataset.dataset, args.client.client_num, args.data.sample_method.alpha, sample_num, seed)
         return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
-    elif args.data.sample_method.name == 'pathological_noniid':
+    elif args.data.sample_method.name == 'pathological':
         indexes = pathological_noniid(dataset.dataset, args.client.client_num, args.data.sample_method.alpha, sample_num, seed)
         return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
     else:
@@ -45,28 +41,6 @@ def iid_sampling(dataset, client_number):
 
     return [MyDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
-
-def dirichlet_sampling(dataset, client_number, alpha):
-    n_classes = 10
-    # (#label, #client) label_distribution[i, j] means the ratio of samples of class i in client j.
-    # Thus, np.sum(label_distribution, axis=1) = np.ones()
-    label_distribution = np.random.dirichlet([alpha] * client_number, n_classes)
-
-    # recording the sample indexes for each class
-    class_indexes = [np.argwhere(dataset == y).flatten() for y in range(n_classes)]
-    for item in class_indexes:
-        np.random.shuffle(item)
-
-    client_indexes = [[] for _ in range(client_number)]
-    for c, fracs in zip(class_indexes, label_distribution):
-        # c: total indexes for each class
-        # fracs: distribution over each client
-        for i, idc in enumerate(np.split(c, (np.cumsum(fracs)[:-1] * len(c)).astype(int))):
-            client_indexes[i] += [idc]
-
-    client_indexes = [np.concatenate(idc) for idc in client_indexes]
-
-    return client_indexes
 
 def pathological_noniid(dataset, num_users, alpha, sample_num, seed):
     num_indices = len(dataset.targets)

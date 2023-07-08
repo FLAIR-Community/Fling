@@ -5,7 +5,7 @@ exp_args = dict(
     learn=dict(
         device='cuda:0',
         local_eps=5,
-        local_p_eps=2,
+        local_lora_eps=2,
         global_eps=200,
         batch_size=100,
         optimizer=dict(name='sgd', lr=0.1, momentum=0.9),
@@ -20,7 +20,7 @@ exp_args = dict(
         Linear_r=3,
         lora_alpha=1,
     ),
-    client=dict(name='fedlora_client', client_num=40, test_frac=0),
+    client=dict(name='fedlora_client', client_num=40, val_frac=0),
     server=dict(name='base_server'),
     group=dict(
         name='base_group',
