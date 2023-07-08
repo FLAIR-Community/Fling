@@ -32,13 +32,14 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     train_set = get_dataset(args, train=True)
     test_set = get_dataset(args, train=False)
     # Split dataset into clients.
-    train_sets = data_sampling(train_set, args)
+    train_sets = data_sampling(train_set, args, seed, train=True)
+    test_sets = data_sampling(test_set, args, seed, train=False)
 
     # Initialize group, clients and server.
     group = get_group(args, logger)
     group.server = get_server(args, test_dataset=test_set)
     for i in range(args.client.client_num):
-        group.append(get_client(train_sets[i], args=args, client_id=i))
+        group.append(get_client(train_sets[i], args=args, client_id=i, test_dataset=test_sets[i]))
     group.initialize()
 
     # Setup lr_scheduler.

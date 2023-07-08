@@ -1,10 +1,9 @@
-import random
+from copy import deepcopy
 import numpy as np
-
 from torch.utils import data
 
 
-class MyDataset(data.Dataset):
+class NaiveDataset(data.Dataset):
 
     def __init__(self, tot_data, indexes):
         self.tot_data = tot_data
@@ -17,46 +16,95 @@ class MyDataset(data.Dataset):
         return len(self.indexes)
 
 
-def data_sampling(dataset, args):
-    if args.data.sample_method.name == 'iid':
-        return iid_sampling(dataset, args.client.client_num)
-    elif args.data.sample_method.name == 'dirichlet':
-        data_labels = np.stack([dataset[i][1] for i in range(len(dataset))], axis=0)
-        indexes = dirichlet_sampling(data_labels, args.client.client_num, alpha=args.data.sample_method.alpha)
-        return [MyDataset(tot_data=dataset, indexes=indexes[i]) for i in range(args.client.client_num)]
-    else:
-        raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
+def iid_sampling(dataset, client_number, sample_num, seed):
+    # if sample_num is not specified, then the dataset is divided equally among each client
+    num_indices = len(dataset)
+    if sample_num == 0:
+        sample_num = num_indices // client_number
 
+    random_state = np.random.RandomState(seed)
 
-def iid_sampling(dataset, client_number):
-    num_items = int(len(dataset) / client_number)
     dict_users, all_index = {}, [i for i in range(len(dataset))]
     for i in range(client_number - 1):
-        dict_users[i] = random.sample(all_index, num_items)
-        all_index = list(set(all_index).difference(set(dict_users[i])))
+        dict_users[i] = random_state.choice(all_index[j], sample_num, replace=False)
     dict_users[client_number - 1] = all_index
 
-    return [MyDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
+    return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
 
-def dirichlet_sampling(dataset, client_number, alpha):
-    n_classes = 10
-    # (#label, #client) label_distribution[i, j] means the ratio of samples of class i in client j.
-    # Thus, np.sum(label_distribution, axis=1) = np.ones()
-    label_distribution = np.random.dirichlet([alpha] * client_number, n_classes)
+def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
+    num_indices = len(dataset.targets)
+    labels = np.array(dataset.targets)
+    num_classes = len(np.unique(labels))
+    idxs_classes = [[] for _ in range(num_classes)]
 
-    # recording the sample indexes for each class
-    class_indexes = [np.argwhere(dataset == y).flatten() for y in range(n_classes)]
-    for item in class_indexes:
-        np.random.shuffle(item)
+    # if sample_num is not specified, then the dataset is divided equally among each client
+    if sample_num == 0:
+        sample_num = num_indices // client_number
+
+    for i in range(num_indices):
+        idxs_classes[labels[i]].append(i)
 
     client_indexes = [[] for _ in range(client_number)]
-    for c, fracs in zip(class_indexes, label_distribution):
-        # c: total indexes for each class
-        # fracs: distribution over each client
-        for i, idc in enumerate(np.split(c, (np.cumsum(fracs)[:-1] * len(c)).astype(int))):
-            client_indexes[i] += [idc]
+    random_state = np.random.RandomState(seed)
 
-    client_indexes = [np.concatenate(idc) for idc in client_indexes]
+    class_idxs = [i for i in range(num_classes)]
+    for i in range(client_number):
+        class_idx = random_state.choice(class_idxs, alpha, replace=False)
+        for j in class_idx:
+            selected = random_state.choice(idxs_classes[j], int(sample_num / alpha), replace=False)
+            client_indexes[i] += list(selected)
+        client_indexes[i] = np.array(client_indexes[i])
+    return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
 
-    return client_indexes
+
+def dirichlet_sampling(dataset, client_number, sample_num, seed, alpha):
+    num_indices = len(dataset.targets)
+    labels = np.array(dataset.targets)
+    num_classes = len(np.unique(labels))
+    idxs_classes = [[] for _ in range(num_classes)]
+
+    # if sample_num is not specified, then the dataset is divided equally among each client
+    if sample_num == 0:
+        sample_num = num_indices // client_number
+
+    for i in range(num_indices):
+        idxs_classes[labels[i]].append(i)
+
+    client_indexes = [[] for _ in range(client_number)]
+    random_state = np.random.RandomState(seed)
+    q = random_state.dirichlet(np.repeat(alpha, num_classes), client_number)
+
+    for i in range(client_number):
+        # make sure that each client have sample_num samples
+        temp_sample = sample_num
+
+        # partition each class for clients
+        for j in range(num_classes):
+            select_num = int(sample_num * q[i][j] + 0.5)
+            select_num = select_num if temp_sample - select_num >= 0 else temp_sample
+            temp_sample -= select_num
+            assert select_num >= 0
+            selected = random_state.choice(idxs_classes[j], select_num, replace=False)
+            client_indexes[i] += list(selected)
+        client_indexes[i] = np.array(client_indexes[i])
+    return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
+
+
+sampling_methods = {
+    'iid': iid_sampling,
+    'dirichlet': dirichlet_sampling,
+    'pathological': pathological_sampling,
+}
+
+
+def data_sampling(dataset, args, seed, train=True):
+    sampling_config = deepcopy(args.data.sample_method)
+    train_num, test_num = sampling_config.pop('train_num'), sampling_config.pop('test_num')
+    sample_num = train_num if train else test_num
+    sampling_name = sampling_config.pop('name')
+    try:
+        sampling_func = sampling_methods[sampling_name]
+    except KeyError:
+        raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
+    return sampling_func(dataset, args.client.client_num, sample_num, seed, **sampling_config)
