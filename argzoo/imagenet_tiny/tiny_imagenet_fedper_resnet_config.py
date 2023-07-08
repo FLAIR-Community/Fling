@@ -2,13 +2,9 @@ from easydict import EasyDict
 
 exp_args = dict(
     data=dict(
-        dataset='tiny_imagenet', data_path='./data/tiny_imagenet',
-        sample_method=dict(
-            name='dirichlet',
-            alpha=0.2,
-            train_num=500,
-            test_num=100
-        )
+        dataset='tiny_imagenet',
+        data_path='./data/tiny_imagenet',
+        sample_method=dict(name='dirichlet', alpha=0.2, train_num=500, test_num=100)
     ),
     learn=dict(
         device='cuda:0',
