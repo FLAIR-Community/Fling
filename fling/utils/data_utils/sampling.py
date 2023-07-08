@@ -25,16 +25,15 @@ def iid_sampling(dataset, client_number, sample_num, seed):
     random_state = np.random.RandomState(seed)
 
     dict_users, all_index = {}, [i for i in range(len(dataset))]
-    for i in range(client_number - 1):
-        dict_users[i] = random_state.choice(all_index[j], sample_num, replace=False)
-    dict_users[client_number - 1] = all_index
+    for i in range(client_number):
+        dict_users[i] = random_state.choice(all_index, sample_num, replace=False)
 
     return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
 
 def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
-    num_indices = len(dataset.targets)
-    labels = np.array(dataset.targets)
+    num_indices = len(dataset)
+    labels = np.array([dataset[i][1] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
     idxs_classes = [[] for _ in range(num_classes)]
 
@@ -59,8 +58,8 @@ def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
 
 
 def dirichlet_sampling(dataset, client_number, sample_num, seed, alpha):
-    num_indices = len(dataset.targets)
-    labels = np.array(dataset.targets)
+    num_indices = len(dataset)
+    labels = np.array([dataset[i][1] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
     idxs_classes = [[] for _ in range(num_classes)]
 

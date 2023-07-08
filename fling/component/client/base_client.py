@@ -4,6 +4,7 @@ import random
 import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
+from typing import Iterable
 
 from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
 from fling.utils.registry_utils import CLIENT_REGISTRY
@@ -22,18 +23,17 @@ class BaseClient(ClientTemplate):
     If users want to define a new client class, it is recommended to inherit this class.
     """
 
-    def __init__(self, args, train_dataset, test_dataset, client_id):
+    def __init__(self, args: dict, client_id: int, train_dataset: Iterable, test_dataset: Iterable = None):
         """
         Initializing train dataset, test dataset(for personalized settings).
         """
-        super(BaseClient, self).__init__(args, train_dataset, test_dataset, client_id)
+        super(BaseClient, self).__init__(args, client_id, train_dataset, test_dataset)
         val_frac = args.client.val_frac
         # If val_frac > 0, it means that a fraction of the given dataset will be separated for validating.
         if val_frac == 0:
             # ``self.sample_num`` refers to the number of local training number.
             self.sample_num = len(train_dataset)
             self.train_dataloader = DataLoader(train_dataset, batch_size=args.learn.batch_size, shuffle=True)
-            self.test_dataloader = DataLoader(test_dataset, batch_size=args.learn.batch_size, shuffle=True)
         else:
             # Separate a fraction of ``train_dataset`` for validating.
             real_train = copy.deepcopy(train_dataset)
@@ -51,6 +51,8 @@ class BaseClient(ClientTemplate):
 
             self.train_dataloader = DataLoader(real_train, batch_size=args.learn.batch_size, shuffle=True)
             self.val_dataloader = DataLoader(real_test, batch_size=args.learn.batch_size, shuffle=True)
+
+        if test_dataset is not None:
             self.test_dataloader = DataLoader(test_dataset, batch_size=args.learn.batch_size, shuffle=True)
 
     def train_step(self, batch_data, criterion, monitor, optimizer):
