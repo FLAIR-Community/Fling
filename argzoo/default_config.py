@@ -27,7 +27,7 @@ default_exp_args = dict(
         # Batch size for local training, testing and fine-tuning.
         batch_size=32,
         # Test place for federated learning. Options: 'before_aggregation', 'after_aggregation'
-        test_place=['after_aggregation', 'before_aggregation'],
+        test_place=['after_aggregation'],
         # Optimizer used in local training.
         optimizer=dict(
             # Name for optimizer.
