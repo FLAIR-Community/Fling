@@ -33,7 +33,7 @@ def iid_sampling(dataset, client_number, sample_num, seed):
 
 def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
     num_indices = len(dataset)
-    labels = np.array([dataset[i][1] for i in range(num_indices)])
+    labels = np.array([dataset[i]['class_id'] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
     idxs_classes = [[] for _ in range(num_classes)]
 
@@ -59,7 +59,7 @@ def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
 
 def dirichlet_sampling(dataset, client_number, sample_num, seed, alpha):
     num_indices = len(dataset)
-    labels = np.array([dataset[i][1] for i in range(num_indices)])
+    labels = np.array([dataset[i]['class_id'] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
     idxs_classes = [[] for _ in range(num_classes)]
 

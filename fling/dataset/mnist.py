@@ -19,4 +19,4 @@ class MNISTDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, item):
-        return self.dataset[item]
+        return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}
