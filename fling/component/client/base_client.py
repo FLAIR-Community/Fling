@@ -106,7 +106,7 @@ class BaseClient(ClientTemplate):
         )
         criterion = nn.CrossEntropyLoss()
 
-        monitor = VariableMonitor(['train_acc', 'train_loss'])
+        monitor = VariableMonitor()
 
         # Main training loop.
         for epoch in range(self.args.learn.local_eps):
@@ -155,7 +155,7 @@ class BaseClient(ClientTemplate):
         for epoch in range(finetune_eps):
             self.model.train()
             self.model.to(self.device)
-            monitor = VariableMonitor(['train_acc', 'train_loss'])
+            monitor = VariableMonitor()
             for _, data in enumerate(self.train_dataloader):
                 preprocessed_data = self.preprocess_data(data)
                 # Update total sample number.
@@ -180,7 +180,7 @@ class BaseClient(ClientTemplate):
         self.model.to(self.device)
 
         criterion = nn.CrossEntropyLoss()
-        monitor = VariableMonitor(['test_acc', 'test_loss'])
+        monitor = VariableMonitor()
 
         # Main test loop.
         with torch.no_grad():

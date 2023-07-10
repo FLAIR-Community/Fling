@@ -44,7 +44,7 @@ class BaseServer(ServerTemplate):
         model.eval()
         model.to(self.device)
 
-        monitor = VariableMonitor(['test_acc', 'test_loss'])
+        monitor = VariableMonitor()
         criterion = nn.CrossEntropyLoss()
 
         with torch.no_grad():

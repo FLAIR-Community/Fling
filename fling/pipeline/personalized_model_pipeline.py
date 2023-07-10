@@ -49,7 +49,7 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
         # Initialize variable monitor.
-        train_monitor = VariableMonitor(['train_acc', 'train_loss'])
+        train_monitor = VariableMonitor()
 
         # Random sample participated clients in each communication round.
         participated_clients = client_sampling(range(args.client.client_num), args.client.sample_rate)
@@ -63,7 +63,7 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
 
         # Testing
         if i % args.other.test_freq == 0 and "before_aggregation" in args.learn.test_place:
-            test_monitor = VariableMonitor(['test_acc', 'test_loss'])
+            test_monitor = VariableMonitor()
 
             # Testing for each client and add results to the monitor
             for j in range(args.client.client_num):
@@ -85,7 +85,7 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
 
         # Testing
         if i % args.other.test_freq == 0 and "after_aggregation" in args.learn.test_place:
-            test_monitor = VariableMonitor(['test_acc', 'test_loss'])
+            test_monitor = VariableMonitor()
 
             # Testing for each client and add results to the monitor
             for j in range(args.client.client_num):
