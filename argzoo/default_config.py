@@ -8,7 +8,13 @@ default_exp_args = dict(
         # Image transformation methods, such as: Random Resized Crop(RRC), Resize, Color Jitter ...
         transforms=dict(),
         # How datasets distribute across all clients.
-        sample_method=dict(name='iid')
+        sample_method=dict(
+            name='iid',
+            # Default training number for each client is 500.
+            train_num=500,
+            # Default testing number for each client is 500.
+            test_num=100
+        )
     ),
     # Configurations about learning process.
     learn=dict(
@@ -20,6 +26,8 @@ default_exp_args = dict(
         global_eps=40,
         # Batch size for local training, testing and fine-tuning.
         batch_size=32,
+        # Test place for federated learning. Options: 'before_aggregation', 'after_aggregation'
+        test_place=['after_aggregation'],
         # Optimizer used in local training.
         optimizer=dict(
             # Name for optimizer.
@@ -59,9 +67,9 @@ default_exp_args = dict(
         # The ratio of clients participated in each global epoch. For instance, if `sample_rate=0.5`,
         # only half of all clients will join federated learning in each global epoch.
         sample_rate=1,
-        # The fraction ratio of test samples in total samples. For instance, if `test_frac=0.2`, this means
-        # 20% of total data samples will be regarded as local test dataset, and 80% for training dataset.
-        test_frac=0,
+        # The fraction ratio of test samples in total samples. For instance, if `val_frac=0.2`, this means
+        # 20% of total data samples will be regarded as local validation dataset, and 80% for training dataset.
+        val_frac=0,
     ),
     # Configurations about server.
     server=dict(

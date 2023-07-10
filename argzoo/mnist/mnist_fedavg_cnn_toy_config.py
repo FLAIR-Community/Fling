@@ -1,7 +1,7 @@
 from easydict import EasyDict
 
 exp_args = dict(
-    data=dict(dataset='mnist', data_path='./data/mnist', sample_method=dict(name='iid')),
+    data=dict(dataset='mnist', data_path='./data/mnist', sample_method=dict(name='iid', train_num=500, test_num=100)),
     learn=dict(
         device='cuda:0', local_eps=1, global_eps=4, batch_size=32, optimizer=dict(name='sgd', lr=0.02, momentum=0.9)
     ),
@@ -20,4 +20,5 @@ exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
     from fling.pipeline import generic_model_serial_pipeline
+
     generic_model_serial_pipeline(exp_args, seed=0)

@@ -1,7 +1,11 @@
 from easydict import EasyDict
 
 exp_args = dict(
-    data=dict(dataset='mnist', data_path='./data/mnist', sample_method=dict(name='dirichlet', alpha=0.2)),
+    data=dict(
+        dataset='mnist',
+        data_path='./data/mnist',
+        sample_method=dict(name='dirichlet', alpha=0.2, train_num=500, test_num=100)
+    ),
     learn=dict(
         device='cuda:0',
         local_eps=1,

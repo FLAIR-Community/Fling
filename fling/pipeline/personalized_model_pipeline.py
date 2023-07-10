@@ -32,13 +32,14 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     train_set = get_dataset(args, train=True)
     test_set = get_dataset(args, train=False)
     # Split dataset into clients.
-    train_sets = data_sampling(train_set, args)
+    train_sets = data_sampling(train_set, args, seed, train=True)
+    test_sets = data_sampling(test_set, args, seed, train=False)
 
     # Initialize group, clients and server.
     group = get_group(args, logger)
     group.server = get_server(args, test_dataset=test_set)
     for i in range(args.client.client_num):
-        group.append(get_client(train_sets[i], args=args, client_id=i))
+        group.append(get_client(args=args, client_id=i, train_dataset=train_sets[i], test_dataset=test_sets[i]))
     group.initialize()
 
     # Setup lr_scheduler.
@@ -60,6 +61,19 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
         for j in tqdm.tqdm(participated_clients):
             train_monitor.append(group.clients[j].train(lr=cur_lr))
 
+        # Testing
+        if i % args.other.test_freq == 0 and "before_aggregation" in args.learn.test_place:
+            test_monitor = VariableMonitor(['test_acc', 'test_loss'])
+
+            # Testing for each client and add results to the monitor
+            for j in range(args.client.client_num):
+                test_monitor.append(group.clients[j].test())
+            # Get mean results across each client.
+            mean_test_variables = test_monitor.variable_mean()
+
+            # Logging test variables.
+            logger.add_scalars_dict(prefix='before_aggregation_test', dic=mean_test_variables, rnd=i)
+
         # Aggregate parameters in each client.
         trans_cost = group.aggregate(i)
 
@@ -70,7 +84,7 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
         logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
         # Testing
-        if i % args.other.test_freq == 0:
+        if i % args.other.test_freq == 0 and "after_aggregation" in args.learn.test_place:
             test_monitor = VariableMonitor(['test_acc', 'test_loss'])
 
             # Testing for each client and add results to the monitor
@@ -80,7 +94,7 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
             mean_test_variables = test_monitor.variable_mean()
 
             # Logging test variables.
-            logger.add_scalars_dict(prefix='test', dic=mean_test_variables, rnd=i)
+            logger.add_scalars_dict(prefix='after_aggregation_test', dic=mean_test_variables, rnd=i)
 
             # Saving model checkpoints.
             torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))

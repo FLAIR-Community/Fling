@@ -4,6 +4,7 @@ import random
 import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
+from typing import Iterable
 
 from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
 from fling.utils.registry_utils import CLIENT_REGISTRY
@@ -22,34 +23,37 @@ class BaseClient(ClientTemplate):
     If users want to define a new client class, it is recommended to inherit this class.
     """
 
-    def __init__(self, args, train_dataset, client_id):
+    def __init__(self, args: dict, client_id: int, train_dataset: Iterable, test_dataset: Iterable = None):
         """
         Initializing train dataset, test dataset(for personalized settings).
         """
-        super(BaseClient, self).__init__(args, train_dataset, client_id)
-        test_frac = args.client.test_frac
-        # If test_frac > 0, it means that a fraction of the given dataset will be separated for testing.
-        if test_frac == 0:
+        super(BaseClient, self).__init__(args, client_id, train_dataset, test_dataset)
+        val_frac = args.client.val_frac
+        # If val_frac > 0, it means that a fraction of the given dataset will be separated for validating.
+        if val_frac == 0:
             # ``self.sample_num`` refers to the number of local training number.
             self.sample_num = len(train_dataset)
             self.train_dataloader = DataLoader(train_dataset, batch_size=args.learn.batch_size, shuffle=True)
         else:
-            # Separate a fraction of ``train_dataset`` for testing.
+            # Separate a fraction of ``train_dataset`` for validating.
             real_train = copy.deepcopy(train_dataset)
             real_test = copy.deepcopy(train_dataset)
             # Get the indexes of train dataset.
             indexes = real_train.indexes
             random.shuffle(indexes)
             # Randomly sampling a part to be test dataset.
-            train_index = indexes[:int((1 - test_frac) * len(train_dataset))]
-            test_index = indexes[int((1 - test_frac) * len(train_dataset)):]
+            train_index = indexes[:int((1 - val_frac) * len(train_dataset))]
+            test_index = indexes[int((1 - val_frac) * len(train_dataset)):]
             real_train.indexes = train_index
             real_test.indexes = test_index
             # ``self.sample_num`` refers to the number of local training number.
             self.sample_num = len(real_train)
 
             self.train_dataloader = DataLoader(real_train, batch_size=args.learn.batch_size, shuffle=True)
-            self.test_dataloader = DataLoader(real_test, batch_size=args.learn.batch_size, shuffle=True)
+            self.val_dataloader = DataLoader(real_test, batch_size=args.learn.batch_size, shuffle=True)
+
+        if test_dataset is not None:
+            self.test_dataloader = DataLoader(test_dataset, batch_size=args.learn.batch_size, shuffle=True)
 
     def train_step(self, batch_data, criterion, monitor, optimizer):
         batch_x, batch_y = batch_data['x'], batch_data['y']
@@ -83,7 +87,7 @@ class BaseClient(ClientTemplate):
         )
 
     def preprocess_data(self, data):
-        return {'x': data[0].to(self.device), 'y': data[1].to(self.device)}
+        return {'x': data['input'].to(self.device), 'y': data['class_id'].to(self.device)}
 
     def train(self, lr, device=None):
         """
