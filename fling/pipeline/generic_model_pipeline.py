@@ -48,7 +48,7 @@ def generic_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
         # Initialize variable monitor.
-        train_monitor = VariableMonitor(['train_acc', 'train_loss'])
+        train_monitor = VariableMonitor()
 
         # Random sample participated clients in each communication round.
         participated_clients = client_sampling(range(args.client.client_num), args.client.sample_rate)

@@ -35,13 +35,15 @@ class Logger(SummaryWriter):
 
 class VariableMonitor:
 
-    def __init__(self, keys):
+    def __init__(self):
         self.length = 0
-        self.dic = {k: [] for k in keys}
+        self.dic = {}
 
     def append(self, item, weight=1):
         self.length += weight
         for k in item.keys():
+            if k not in self.dic.keys():
+                self.dic[k] = []
             self.dic[k].append(weight * item[k])
 
     def variable_mean(self):
