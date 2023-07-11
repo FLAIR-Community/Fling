@@ -7,6 +7,9 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('cifar10')
 class CIFAR10Dataset(Dataset):
+    r"""
+    Implementation for CIFAR10 dataset. Details can be viewed in: https://www.cs.toronto.edu/~kriz/cifar.html
+    """
 
     def __init__(self, cfg, train):
         super(CIFAR10Dataset, self).__init__()

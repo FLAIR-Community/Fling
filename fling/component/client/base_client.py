@@ -25,7 +25,15 @@ class BaseClient(ClientTemplate):
 
     def __init__(self, args: dict, client_id: int, train_dataset: Iterable, test_dataset: Iterable = None):
         """
-        Initializing train dataset, test dataset(for personalized settings).
+        Overview:
+            Initializing train dataset, test dataset(for personalized settings).
+        Arguments:
+            - args: dict type arguments.
+            - train_dataset: private dataset for training
+            - test_dataset: private dataset for testing (Optional)
+            - client_id: unique id for this client.
+        Returns:
+            - None
         """
         super(BaseClient, self).__init__(args, client_id, train_dataset, test_dataset)
         val_frac = args.client.val_frac

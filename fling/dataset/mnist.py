@@ -7,6 +7,9 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('mnist')
 class MNISTDataset(Dataset):
+    r"""
+        Implementation for MNIST dataset. Details can be viewed in: http://yann.lecun.com/exdb/mnist/
+    """
 
     def __init__(self, cfg, train):
         super(MNISTDataset, self).__init__()
