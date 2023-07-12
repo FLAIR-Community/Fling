@@ -34,7 +34,7 @@ class BaseServer(ServerTemplate):
         )
 
     def preprocess_data(self, data):
-        return {'x': data[0].to(self.device), 'y': data[1].to(self.device)}
+        return {'x': data['input'].to(self.device), 'y': data['class_id'].to(self.device)}
 
     def test(self, model, test_loader=None):
         if test_loader is not None:
@@ -44,7 +44,7 @@ class BaseServer(ServerTemplate):
         model.eval()
         model.to(self.device)
 
-        monitor = VariableMonitor(['test_acc', 'test_loss'])
+        monitor = VariableMonitor()
         criterion = nn.CrossEntropyLoss()
 
         with torch.no_grad():

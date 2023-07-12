@@ -12,13 +12,14 @@ class ClientTemplate:
         Template of client in Federated Learning.
     """
 
-    def __init__(self, args: dict, train_dataset: Iterable, test_dataset: Iterable, client_id: int) -> None:
+    def __init__(self, args: dict, client_id: int, train_dataset: Iterable, test_dataset: Iterable = None) -> None:
         r"""
         Overview:
             Initialization for a client.
         Arguments:
             - args: dict type arguments.
-            - train_dataset: private dataset.
+            - train_dataset: private dataset for training
+            - test_dataset: private dataset for testing (Optional)
             - client_id: unique id for this client.
         Returns:
             - None

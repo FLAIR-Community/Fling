@@ -7,6 +7,10 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('tiny_imagenet')
 class TinyImagenetDataset(Dataset):
+    r"""
+        Implementation for Tiny-Imagenet dataset. Details can be viewed in:
+        http://cs231n.stanford.edu/tiny-imagenet-200.zip
+    """
 
     def __init__(self, cfg, train):
         super(TinyImagenetDataset, self).__init__()
@@ -19,4 +23,4 @@ class TinyImagenetDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, item):
-        return self.dataset[item]
+        return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}
