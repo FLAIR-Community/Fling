@@ -51,7 +51,7 @@ default_exp_args = dict(
     # Configurations about models.
     model=dict(
         # Name for model used. Must be registered in `MODEL_REGISTRY`.
-        name='cifar_resnet',
+        name='resnet8',
         # Arguments used in initializing corresponding model.
         # Channel of input image.
         input_channel=3,
