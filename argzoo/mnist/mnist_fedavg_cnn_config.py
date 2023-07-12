@@ -10,7 +10,7 @@ exp_args = dict(
         input_channel=1,
         class_number=10,
     ),
-    client=dict(name='base_client', client_num=30),
+    client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(name='base_group', aggregation_method='avg'),
     other=dict(test_freq=3, logging_path='./logging/mnist_fedavg_cnn_iid')

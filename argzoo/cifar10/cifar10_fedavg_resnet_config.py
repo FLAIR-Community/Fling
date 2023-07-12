@@ -8,11 +8,11 @@ exp_args = dict(
         device='cuda:0', local_eps=8, global_eps=40, batch_size=32, optimizer=dict(name='sgd', lr=0.02, momentum=0.9)
     ),
     model=dict(
-        name='cifar_resnet',
+        name='resnet8',
         input_channel=3,
         class_number=10,
     ),
-    client=dict(name='base_client', client_num=30),
+    client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(name='base_group', aggregation_method='avg'),
     other=dict(test_freq=3, logging_path='./logging/cifar10_fedavg_resnet_iid')

@@ -16,11 +16,11 @@ exp_args = dict(
         finetune_parameters=dict(name='contain', keywords=['fc']),
     ),
     model=dict(
-        name='cifar_resnet',
+        name='resnet8',
         input_channel=3,
         class_number=100,
     ),
-    client=dict(name='base_client', client_num=30, test_frac=0.2),
+    client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(
         name='base_group',
