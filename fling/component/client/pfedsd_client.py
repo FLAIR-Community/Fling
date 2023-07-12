@@ -23,51 +23,15 @@ class pFedSDClient(BaseClient):
         Initializing train dataset, test dataset(for personalized settings).
         """
         super(pFedSDClient, self).__init__(args, client_id, train_dataset, test_dataset)
-        self.local_model_pre = None # record the local model in the previous round, used for distillation in pfedsd
+        self.local_model_pre = None  # record the local model in the previous round, used for distillation in pfedsd
 
     def train(self, lr, device=None):
         """
         Local training.
         """
-        if device is not None:
-            device_bak = self.device
-            self.device = device
-        self.model.train()
-        self.model.to(self.device)
-
-        # Set optimizer, loss function.
-        weights = self.model.parameters()
-        op = get_optimizer(
-            name=self.args.learn.optimizer.name,
-            lr=lr,
-            momentum=self.args.learn.optimizer.momentum,
-            weights=weights
-        )
-
-        criterion = nn.CrossEntropyLoss()
-
-        monitor = VariableMonitor()
-
-        # Main training loop for lora
-        for epoch in range(self.args.learn.local_eps):
-            for _, data in enumerate(self.train_dataloader):
-                preprocessed_data = self.preprocess_data(data)
-                # Update total sample number.
-                self.train_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor, optimizer=op)
-
-        # Calculate the mean metrics.
-        mean_monitor_variables = monitor.variable_mean()
-
-
-
-        # Put the model to cpu after training to save GPU memory.
-        self.model.to('cpu')
-
+        mean_monitor_variables = super().train(lr, device)
         # record the local model in this round
         self.local_model_pre = copy.deepcopy(self.model)
-
-        if device is not None:
-            self.device = device_bak
 
         return mean_monitor_variables
 
@@ -87,8 +51,6 @@ class pFedSDClient(BaseClient):
             q_v = F.softmax(o_pre / tau, dim=-1)
             q_w = F.log_softmax(o / tau, dim=-1)
             loss += lamda * tau ** 2 * F.kl_div(q_w, q_v, reduction='batchmean')
-
-
 
         monitor.append(
             {

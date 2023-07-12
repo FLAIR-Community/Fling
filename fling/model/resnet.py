@@ -8,8 +8,16 @@ from fling.utils.registry_utils import MODEL_REGISTRY
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation
+    )
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
@@ -90,20 +98,24 @@ class ResNet(nn.Module):
         if replace_stride_with_dilation is None:
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
-            raise ValueError("replace_stride_with_dilation should be None "
-                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+            raise ValueError(
+                "replace_stride_with_dilation should be None "
+                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
+            )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(input_channel, self.inplanes, kernel_size=7, stride=2, padding=3,
-                               bias=False)
+        self.conv1 = nn.Conv2d(input_channel, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.layers = [self._make_layer(block, 64, layers[0])]
         for num in range(1, len(layers)):
-            self.layers.append(self._make_layer(block, features[num], layers[num], stride=2,
-                                                dilate=replace_stride_with_dilation[num - 1]))
+            self.layers.append(
+                self._make_layer(
+                    block, features[num], layers[num], stride=2, dilate=replace_stride_with_dilation[num - 1]
+                )
+            )
         self.layers = nn.Sequential(*self.layers)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
@@ -121,8 +133,14 @@ class ResNet(nn.Module):
                 if isinstance(m, BasicBlock):
                     nn.init.constant_(m.bn2.weight, 0)
 
-    def _make_layer(self, block: Type[Union[BasicBlock]], planes: int, blocks: int,
-                    stride: int = 1, dilate: bool = False) -> nn.Sequential:
+    def _make_layer(
+            self,
+            block: Type[Union[BasicBlock]],
+            planes: int,
+            blocks: int,
+            stride: int = 1,
+            dilate: bool = False
+    ) -> nn.Sequential:
         norm_layer = self._norm_layer
         downsample = None
         previous_dilation = self.dilation
@@ -136,13 +154,23 @@ class ResNet(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation, norm_layer))
+        layers.append(
+            block(
+                self.inplanes, planes, stride, downsample, self.groups, self.base_width, previous_dilation, norm_layer
+            )
+        )
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation,
-                                norm_layer=norm_layer))
+            layers.append(
+                block(
+                    self.inplanes,
+                    planes,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                    dilation=self.dilation,
+                    norm_layer=norm_layer
+                )
+            )
 
         return nn.Sequential(*layers)
 
@@ -162,23 +190,27 @@ class ResNet(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
 
+
 @MODEL_REGISTRY.register('resnet18')
 def resnet18(**kwargs: Any) -> ResNet:  # 18 = 2 + 2 * (2 + 2 + 2 + 2)
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+
 
 @MODEL_REGISTRY.register('resnet10')
 def resnet10(**kwargs: Any) -> ResNet:  # 10 = 2 + 2 * (1 + 1 + 1 + 1)
     return ResNet(BasicBlock, [1, 1, 1, 1], **kwargs)
 
+
 @MODEL_REGISTRY.register('resnet8')
 def resnet8(**kwargs: Any) -> ResNet:  # 8 = 2 + 2 * (1 + 1 + 1)
     return ResNet(BasicBlock, [1, 1, 1], **kwargs)
+
 
 @MODEL_REGISTRY.register('resnet6')
 def resnet6(**kwargs: Any) -> ResNet:  # 6 = 2 + 2 * (1 + 1)
     return ResNet(BasicBlock, [1, 1], **kwargs)
 
+
 @MODEL_REGISTRY.register('resnet4')
 def resnet4(**kwargs: Any) -> ResNet:  # 4 = 2 + 2 * (1)
     return ResNet(BasicBlock, [1], **kwargs)
-
