@@ -66,6 +66,8 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
 
+**pFedSD:** [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434)
+
 ## Acknowledgments
 
 Special thanks to [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu)
