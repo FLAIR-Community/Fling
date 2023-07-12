@@ -3,7 +3,7 @@ from easydict import EasyDict
 exp_args = dict(
     data=dict(
         dataset='tiny_imagenet',
-        data_path='./data/tiny_imagenet',
+        data_path='./data/tiny-imagenet-200',
         sample_method=dict(name='iid', train_num=500, test_num=100)
     ),
     learn=dict(
