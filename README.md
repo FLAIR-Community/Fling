@@ -58,11 +58,11 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 
 ## Currently Supported Algorithms
 
-#### Generic Federated Learning
+### Generic Federated Learning
 
 **FedAvg:** [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf)
 
-#### **Personalized Federated Learning**
+### **Personalized Federated Learning**
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
 
