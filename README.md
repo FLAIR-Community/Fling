@@ -70,7 +70,7 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 
 ## Acknowledgments
 
-Special thanks to [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu)
+Special thanks to [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu), 
 
 
 ## Citation
