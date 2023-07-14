@@ -1,3 +1,6 @@
+"""
+Run this file to download Shakespear dataset and prepare it for training / testing.
+"""
 import os
 import requests
 import tiktoken

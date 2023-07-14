@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
@@ -12,7 +14,7 @@ class TinyImagenetDataset(Dataset):
         http://cs231n.stanford.edu/tiny-imagenet-200.zip
     """
 
-    def __init__(self, cfg, train):
+    def __init__(self, cfg: dict, train: bool):
         super(TinyImagenetDataset, self).__init__()
         self.train = train
         self.cfg = cfg
@@ -22,8 +24,8 @@ class TinyImagenetDataset(Dataset):
         else:
             self.dataset = ImageFolder(os.path.join(cfg.data.data_path, 'val'), transform=transform)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dataset)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> dict:
         return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}

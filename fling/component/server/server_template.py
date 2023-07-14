@@ -9,7 +9,7 @@ class ServerTemplate:
         Template of server in Federated Learning.
     """
 
-    def __init__(self, args: dict, test_dataset: Iterable) -> None:
+    def __init__(self, args: dict, test_dataset: Iterable):
         r"""
         Overview:
             Initialization for a server.

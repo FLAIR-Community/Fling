@@ -11,15 +11,15 @@ class MNISTDataset(Dataset):
         Implementation for MNIST dataset. Details can be viewed in: http://yann.lecun.com/exdb/mnist/
     """
 
-    def __init__(self, cfg, train):
+    def __init__(self, cfg: dict, train: bool):
         super(MNISTDataset, self).__init__()
         self.train = train
         self.cfg = cfg
         transform = get_data_transform(cfg.data.transforms, train=train)
         self.dataset = MNIST(cfg.data.data_path, train=train, transform=transform, download=True)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dataset)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> int:
         return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}

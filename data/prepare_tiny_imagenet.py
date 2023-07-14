@@ -1,3 +1,6 @@
+"""
+Run this file to download Tiny-Imagenet dataset and prepare it for training / testing.
+"""
 import os
 from shutil import move
 from os import rmdir

@@ -1,22 +1,24 @@
 from copy import deepcopy
 import numpy as np
+from typing import Iterable
+
 from torch.utils import data
 
 
 class NaiveDataset(data.Dataset):
 
-    def __init__(self, tot_data, indexes):
+    def __init__(self, tot_data: Iterable, indexes: Iterable):
         self.tot_data = tot_data
         self.indexes = indexes
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> object:
         return self.tot_data[self.indexes[item]]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.indexes)
 
 
-def iid_sampling(dataset, client_number, sample_num, seed):
+def iid_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int) -> list:
     # if sample_num is not specified, then the dataset is divided equally among each client
     num_indices = len(dataset)
     if sample_num == 0:
@@ -31,7 +33,7 @@ def iid_sampling(dataset, client_number, sample_num, seed):
     return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
 
-def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
+def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int, alpha: int) -> list:
     num_indices = len(dataset)
     labels = np.array([dataset[i]['class_id'] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
@@ -57,7 +59,7 @@ def pathological_sampling(dataset, client_number, sample_num, seed, alpha):
     return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
 
 
-def dirichlet_sampling(dataset, client_number, sample_num, seed, alpha):
+def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int, alpha: float) -> list:
     num_indices = len(dataset)
     labels = np.array([dataset[i]['class_id'] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
@@ -97,7 +99,7 @@ sampling_methods = {
 }
 
 
-def data_sampling(dataset, args, seed, train=True):
+def data_sampling(dataset: Iterable, args: dict, seed: int, train: bool = True) -> object:
     sampling_config = deepcopy(args.data.sample_method)
     train_num, test_num = sampling_config.pop('train_num'), sampling_config.pop('test_num')
     sample_num = train_num if train else test_num

@@ -2,6 +2,7 @@ import math
 import pickle
 import random
 from functools import reduce
+from typing import Iterable
 
 import numpy as np
 import torch
@@ -9,7 +10,7 @@ import torch.optim as optim
 import torch.nn as nn
 
 
-def get_optimizer(name, lr, momentum, weights):
+def get_optimizer(name: str, lr: float, momentum: float, weights: object) -> optim.Optimizer:
     if name.lower() == 'sgd':
         return optim.SGD(params=weights, momentum=momentum, lr=lr)
     elif name.lower() == 'adam':
@@ -19,7 +20,7 @@ def get_optimizer(name, lr, momentum, weights):
         assert False
 
 
-def get_params_number(net):
+def get_params_number(net: nn.Module) -> int:
     # get total params number in nn.Module net
     res = 0
     for param in net.parameters():
@@ -27,17 +28,17 @@ def get_params_number(net):
     return res
 
 
-def save_file(obj, path):
+def save_file(obj: object, path: str) -> None:
     with open(path, 'wb') as f:
         pickle.dump(obj, f)
 
 
-def load_file(path):
+def load_file(path: str) -> object:
     with open(path, 'rb') as f:
         return pickle.load(f)
 
 
-def seed_everything(seed):
+def seed_everything(seed: int) -> None:
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
@@ -45,7 +46,7 @@ def seed_everything(seed):
         torch.cuda.manual_seed(seed)
 
 
-def calculate_mean_std(train_dataset, test_dataset):
+def calculate_mean_std(train_dataset: Iterable, test_dataset: Iterable) -> tuple:
     if train_dataset[0][0].shape[0] == 1:
         res = []
         res_std = []
@@ -93,11 +94,11 @@ def get_finetune_parameters(model, finetune_args):
 
 class LRScheduler:
 
-    def __init__(self, args):
+    def __init__(self, args: dict):
         self.args = args.learn.scheduler
         self.lr = args.learn.optimizer.lr
 
-    def get_lr(self, train_round):
+    def get_lr(self, train_round: int) -> lr:
         if self.args.name == 'fix':
             return self.lr
         elif self.args.name == 'linear':
@@ -116,7 +117,7 @@ class LRScheduler:
             raise ValueError(f'Unrecognized lr scheduler: {self.args.name}')
 
 
-def get_activation(name, **kwargs):
+def get_activation(name: str, **kwargs):
     func_dict = {'relu': nn.ReLU, 'tanh': nn.Tanh, 'leaky_relu': nn.LeakyReLU}
     try:
         return func_dict[name](**kwargs)

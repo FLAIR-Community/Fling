@@ -11,15 +11,15 @@ class CIFAR10Dataset(Dataset):
     Implementation for CIFAR10 dataset. Details can be viewed in: https://www.cs.toronto.edu/~kriz/cifar.html
     """
 
-    def __init__(self, cfg, train):
+    def __init__(self, cfg: dict, train: bool):
         super(CIFAR10Dataset, self).__init__()
         self.train = train
         self.cfg = cfg
         transform = get_data_transform(cfg.data.transforms, train=train)
         self.dataset = CIFAR10(cfg.data.data_path, train=train, transform=transform, download=True)
 
-    def __len__(self):
+    def __len__(self) -> None:
         return len(self.dataset)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> dict:
         return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}

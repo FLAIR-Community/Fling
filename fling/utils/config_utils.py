@@ -24,7 +24,7 @@ def save_config_file(config: dict, path: str) -> None:
         f.write('exp_config = ' + config_string)
 
 
-def compile_config(new_config, seed):
+def compile_config(new_config: dict, seed: int) -> dict:
     seed_everything(seed)
     result_config = EasyDict(deep_merge_dicts(default_exp_args, new_config))
     exp_dir = result_config.other.logging_path
@@ -56,8 +56,12 @@ def deep_merge_dicts(original: dict, new_dict: dict) -> dict:
 
 
 def deep_update(
-    original: dict, new_dict: dict, new_keys_allowed: bool = False, whitelist=None, override_all_if_type_changes=None
-):
+        original: dict,
+        new_dict: dict,
+        new_keys_allowed: bool = False,
+        whitelist=None,
+        override_all_if_type_changes=None
+) -> dict:
     """
     Overview:
         Update original dict with values from new_dict recursively.

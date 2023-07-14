@@ -12,7 +12,7 @@ class ParameterServerGroup:
         Base implementation of the group in federated learning.
     """
 
-    def __init__(self, args: dict, logger: VariableMonitor) -> None:
+    def __init__(self, args: dict, logger: VariableMonitor):
         r"""
         Overview:
             Lazy initialization of group.
