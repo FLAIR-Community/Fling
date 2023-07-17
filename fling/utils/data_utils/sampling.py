@@ -19,8 +19,21 @@ class NaiveDataset(data.Dataset):
 
 
 def iid_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int) -> list:
-    # if sample_num is not specified, then the dataset is divided equally among each client
+    r"""
+    Overview:
+        Independent and identical (i.i.d) sampling method.
+    Arguments:
+        dataset: the total dataset to be sampled from
+        client_number: the number of clients
+        sample_num: the number of samples in each client. If the value is zero, the number will be
+            ``len(dataset) // client_number``.
+        seed: dynamic seed.
+    Returns:
+        A list of datasets for each client.
+    """
     num_indices = len(dataset)
+
+    # If sample_num is not specified, then the dataset is divided equally among each client
     if sample_num == 0:
         sample_num = num_indices // client_number
 
@@ -34,6 +47,19 @@ def iid_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: i
 
 
 def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int, alpha: int) -> list:
+    r"""
+    Overview:
+        Pathological sampling method.
+    Arguments:
+        dataset: the total dataset to be sampled from
+        client_number: the number of clients
+        sample_num: the number of samples in each client. If the value is zero, the number will be
+         ``len(dataset) // client_number``.
+        seed: dynamic seed.
+        alpha: how many classes in each client.
+    Returns:
+        A list of datasets for each client.
+    """
     num_indices = len(dataset)
     labels = np.array([dataset[i]['class_id'] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
@@ -67,6 +93,20 @@ def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int
 
 
 def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int, alpha: float) -> list:
+    r"""
+    Overview:
+        Dirichlet sampling method.
+    Arguments:
+        dataset: the total dataset to be sampled from
+        client_number: the number of clients
+        sample_num: the number of samples in each client. If the value is zero, the number will be
+         ``len(dataset) // client_number``.
+        seed: dynamic seed.
+        alpha: the argument alpha in dirichlet sampling with range (0, +inf).
+         A smaller alpha means the distributions sampled are more imbalanced.
+    Returns:
+        A list of datasets for each client.
+    """
     num_indices = len(dataset)
     labels = np.array([dataset[i]['class_id'] for i in range(num_indices)])
     num_classes = len(np.unique(labels))
@@ -103,6 +143,7 @@ def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, s
     return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
 
 
+# Supported sampling methods.
 sampling_methods = {
     'iid': iid_sampling,
     'dirichlet': dirichlet_sampling,
@@ -111,10 +152,26 @@ sampling_methods = {
 
 
 def data_sampling(dataset: Iterable, args: dict, seed: int, train: bool = True) -> object:
+    r"""
+    Overview:
+        Dirichlet sampling method.
+    Arguments:
+        dataset: the total dataset to be sampled from.
+        args: arguments.
+        seed: dynamic seed.
+        train: whether this sampling is for training dataset or testing dataset.
+    Returns:
+        A list of datasets for each client.
+    """
+    # Copy the config, or it will be modified by ``pop()``
     sampling_config = deepcopy(args.data.sample_method)
+    # Determine the number of samples in each client.
     train_num, test_num = sampling_config.pop('train_num'), sampling_config.pop('test_num')
     sample_num = train_num if train else test_num
+    # Determine the name of sampling methods.
     sampling_name = sampling_config.pop('name')
+
+    # Sampling
     try:
         sampling_func = sampling_methods[sampling_name]
     except KeyError:
