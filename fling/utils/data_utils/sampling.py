@@ -39,10 +39,11 @@ def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int
     num_classes = len(np.unique(labels))
     idxs_classes = [[] for _ in range(num_classes)]
 
-    # if sample_num is not specified, then the dataset is divided equally among each client
+    # If sample_num is not specified, then the dataset is divided equally among each client
     if sample_num == 0:
         sample_num = num_indices // client_number
 
+    # Get samples for each class.
     for i in range(num_indices):
         idxs_classes[labels[i]].append(i)
 
@@ -51,9 +52,15 @@ def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int
 
     class_idxs = [i for i in range(num_classes)]
     for i in range(client_number):
+        # Randomly select some classes to sample from.
         class_idx = random_state.choice(class_idxs, alpha, replace=False)
         for j in class_idx:
-            selected = random_state.choice(idxs_classes[j], int(sample_num / alpha), replace=False)
+            # Calculate number of samples for each class.
+            select_num = int(sample_num / alpha)
+            # Sample a required number of samples.
+            # If the number of samples in ``idx_classes[j]`` is more or equal than the required number,
+            # set the argument ``replace=False``. Otherwise, set ``replace=True``
+            selected = random_state.choice(idxs_classes[j], select_num, replace=(select_num > len(idxs_classes[j])))
             client_indexes[i] += list(selected)
         client_indexes[i] = np.array(client_indexes[i])
     return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
@@ -65,10 +72,11 @@ def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, s
     num_classes = len(np.unique(labels))
     idxs_classes = [[] for _ in range(num_classes)]
 
-    # if sample_num is not specified, then the dataset is divided equally among each client
+    # If ``sample_num`` is not specified, the dataset is divided equally among each client
     if sample_num == 0:
         sample_num = num_indices // client_number
 
+    # Get samples for each class.
     for i in range(num_indices):
         idxs_classes[labels[i]].append(i)
 
@@ -77,16 +85,18 @@ def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, s
     q = random_state.dirichlet(np.repeat(alpha, num_classes), client_number)
 
     for i in range(client_number):
-        # make sure that each client have sample_num samples
-        temp_sample = sample_num
-
-        # partition each class for clients
+        num_samples_of_client = 0
+        # Partition class-wise samples.
         for j in range(num_classes):
-            select_num = int(sample_num * q[i][j] + 0.5)
-            select_num = select_num if temp_sample - select_num >= 0 else temp_sample
-            temp_sample -= select_num
-            assert select_num >= 0
-            selected = random_state.choice(idxs_classes[j], select_num, replace=False)
+            # Make sure that each client have exactly ``sample_num`` samples.
+            # For the last class, the number of samples is exactly the remaining sample number.
+            select_num = int(sample_num * q[i][j] + 0.5) if j < num_classes - 1 else sample_num - num_samples_of_client
+            # Record current sampled number.
+            num_samples_of_client += select_num
+            # Sample a required number of samples.
+            # If the number of samples in ``idx_classes[j]`` is more or equal than the required number,
+            # set the argument ``replace=False``. Otherwise, set ``replace=True``
+            selected = random_state.choice(idxs_classes[j], select_num, replace=(select_num > len(idxs_classes[j])))
             client_indexes[i] += list(selected)
         client_indexes[i] = np.array(client_indexes[i])
     return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
