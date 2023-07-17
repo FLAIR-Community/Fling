@@ -91,6 +91,7 @@ def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, s
             # Make sure that each client have exactly ``sample_num`` samples.
             # For the last class, the number of samples is exactly the remaining sample number.
             select_num = int(sample_num * q[i][j] + 0.5) if j < num_classes - 1 else sample_num - num_samples_of_client
+            select_num = max(select_num, 0)
             # Record current sampled number.
             num_samples_of_client += select_num
             # Sample a required number of samples.
