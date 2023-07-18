@@ -98,7 +98,7 @@ class LRScheduler:
         self.args = args.learn.scheduler
         self.lr = args.learn.optimizer.lr
 
-    def get_lr(self, train_round: int) -> lr:
+    def get_lr(self, train_round: int) -> float:
         if self.args.name == 'fix':
             return self.lr
         elif self.args.name == 'linear':
