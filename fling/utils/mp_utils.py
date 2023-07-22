@@ -27,6 +27,19 @@ class MultiProcessLauncher:
 
     def launch(self, clients, **kwargs) -> list:
         tasks = [(client, kwargs) for client in clients]
+        # import pickle
+        # def attempt_pickle(obj):
+        #     try:
+        #         pickle.dumps(obj)
+        #         print(f"Attribute is pickleable.")
+        #     except Exception as e:
+        #         print(f"Attribute is not pickleable due to: {e}")
+
+        # for attr in dir(clients[0]):
+        #     if not attr.startswith('__'):  # skip special methods
+        #         attribute = getattr(clients[0], attr)
+        #         print(f"Attempting to pickle attribute '{attr}':")
+        #         attempt_pickle(attribute)
         with multiprocessing.Pool(self.num_proc) as pool:
             # Use starmap to apply the worker function to every task
             # Each task is a tuple that contains the task object and the arguments

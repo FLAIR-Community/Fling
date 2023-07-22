@@ -1,5 +1,6 @@
 import os
 import torch
+import multiprocessing as mp
 
 from fling.component.client import get_client
 from fling.component.server import get_server
@@ -26,6 +27,7 @@ def generic_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) -> None
     """
     # Compile the input arguments first.
     args = compile_config(args, seed)
+    mp.set_start_method('spawn')
 
     # Construct logger.
     logger = Logger(args.other.logging_path)
