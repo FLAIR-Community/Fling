@@ -132,6 +132,8 @@ class BaseClient(ClientTemplate):
         if device is not None:
             self.device = device_bak
 
+        print("#######################################")
+
         return mean_monitor_variables
 
     def finetune(self, lr, finetune_args, device=None, finetune_eps=None):

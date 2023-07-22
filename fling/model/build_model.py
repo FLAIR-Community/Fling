@@ -15,7 +15,7 @@ def get_model(args: dict) -> torch.nn.Module:
     model = MODEL_REGISTRY.build(model_name, **args.model)
     # Check the PyTorch version and current platform.
     # If the version is greater than 2.0.0 and the current platform is Linux, using the compiling mode for efficiency.
-    if torch.__version__[0] == '2':
+    if torch.__version__[0] == '2' and False:
         # Compile
         if platform.system().lower() == 'linux':
             warnings.warn('Using PyTorch >= 2.0, compiling the model ...')
