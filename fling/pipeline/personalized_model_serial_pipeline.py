@@ -13,9 +13,9 @@ from fling.utils import Logger, compile_config, client_sampling, VariableMonitor
 def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     r"""
     Overview:
-       Pipeline for pesonalized federated learning. Under this setting, models of each client is different.
+       Pipeline for personalized federated learning. Under this setting, models of each client is different.
        The final performance of is calculated by averaging the local model in each client.
-       Typically each local model is tested using local test dataset.
+       Typically, each local model is tested using local test dataset.
     Arguments:
         - args: dict type arguments.
         - seed: random seed.
