@@ -4,19 +4,27 @@ import multiprocessing
 def client_trainer(client, kwargs):
     # This is the function that each client will execute
     # It will receive a task and its arguments, execute it, and return its result
-    return client.train(**kwargs)
+    res = client.train(**kwargs)
+    return res, client
 
 
 def client_tester(client, kwargs):
     # This is the function that each client will execute
     # It will receive a task and its arguments, execute it, and return its result
-    return client.test(**kwargs)
+    res = client.test(**kwargs)
+    return res, client
 
 
 def client_finetuner(client, kwargs):
     # This is the function that each client will execute
     # It will receive a task and its arguments, execute it, and return its result
-    return client.finetune(**kwargs)
+    res = client.finetune(**kwargs)
+    return res, client
+
+
+def copy_attributes(src, dst):
+    for attr in src.__dict__:
+        setattr(dst, attr, getattr(src, attr))
 
 
 class MultiProcessLauncher:
@@ -38,4 +46,13 @@ class MultiProcessLauncher:
                 results = pool.starmap(client_finetuner, tasks)
             else:
                 raise ValueError(f'Unrecognized task name: {self.task_name}')
-        return results
+        loggers = [results[i][0] for i in range(len(results))]
+        new_clients = [results[i][1] for i in range(len(results))]
+
+        for new_client in new_clients:
+            for client in clients:
+                if new_client.client_id == client.client_id:
+                    copy_attributes(src=new_client, dst=client)
+                    break
+
+        return loggers
