@@ -135,7 +135,7 @@ def get_launcher(args):
     launcher_name = launcher_args.pop('name')
     if launcher_name == 'serial':
         return SerialLauncher()
-    elif launcher_name == 'multiprocess':
+    elif launcher_name == 'multiprocessing':
         return MultiProcessLauncher(**launcher_args)
     else:
         raise ValueError(f'Unrecognized launcher type: {launcher_name}')

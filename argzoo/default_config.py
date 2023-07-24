@@ -88,6 +88,15 @@ default_exp_args = dict(
             name='all'
         ),
     ),
+    # Launcher configurations.
+    launcher=dict(
+        # For the simplest launcher, serial is the suitable choice.
+        name='serial'
+        # If you want to use multiprocess to accelerate the training process, you can use the following setting.
+        # name = 'multiprocessing'
+        # num_proc = 2
+        # ``num_proc`` refers to the number of processes used in your program.
+    ),
     # Other configurations.
     other=dict(
         # Frequency for testing. For example, `test_freq=3` means the performance is tested every 3 global epochs.
@@ -97,5 +106,4 @@ default_exp_args = dict(
         # If the directory already exists, some parts might be over-written, which should be carefully inspected.
         logging_path='./logging/default_experiment'
     ),
-    launcher=dict(name='serial')
 )

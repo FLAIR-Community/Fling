@@ -46,7 +46,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     # Setup lr_scheduler.
     lr_scheduler = LRScheduler(args)
 
-    # Setup multiprocess launcher.
+    # Setup launcher.
     launcher = get_launcher(args)
 
     # Training loop
