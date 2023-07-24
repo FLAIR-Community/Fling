@@ -63,9 +63,7 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
         # Local training for each participated client and add results to the monitor.
         # Use multiprocessing for acceleration.
         train_results = launcher.launch(
-            clients=[group.clients[j] for j in participated_clients],
-            lr=cur_lr,
-            task_name='train'
+            clients=[group.clients[j] for j in participated_clients], lr=cur_lr, task_name='train'
         )
         for item in train_results:
             train_monitor.append(item)

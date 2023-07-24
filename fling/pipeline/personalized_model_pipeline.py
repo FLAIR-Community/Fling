@@ -64,9 +64,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
         # Local training for each participated client and add results to the monitor.
         # Use multiprocessing for acceleration.
         train_results = launcher.launch(
-            clients=[group.clients[j] for j in participated_clients],
-            lr=cur_lr,
-            task_name='train'
+            clients=[group.clients[j] for j in participated_clients], lr=cur_lr, task_name='train'
         )
         for item in train_results:
             train_monitor.append(item)
@@ -78,8 +76,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
             test_results = launcher.launch(
-                clients=[group.clients[j] for j in range(args.client.client_num)],
-                task_name='test'
+                clients=[group.clients[j] for j in range(args.client.client_num)], task_name='test'
             )
             for item in test_results:
                 test_monitor.append(item)
@@ -106,8 +103,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
             test_results = launcher.launch(
-                clients=[group.clients[j] for j in range(args.client.client_num)],
-                task_name='test'
+                clients=[group.clients[j] for j in range(args.client.client_num)], task_name='test'
             )
             for item in test_results:
                 test_monitor.append(item)

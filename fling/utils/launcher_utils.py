@@ -25,11 +25,7 @@ def _client_finetuner(client: ClientTemplate, kwargs: dict) -> tuple:
     return res, client
 
 
-op2func = {
-    'train': _client_trainer,
-    'test': _client_tester,
-    'finetune': _client_finetuner
-}
+op2func = {'train': _client_trainer, 'test': _client_tester, 'finetune': _client_finetuner}
 
 
 def copy_attributes(src: object, dst: object) -> None:
