@@ -6,10 +6,10 @@ from fling.component.server import get_server
 from fling.component.group import get_group
 from fling.dataset import get_dataset
 from fling.utils.data_utils import data_sampling
-from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler, MultiProcessLauncher
+from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler, get_launcher
 
 
-def personalized_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) -> None:
+def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     r"""
     Overview:
        Pipeline for personalized federated learning. Under this setting, models of each client is different.
@@ -47,9 +47,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) ->
     lr_scheduler = LRScheduler(args)
 
     # Setup multiprocess launcher.
-    train_launcher = MultiProcessLauncher(num_proc=num_proc, task_name='train')
-    test_launcher = MultiProcessLauncher(num_proc=num_proc, task_name='test')
-    finetune_launcher = MultiProcessLauncher(num_proc=num_proc, task_name='finetune')
+    launcher = get_launcher(args)
 
     # Training loop
     for i in range(args.learn.global_eps):
@@ -65,7 +63,11 @@ def personalized_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) ->
 
         # Local training for each participated client and add results to the monitor.
         # Use multiprocessing for acceleration.
-        train_results = train_launcher.launch(clients=[group.clients[j] for j in participated_clients], lr=cur_lr)
+        train_results = launcher.launch(
+            clients=[group.clients[j] for j in participated_clients],
+            lr=cur_lr,
+            task_name='train'
+        )
         for item in train_results:
             train_monitor.append(item)
 
@@ -75,7 +77,10 @@ def personalized_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) ->
 
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
-            test_results = test_launcher.launch(clients=[group.clients[j] for j in range(args.client.client_num)])
+            test_results = launcher.launch(
+                clients=[group.clients[j] for j in range(args.client.client_num)],
+                task_name='test'
+            )
             for item in test_results:
                 test_monitor.append(item)
 
@@ -100,7 +105,10 @@ def personalized_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) ->
 
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
-            test_results = test_launcher.launch(clients=[group.clients[j] for j in range(args.client.client_num)])
+            test_results = launcher.launch(
+                clients=[group.clients[j] for j in range(args.client.client_num)],
+                task_name='test'
+            )
             for item in test_results:
                 test_monitor.append(item)
 
@@ -115,10 +123,11 @@ def personalized_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) ->
 
     # Fine-tuning
     # Fine-tune model on each client and collect all the results.
-    finetune_results = finetune_launcher.launch(
+    finetune_results = launcher.launch(
         clients=[group.clients[j] for j in range(args.client.client_num)],
         lr=cur_lr,
-        finetune_args=args.learn.finetune_parameters
+        finetune_args=args.learn.finetune_parameters,
+        task_name='finetune'
     )
 
     # Logging fine-tune results

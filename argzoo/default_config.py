@@ -96,5 +96,6 @@ default_exp_args = dict(
         # If the directory does not exist, it will be created automatically.
         # If the directory already exists, some parts might be over-written, which should be carefully inspected.
         logging_path='./logging/default_experiment'
-    )
+    ),
+    launcher=dict(name='serial')
 )

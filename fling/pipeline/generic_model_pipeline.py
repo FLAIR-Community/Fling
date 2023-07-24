@@ -1,6 +1,5 @@
 import os
 import torch
-import multiprocessing as mp
 
 from fling.component.client import get_client
 from fling.component.server import get_server
@@ -9,10 +8,10 @@ from fling.dataset import get_dataset
 
 from fling.utils.data_utils import data_sampling
 from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler
-from fling.utils import MultiProcessLauncher
+from fling.utils import get_launcher
 
 
-def generic_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) -> None:
+def generic_model_pipeline(args: dict, seed: int = 0) -> None:
     r"""
     Overview:
        Pipeline for generic federated learning. Under this setting, models of each client is the same.
@@ -27,7 +26,6 @@ def generic_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) -> None
     """
     # Compile the input arguments first.
     args = compile_config(args, seed)
-    mp.set_start_method('spawn')
 
     # Construct logger.
     logger = Logger(args.other.logging_path)
@@ -47,9 +45,8 @@ def generic_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) -> None
 
     # Setup lr_scheduler.
     lr_scheduler = LRScheduler(args)
-
-    # Setup multiprocess launcher.
-    train_launcher = MultiProcessLauncher(num_proc=num_proc, task_name='train')
+    # Setup launcher.
+    launcher = get_launcher(args)
 
     # Training loop
     for i in range(args.learn.global_eps):
@@ -65,7 +62,11 @@ def generic_model_pipeline(args: dict, seed: int = 0, num_proc: int = 2) -> None
 
         # Local training for each participated client and add results to the monitor.
         # Use multiprocessing for acceleration.
-        train_results = train_launcher.launch(clients=[group.clients[j] for j in participated_clients], lr=cur_lr)
+        train_results = launcher.launch(
+            clients=[group.clients[j] for j in participated_clients],
+            lr=cur_lr,
+            task_name='train'
+        )
         for item in train_results:
             train_monitor.append(item)
 
