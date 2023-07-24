@@ -54,6 +54,7 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 ## Feature
 
 - Support for a variety of algorithms and datasets.
+- Support multiprocessing training on each client for better efficiency.
 - Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
 
 ## Currently Supported Algorithms

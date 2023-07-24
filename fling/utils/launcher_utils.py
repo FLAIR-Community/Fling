@@ -142,7 +142,7 @@ def get_launcher(args: dict) -> object:
     # Copy the args or the args will be modified by the following ``pop()``
     launcher_args = deepcopy(args.launcher)
     launcher_name = launcher_args.pop('name')
-    
+
     # Build different types of launchers.
     if launcher_name == 'serial':
         return SerialLauncher()
