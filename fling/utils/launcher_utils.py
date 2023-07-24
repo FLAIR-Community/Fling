@@ -47,7 +47,7 @@ class SerialLauncher:
         Use one process to serially execute operations all clients.
     """
 
-    def launch(self, clients, task_name, **kwargs) -> list:
+    def launch(self, clients: ClientTemplate, task_name: str, **kwargs) -> list:
         r"""
         Overview:
             Launch the tasks in each client.
@@ -130,9 +130,20 @@ class MultiProcessLauncher:
         return loggers
 
 
-def get_launcher(args):
+def get_launcher(args: dict) -> object:
+    r"""
+    Overview:
+        Build the launcher according to the configurations.
+    Arguments:
+        args: The input configurations.
+    Returns:
+        Corresponding launcher.
+    """
+    # Copy the args or the args will be modified by the following ``pop()``
     launcher_args = deepcopy(args.launcher)
     launcher_name = launcher_args.pop('name')
+    
+    # Build different types of launchers.
     if launcher_name == 'serial':
         return SerialLauncher()
     elif launcher_name == 'multiprocessing':
