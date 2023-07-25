@@ -21,5 +21,5 @@ exp_args = dict(
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
-    from fling.pipeline import generic_model_serial_pipeline
-    generic_model_serial_pipeline(exp_args, seed=0)
+    from fling.pipeline import generic_model_pipeline
+    generic_model_pipeline(exp_args, seed=0)

@@ -43,7 +43,7 @@ class ClientTemplate:
         Returns:
             - None
         """
-        self.fed_keys = keys
+        self.fed_keys = list(keys)
 
     def update_model(self, dic: dict) -> None:
         r"""

@@ -1,5 +1,4 @@
 import os
-import tqdm
 import torch
 
 from fling.component.client import get_client
@@ -7,18 +6,20 @@ from fling.component.server import get_server
 from fling.component.group import get_group
 from fling.dataset import get_dataset
 from fling.utils.data_utils import data_sampling
-from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler
+from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler, get_launcher
 
 
-def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
+def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     r"""
     Overview:
-       Pipeline for pesonalized federated learning. Under this setting, models of each client is different.
+       Pipeline for personalized federated learning. Under this setting, models of each client is different.
        The final performance of is calculated by averaging the local model in each client.
-       Typically each local model is tested using local test dataset.
+       Typically, each local model is tested using local test dataset.
+       This function is a parallel version that use multiprocessing method to accelerate the program.
     Arguments:
         - args: dict type arguments.
         - seed: random seed.
+        - num_proc: number of process.
     Returns:
         - None
     """
@@ -45,6 +46,9 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
     # Setup lr_scheduler.
     lr_scheduler = LRScheduler(args)
 
+    # Setup launcher.
+    launcher = get_launcher(args)
+
     # Training loop
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
@@ -58,16 +62,25 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
         cur_lr = lr_scheduler.get_lr(train_round=i)
 
         # Local training for each participated client and add results to the monitor.
-        for j in tqdm.tqdm(participated_clients):
-            train_monitor.append(group.clients[j].train(lr=cur_lr))
+        # Use multiprocessing for acceleration.
+        train_results = launcher.launch(
+            clients=[group.clients[j] for j in participated_clients], lr=cur_lr, task_name='train'
+        )
+        for item in train_results:
+            train_monitor.append(item)
 
         # Testing
         if i % args.other.test_freq == 0 and "before_aggregation" in args.learn.test_place:
             test_monitor = VariableMonitor()
 
             # Testing for each client and add results to the monitor
-            for j in range(args.client.client_num):
-                test_monitor.append(group.clients[j].test())
+            # Use multiprocessing for acceleration.
+            test_results = launcher.launch(
+                clients=[group.clients[j] for j in range(args.client.client_num)], task_name='test'
+            )
+            for item in test_results:
+                test_monitor.append(item)
+
             # Get mean results across each client.
             mean_test_variables = test_monitor.variable_mean()
 
@@ -88,8 +101,13 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
             test_monitor = VariableMonitor()
 
             # Testing for each client and add results to the monitor
-            for j in range(args.client.client_num):
-                test_monitor.append(group.clients[j].test())
+            # Use multiprocessing for acceleration.
+            test_results = launcher.launch(
+                clients=[group.clients[j] for j in range(args.client.client_num)], task_name='test'
+            )
+            for item in test_results:
+                test_monitor.append(item)
+
             # Get mean results across each client.
             mean_test_variables = test_monitor.variable_mean()
 
@@ -101,10 +119,12 @@ def personalized_model_serial_pipeline(args: dict, seed: int = 0) -> None:
 
     # Fine-tuning
     # Fine-tune model on each client and collect all the results.
-    finetune_results = [
-        group.clients[i].finetune(lr=cur_lr, finetune_args=args.learn.finetune_parameters)
-        for i in range(len(group.clients))
-    ]
+    finetune_results = launcher.launch(
+        clients=[group.clients[j] for j in range(args.client.client_num)],
+        lr=cur_lr,
+        finetune_args=args.learn.finetune_parameters,
+        task_name='finetune'
+    )
 
     # Logging fine-tune results
     for key in finetune_results[0][0].keys():

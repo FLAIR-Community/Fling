@@ -1,7 +1,9 @@
+import time
+
 from fling.utils import get_params_number
 from fling.utils.compress_utils import *
 from fling.utils.registry_utils import GROUP_REGISTRY
-from fling.utils import VariableMonitor
+from fling.utils import Logger
 from fling.component.client import ClientTemplate
 
 
@@ -12,7 +14,7 @@ class ParameterServerGroup:
         Base implementation of the group in federated learning.
     """
 
-    def __init__(self, args: dict, logger: VariableMonitor):
+    def __init__(self, args: dict, logger: Logger):
         r"""
         Overview:
             Lazy initialization of group.
@@ -28,6 +30,7 @@ class ParameterServerGroup:
         self.server = None
         self.args = args
         self.logger = logger
+        self._time = time.time()
 
     def initialize(self) -> None:
         r"""
@@ -104,6 +107,13 @@ class ParameterServerGroup:
         else:
             print('Unrecognized compression method: ' + self.args.group.aggregation_method)
             assert False
+
+        # Add logger for time per round.
+        # This time is the interval between two times of executing this ``aggregate()`` function.
+        time_per_round = time.time() - self._time
+        self._time = time.time()
+        self.logger.add_scalar('time/time_per_round', time_per_round, train_round)
+
         return trans_cost
 
     def flush(self) -> None:

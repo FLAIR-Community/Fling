@@ -1,8 +1,9 @@
 import os
 import copy
 import warnings
-
 from easydict import EasyDict
+
+import torch.multiprocessing as mp
 
 from argzoo.default_config import default_exp_args
 from fling.utils import seed_everything
@@ -26,6 +27,7 @@ def save_config_file(config: dict, path: str) -> None:
 
 def compile_config(new_config: dict, seed: int) -> dict:
     seed_everything(seed)
+    mp.set_start_method('spawn')
     result_config = EasyDict(deep_merge_dicts(default_exp_args, new_config))
     exp_dir = result_config.other.logging_path
     if not os.path.exists(exp_dir):

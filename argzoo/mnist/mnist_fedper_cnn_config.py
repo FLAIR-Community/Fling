@@ -37,6 +37,6 @@ exp_args = dict(
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
-    from fling.pipeline import personalized_model_serial_pipeline
+    from fling.pipeline import personalized_model_pipeline
 
-    personalized_model_serial_pipeline(exp_args, seed=0)
+    personalized_model_pipeline(exp_args, seed=0)

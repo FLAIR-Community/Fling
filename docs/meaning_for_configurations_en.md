@@ -4,7 +4,7 @@
 
 In this document, we provide a simple configuration file and explain the meanings of each key.
 
-```
+```python
 default_exp_args = dict(
     # Configurations about data.
     data=dict(
@@ -33,6 +33,8 @@ default_exp_args = dict(
         global_eps=40,
         # Batch size for local training, testing and fine-tuning.
         batch_size=32,
+        # Test place for federated learning. Options: 'before_aggregation', 'after_aggregation'
+        test_place=['after_aggregation'],
         # Optimizer used in local training.
         optimizer=dict(
             # Name for optimizer.
@@ -56,7 +58,7 @@ default_exp_args = dict(
     # Configurations about models.
     model=dict(
         # Name for model used. Must be registered in `MODEL_REGISTRY`.
-        name='cifar_resnet',
+        name='resnet8',
         # Arguments used in initializing corresponding model.
         # Channel of input image.
         input_channel=3,
@@ -93,6 +95,15 @@ default_exp_args = dict(
             name='all'
         ),
     ),
+    # Launcher configurations.
+    launcher=dict(
+        # For the simplest launcher, serial is the suitable choice.
+        name='serial'
+        # If you want to use multiprocess to accelerate the training process, you can use the following setting.
+        # name = 'multiprocessing'
+        # num_proc = 2
+        # ``num_proc`` refers to the number of processes used in your program.
+    ),
     # Other configurations.
     other=dict(
         # Frequency for testing. For example, `test_freq=3` means the performance is tested every 3 global epochs.
@@ -101,7 +112,7 @@ default_exp_args = dict(
         # If the directory does not exist, it will be created automatically.
         # If the directory already exists, some parts might be over-written, which should be carefully inspected.
         logging_path='./logging/default_experiment'
-    )
+    ),
 )
 ```
 
@@ -109,7 +120,7 @@ default_exp_args = dict(
 
 - Beside "fix", the key `learn.scheduler` has a variety of types. For example, we can define a scheduler using cosine function:
 
-```
+```python
 scheduler=dict(
     # Cosine learning rate scheduler.
     name='cos'
@@ -122,9 +133,11 @@ scheduler=dict(
 
 For other types schedulers, please refer to `fling.utils.LRScheduler`.
 
+
+
 - Beside "all", the key `learn.finetune_parameters` has other usages. For example, if you only want to fine-tune parameters whose names **contain** keywords "fc" or "bn", you can write:
 
-```
+```python
 finetune_parameters=dict(
     # This means to only fine-tune parameters whose names have keywords listed in `keywords`
     name='contain',
@@ -134,7 +147,7 @@ finetune_parameters=dict(
 
 On the opposite, if you want to fine-tune parameters whose names **except** keywords "fc" or "bn", you can write:
 
-```
+```python
 finetune_parameters=dict(
     # This means to only fine-tune parameters except those whose names have keywords listed in `keywords`
     name='except',
@@ -143,3 +156,25 @@ finetune_parameters=dict(
 ```
 
 The setting for `group.aggregation_parameters` is similar.
+
+
+
+- Besides "serial", the key `launcher.name` has other usages. By default, the key "serial" means that all operations on each client is executed serially, which can be not efficient enough. We can use the multiprocessing method to accelerate this process. For the configuration, you can set:
+
+```python
+launcher=dict(
+    name = 'multiprocessing'
+    num_proc = 2
+)
+```
+
+There are several things important:
+
+1) For Windows users, this method can be not stable due to the fact that multiprocessing + PyTorch does not support for Windows well. It may lead to unexpected bugs. If you meet any bugs related to multiprocessing on Windows, consider using the serial launcher instead.
+2) The `num_proc` refers to the number of processes used in the program. The optimal value of this value can be affected by the task you execute, the hardware you use, the neural network you employ, the data you use ...... You should tune this value carefully on your system and choose the best choice. Here is a simple benchmark on A100 with 4-core CPU, batch_size=32:
+
+| num_proc          | 1     | 2     | 3     | 4     | 8     |
+| ----------------- | ----- | ----- | ----- | ----- | ----- |
+| MNIST + CNN       | 21.7s | 14.9s | 15.3s | 16.5s | 25.2s |
+| CIFAR10 + ResNet8 | 45.2s | 32.1s | 30.1s | 32.5s | 40.4s |
+
