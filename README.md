@@ -6,6 +6,8 @@
 
 Its goal is to **simulate the distributed learning process of Federated Learning on single or multiple machines**, providing a **fair testing platform** for the performance of various federated learning algorithms on different datasets. It is mainly based on the Python language and uses the PyTorch framework as the backend module for deep learning, supporting a variety of federated learning algorithms and commonly used federated learning datasets.
 
+It mainly supports:
+
 - Generic Federated Learning methods, such as FedAvg.
 - Personalized Federated Learning methods, such as FedPer.
 

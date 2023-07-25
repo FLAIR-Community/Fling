@@ -107,7 +107,7 @@ class ParameterServerGroup:
         else:
             print('Unrecognized compression method: ' + self.args.group.aggregation_method)
             assert False
-        
+
         # Add logger for time per round.
         # This time is the interval between two times of executing this ``aggregate()`` function.
         time_per_round = time.time() - self._time
