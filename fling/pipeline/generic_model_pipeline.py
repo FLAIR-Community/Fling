@@ -16,13 +16,9 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
     Overview:
        Pipeline for generic federated learning. Under this setting, models of each client is the same.
        The final performance of this generic model is tested on the server (typically using a global test dataset).
-       This function is a parallel version that use multiprocessing method to accelerate the program.
     Arguments:
         - args: dict type arguments.
         - seed: random seed.
-        - num_proc: number of process.
-    Returns:
-        - None
     """
     # Compile the input arguments first.
     args = compile_config(args, seed)
