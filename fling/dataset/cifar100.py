@@ -10,6 +10,12 @@ class CIFAR100Dataset(Dataset):
     r"""
         Implementation for CIFAR100 dataset. Details can be viewed in: https://www.cs.toronto.edu/~kriz/cifar.html
     """
+    default_augmentation = dict(
+        horizontal_flip=dict(p=0.5),
+        random_rotation=dict(degree=15),
+        Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+        random_crop=dict(size=32, padding=4),
+    )
 
     def __init__(self, cfg: dict, train: bool):
         super(CIFAR100Dataset, self).__init__()

@@ -33,6 +33,11 @@ def get_data_transform(cfg, train):
         elif name == 'random_rotation':
             if train:
                 results.append(transforms.RandomRotation(transform_args.degree))
+        elif name == 'Normalize':
+            results.append(transforms.Normalize(transform_args.mean, transform_args.std))
+        elif name == 'random_crop':
+            if train:
+                results.append(transforms.RandomCrop(transform_args.size, transform_args.padding))
         else:
             raise ValueError(f'Unrecognized data transform method: {name}')
     return transforms.Compose(results)

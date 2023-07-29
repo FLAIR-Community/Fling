@@ -14,6 +14,12 @@ class TinyImagenetDataset(Dataset):
         http://cs231n.stanford.edu/tiny-imagenet-200.zip
     """
 
+    default_augmentation = dict(
+        horizontal_flip=dict(p=0.5),
+        random_rotation=dict(degree=15),
+        Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+    )
+
     def __init__(self, cfg: dict, train: bool):
         super(TinyImagenetDataset, self).__init__()
         self.train = train
