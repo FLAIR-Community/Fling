@@ -144,13 +144,13 @@ def compile_data_augmentation_config(cfg: dict) -> None:
     Arguments:
         cfg: The configuration file to be compiled.
     """
-    if 'include_default' not in cfg.data.transforms:
+    if 'include_default' not in cfg['data']['transforms']:
         return
-    include_default = cfg.data.transforms.pop('include_default')
+    include_default = cfg['data']['transforms'].pop('include_default')
     if include_default:
-        dataset_module = DATASET_REGISTRY.get(cfg.data.dataset)
+        dataset_module = DATASET_REGISTRY.get(cfg['data']['dataset'])
         if 'default_augmentation' in dataset_module.__dict__:
             default_cfg = dataset_module.default_augmentation
         else:
             default_cfg = dict()
-        cfg.data.transforms = deep_update(default_cfg, cfg.data.transforms)
+        cfg['data']['transforms'] = deep_update(default_cfg, cfg['data']['transforms'])
