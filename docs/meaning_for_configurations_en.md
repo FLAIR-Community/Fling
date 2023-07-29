@@ -5,6 +5,8 @@
 In this document, we provide a simple configuration file and explain the meanings of each key.
 
 ```python
+import platform
+
 default_exp_args = dict(
     # Configurations about data.
     data=dict(
@@ -100,10 +102,12 @@ default_exp_args = dict(
         # For the simplest launcher, serial is the suitable choice.
         name='serial'
         # If you want to use multiprocess to accelerate the training process, you can use the following setting.
-        # name = 'multiprocessing'
-        # num_proc = 2
+        # name='multiprocessing',
+        # num_proc=2
         # ``num_proc`` refers to the number of processes used in your program.
-    ),
+        # For the default setting, if your os is linux, the multiprocessing mode is enabled.
+        # You can overwrite the default settings by yourself.
+    ) if platform.system().lower() != 'linux' else dict(name='multiprocessing', num_proc=2),
     # Other configurations.
     other=dict(
         # Frequency for testing. For example, `test_freq=3` means the performance is tested every 3 global epochs.
@@ -159,19 +163,21 @@ The setting for `group.aggregation_parameters` is similar.
 
 
 
-- Besides "serial", the key `launcher.name` has other usages. By default, the key "serial" means that all operations on each client is executed serially, which can be not efficient enough. We can use the multiprocessing method to accelerate this process. For the configuration, you can set:
+- Beside "serial", the key `launcher.name` has other usages. On os other than Linux, the default configuration "serial" means that all operations on each client is executed serially, which can be not efficient enough. We can use the multiprocessing method to accelerate this process.
+- On Linux system, the default `launcher.name` is "multiprocessing" and number of processes `num_proc=2`:
 
 ```python
 launcher=dict(
-    name = 'multiprocessing'
-    num_proc = 2
+    name='multiprocessing',
+    num_proc=2
 )
 ```
 
 There are several things important:
 
-1) For Windows users, this method can be not stable due to the fact that multiprocessing + PyTorch does not support for Windows well. It may lead to unexpected bugs. If you meet any bugs related to multiprocessing on Windows, consider using the serial launcher instead.
-2) The `num_proc` refers to the number of processes used in the program. The optimal value of this value can be affected by the task you execute, the hardware you use, the neural network you employ, the data you use ...... You should tune this value carefully on your system and choose the best choice. Here is a simple benchmark on A100 with 4-core CPU, batch_size=32:
+1) For Windows users, this multiprocessing can be not stable due to the fact that multiprocessing + PyTorch does not support for Windows well. It may lead to unexpected bugs. If you meet any bugs related to multiprocessing on Windows, consider using the serial launcher instead.
+2) Due to the new features of PyTorch 2.0, the compiled model does not currently support multiprocessing execution. In our design, if you enable the multiprocessing mode, the compilation of PyTorch will be disabled. This bug might be solved by PyTorch after this pr lands: https://github.com/pytorch/pytorch/pull/101651
+3) The `num_proc` refers to the number of processes used in the program. The optimal value of this value can be affected by the task you execute, the hardware you use, the neural network you employ, the data you use ...... You should tune this value carefully on your system and choose the best choice. Here is a simple benchmark on A100 with 4-core CPU, batch_size=32:
 
 | num_proc          | 1     | 2     | 3     | 4     | 8     |
 | ----------------- | ----- | ----- | ----- | ----- | ----- |
