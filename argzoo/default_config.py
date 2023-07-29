@@ -8,7 +8,7 @@ default_exp_args = dict(
         # Root path for dataset.
         data_path='./data',
         # Image transformation methods, such as: Random Resized Crop(RRC), Resize, Color Jitter ...
-        # The key ``include_default`` means that the default data-augmentation will be applied.
+        # The key ``include_default=True`` means that the default data-augmentation will be applied.
         transforms=dict(include_default=True),
         # How datasets distribute across all clients.
         sample_method=dict(

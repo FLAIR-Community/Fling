@@ -21,5 +21,5 @@ class MNISTDataset(Dataset):
     def __len__(self) -> int:
         return len(self.dataset)
 
-    def __getitem__(self, item: int) -> int:
+    def __getitem__(self, item: int) -> dict:
         return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}

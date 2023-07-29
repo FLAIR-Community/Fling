@@ -2,7 +2,11 @@
 
 ## An Example
 
-In this document, we provide a simple configuration file and explain the meanings of each key.
+In this document, we provide a complete configuration file and explain the meanings of each key.
+
+Note that the following configuration file is exactly the default configuration file. In other words, if some keys do not exist in user-defined config, the value in the following file will be used by default.
+
+Here is the default configuration file, you can also view it at [here](https://github.com/kxzxvbk/Fling/blob/main/argzoo/default_config.py) :
 
 ```python
 import platform
@@ -15,7 +19,8 @@ default_exp_args = dict(
         # Root path for dataset.
         data_path='./data',
         # Image transformation methods, such as: Random Resized Crop(RRC), Resize, Color Jitter ...
-        transforms=dict(),
+        # The key ``include_default=True`` means that the default data-augmentation will be applied.
+        transforms=dict(include_default=True),
         # How datasets distribute across all clients.
         sample_method=dict(
             name='iid',
@@ -120,9 +125,11 @@ default_exp_args = dict(
 )
 ```
 
-## Other usages
+## Other tutorials
 
-- Beside "fix", the key `learn.scheduler` has a variety of types. For example, we can define a scheduler using cosine function:
+### learn.scheduler
+
+This key controls the learning rate scheduler. Beside "fix", the key `learn.scheduler` has a variety of types. For example, we can define a scheduler using cosine function:
 
 ```python
 scheduler=dict(
@@ -137,9 +144,9 @@ scheduler=dict(
 
 For other types schedulers, please refer to `fling.utils.LRScheduler`.
 
+### learn.finetune_parameters
 
-
-- Beside "all", the key `learn.finetune_parameters` has other usages. For example, if you only want to fine-tune parameters whose names **contain** keywords "fc" or "bn", you can write:
+This key controls what parameters should be finetuned. Beside "all", the key `learn.finetune_parameters` has other values. For example, if you only want to fine-tune parameters whose names **contain** keywords "fc" or "bn", you can write:
 
 ```python
 finetune_parameters=dict(
@@ -159,9 +166,9 @@ finetune_parameters=dict(
 )
 ```
 
-The setting for `group.aggregation_parameters` is similar.
+The setting for `group.aggregation_parameters` , which controls what parameters should be aggregated under the framework of Federated Learning, is similar.
 
-
+### launcher
 
 - Beside "serial", the key `launcher.name` has other usages. On os other than Linux, the default configuration "serial" means that all operations on each client is executed serially, which can be not efficient enough. We can use the multiprocessing method to accelerate this process.
 - On Linux system, the default `launcher.name` is "multiprocessing" and number of processes `num_proc=2`:
@@ -183,4 +190,31 @@ There are several things important:
 | ----------------- | ----- | ----- | ----- | ----- | ----- |
 | MNIST + CNN       | 21.7s | 14.9s | 15.3s | 16.5s | 25.2s |
 | CIFAR10 + ResNet8 | 45.2s | 32.1s | 30.1s | 32.5s | 40.4s |
+
+### data.transforms
+
+- The key `include_default` refers to whether include the default data augmentation methods. For example, if you are using the CIFAR100 dataset and set `include_default=True`. The exact data transforms you use is
+
+```python
+transforms=dict(
+    horizontal_flip=dict(p=0.5),
+    random_rotation=dict(degree=15),
+    Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+    random_crop=dict(size=32, padding=4),
+)
+```
+
+, which is defined in the default augmentation [here](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py). Note that for different datasets, the default augmentations can be different and can be even None.
+
+- If users want to disable the default transforms, just use `include_default=False` and define your own methods:
+
+```python
+transforms=dict(
+    include_default=False,
+    # The following is optional.
+    horizontal_flip=dict(p=0.5)
+)
+```
+
+- For detailed data augmentation methods, please refer to [here](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/data_utils/data_transform.py) .
 
