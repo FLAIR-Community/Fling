@@ -216,5 +216,26 @@ transforms=dict(
 )
 ```
 
+- Users can also overwrite the default transforms like this:
+
+```python
+transforms=dict(
+    include_default=True,
+    # Overwrite
+    horizontal_flip=dict(p=0.3)
+)
+```
+
+For CIFAR100, this code is equivalent to:
+
+```python
+transforms=dict(
+    horizontal_flip=dict(p=0.3),
+    random_rotation=dict(degree=15),
+    Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+    random_crop=dict(size=32, padding=4),
+)
+```
+
 - For detailed data augmentation methods, please refer to [here](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/data_utils/data_transform.py) .
 
