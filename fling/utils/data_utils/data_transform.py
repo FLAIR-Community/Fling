@@ -62,8 +62,6 @@ def get_data_transform(cfg, train):
         elif name == 'random_crop':
             if train:
                 results.append(transforms.RandomCrop(transform_args.size, transform_args.padding))
-        elif name == 'to_tensor':
-            results.append(transforms.ToTensor())
         elif name == 'to_device':
             results.append(ToDevice(transform_args.device))
         else:

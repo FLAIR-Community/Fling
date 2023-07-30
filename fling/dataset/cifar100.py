@@ -11,7 +11,6 @@ class CIFAR100Dataset(Dataset):
         Implementation for CIFAR100 dataset. Details can be viewed in: https://www.cs.toronto.edu/~kriz/cifar.html
     """
     default_augmentation = dict(
-        to_tensor=dict(),
         to_device=dict(device='cuda'),
         horizontal_flip=dict(p=0.5),
         random_rotation=dict(degree=15),
