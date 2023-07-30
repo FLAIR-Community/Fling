@@ -101,7 +101,7 @@ class ClientTemplate:
         """
         raise NotImplementedError
 
-    def preprocess_data(self, data: Iterable) -> dict:
+    def preprocess_data(self, data: dict) -> dict:
         r"""
         Overview:
             Pre-process the data batch generated from dataset.

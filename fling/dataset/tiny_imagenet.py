@@ -15,7 +15,6 @@ class TinyImagenetDataset(Dataset):
     """
 
     default_augmentation = dict(
-        to_device=dict(device='cuda'),
         horizontal_flip=dict(p=0.5),
         random_rotation=dict(degree=15),
         Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
