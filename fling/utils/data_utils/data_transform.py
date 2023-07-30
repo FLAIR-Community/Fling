@@ -1,7 +1,31 @@
 from torchvision import transforms
 
 
+class ToDevice:
+    r"""
+    Overview:
+        Convert an image with type ``torch.Tensor`` to a specific device.
+    """
+    def __init__(self, device):
+        self.device = device
+
+    def __call__(self, pic):
+        """
+        Overview:
+            Put image to the desired device.
+        Arguments:
+            pic: Image to be moved.
+        Returns:
+            Tensor: Converted image.
+        """
+        return pic.to(self.device)
+
+    def __repr__(self):
+        return self.__class__.__name__ + f'({self.device})'
+
+
 def get_data_transform(cfg, train):
+    transforms.ToTensor()
     transform_names = cfg.keys()
     results = []
     results.append(transforms.ToTensor())
@@ -38,6 +62,10 @@ def get_data_transform(cfg, train):
         elif name == 'random_crop':
             if train:
                 results.append(transforms.RandomCrop(transform_args.size, transform_args.padding))
+        elif name == 'to_tensor':
+            results.append(transforms.ToTensor())
+        elif name == 'to_device':
+            results.append(ToDevice(transform_args.device))
         else:
             raise ValueError(f'Unrecognized data transform method: {name}')
     return transforms.Compose(results)
