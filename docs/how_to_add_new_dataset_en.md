@@ -10,36 +10,43 @@ In this step, you are required to define a dataset in `fling/dataset` . An examp
 
 ```python
 from torch.utils.data import Dataset
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR100
 
 from fling.utils import get_data_transform
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
-@DATASET_REGISTRY.register('cifar10')
-class CIFAR10Dataset(Dataset):
+@DATASET_REGISTRY.register('cifar100')
+class CIFAR100Dataset(Dataset):
     r"""
-    Implementation for CIFAR10 dataset. Details can be viewed in: https://www.cs.toronto.edu/~kriz/cifar.html
+        Implementation for CIFAR100 dataset. Details can be viewed in: https://www.cs.toronto.edu/~kriz/cifar.html
     """
+    default_augmentation = dict(
+        horizontal_flip=dict(p=0.5),
+        random_rotation=dict(degree=15),
+        Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+        random_crop=dict(size=32, padding=4),
+    )
 
-    def __init__(self, cfg, train):
-        super(CIFAR10Dataset, self).__init__()
+    def __init__(self, cfg: dict, train: bool):
+        super(CIFAR100Dataset, self).__init__()
         self.train = train
         self.cfg = cfg
         transform = get_data_transform(cfg.data.transforms, train=train)
-        self.dataset = CIFAR10(cfg.data.data_path, train=train, transform=transform, download=True)
+        self.dataset = CIFAR100(cfg.data.data_path, train=train, transform=transform, download=True)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dataset)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> dict:
         return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}
 ```
 
 Notice that:
 
-- You should give a name to the dataset by using this decorator: `@DATASET_REGISTRY.register('cifar10')`
+- You should give a name to the dataset by using this decorator: `@DATASET_REGISTRY.register('cifar100')`
 - The dataset defined should be a subclass of `torch.utils.data.Dataset`
+- The `default_augmentation` refers to the default data augmentation method of this dataset. If you do not explicitly define this attribute, no augmentation will be applied by default. More information about how to override this default setting in user-defined config, please refer to this [link](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_en.md).
 - For classification tasks, the return data item should in this diction format: `{'input': x, 'class_id': y} `. If you are not conducting a classification task, please define the format yourself and modify the data-preprocessing and learning operations  according step 5.
 
 ### Step 2: Import the dataset file
