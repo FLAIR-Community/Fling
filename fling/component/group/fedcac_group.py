@@ -84,7 +84,6 @@ class FedCACServerGroup(ParameterServerGroup):
                 if overlap_buffer[i][index] >= threshold:
                     collaboration_clients.append(j)
                 index += 1
-            # print(f'epoch:{self.epoch}, threshold:{threshold}, Omax:{overlap_max}, Oavg:{overlap_avg}, client {i}: collaborator num:{len(collaboration_clients)}, {collaboration_clients}')
 
             for key in w_customized_global.keys():
                 for client in collaboration_clients:
