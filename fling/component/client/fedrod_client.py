@@ -9,8 +9,8 @@ from .base_client import BaseClient
 class FedRoDClient(BaseClient):
     """
     Overview:
-        This class is the implementation FedRoD introduced in ON BRIDGING GENERIC AND PERSONALIZED FEDERATED LEARNING FOR
-    IMAGE CLASSIFICATION <link https://openreview.net/pdf?id=I1hQbx10Kxn link>.
+        This class is the implementation FedRoD introduced in ON BRIDGING GENERIC AND PERSONALIZED FEDERATED LEARNING
+        FOR IMAGE CLASSIFICATION <link https://openreview.net/pdf?id=I1hQbx10Kxn link>.
     """
 
     def __init__(self, *args, **kwargs):
@@ -27,7 +27,7 @@ class FedRoDClient(BaseClient):
         g_head, p_head = self.model(batch_x)
 
         # Calculate loss for p_head and g_head respectively.
-        g_loss = balanced_softmax_loss(batch_y, g_head, self.spc)
+        g_loss = balanced_softmax_loss(batch_y, g_head, self.spc.to(self.device))
         p_loss = criterion(p_head, batch_y)
         loss = g_loss + p_loss
 
@@ -50,7 +50,7 @@ class FedRoDClient(BaseClient):
         g_head, p_head = self.model(batch_x)
 
         # Calculate loss for p_head and g_head respectively.
-        g_loss = balanced_softmax_loss(batch_y, g_head, self.spc)
+        g_loss = balanced_softmax_loss(batch_y, g_head, self.spc.to(self.device))
         p_loss = criterion(p_head, batch_y)
         loss = g_loss + p_loss
 
@@ -64,3 +64,6 @@ class FedRoDClient(BaseClient):
             },
             weight=batch_y.shape[0]
         )
+
+    def preprocess_data(self, data):
+        return {'x': data['input'].to(self.device), 'y': data['class_id'].to(self.device)}
