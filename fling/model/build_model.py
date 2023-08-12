@@ -10,7 +10,11 @@ from fling.utils.registry_utils import MODEL_REGISTRY
 def get_model(args: dict) -> torch.nn.Module:
     # Copy the args to prevent it from modified by ``args.pop('xxx')``
     args = copy.deepcopy(args)
-    torch.set_float32_matmul_precision('high')
+    # Avoid bugs for PyTorch with lower versions.
+    try:
+        torch.set_float32_matmul_precision('high')
+    except AttributeError:
+        pass
     # Get the model constructed by args.
     model_name = args.model.pop('name')
     model = MODEL_REGISTRY.build(model_name, **args.model)
