@@ -16,7 +16,7 @@ exp_args = dict(
         finetune_parameters=dict(name='contain', keywords=['fedrod_p_head']),
     ),
     model=dict(
-        name='resnet8',
+        name='fedrod_resnet8',
         input_channel=3,
         class_number=100,
     ),
