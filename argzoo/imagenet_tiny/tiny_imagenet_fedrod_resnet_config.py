@@ -25,7 +25,7 @@ exp_args = dict(
     group=dict(
         name='base_group',
         aggregation_method='avg',
-        # Only aggregate parameters whose name does not contain the keyword "fc".
+        # Only aggregate parameters whose name does not contain the keyword "fedrod_p_head".
         aggregation_parameters=dict(
             name='except',
             keywords=['fedrod_p_head'],
