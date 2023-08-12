@@ -7,6 +7,7 @@ class ToDevice:
     Overview:
         Convert an image with type ``torch.Tensor`` to a specific device.
     """
+
     def __init__(self, device):
         self.device = device
 

@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 def get_optimizer(name: str, lr: float, momentum: float, weights: object) -> optim.Optimizer:
@@ -90,6 +91,30 @@ def get_finetune_parameters(model, finetune_args):
         if key in use_keys:
             res.append(param)
     return res
+
+
+def balanced_softmax_loss(
+        labels: torch.LongTensor,
+        logits: torch.FloatTensor,
+        sample_per_class: torch.LongTensor,
+        reduction: str = "mean"
+) -> torch.Tensor:
+    r"""
+    Overview:
+        Compute the Balanced Softmax Loss between ``logits`` and the ground truth ``labels``.
+    Arguments:
+        labels: ground truth labels. Shape: ``[B]``.
+        logits: predicted logits. Shape: ``[B, C]``.
+        sample_per_class: number of samples in this client. Shape: `[C]`.
+        reduction: reduction method of loss, one of "none", "mean", "sum".
+    Returns:
+      loss: Calculated balanced softmax loss.
+    """
+    spc = sample_per_class.float()
+    spc = spc.unsqueeze(0)
+    logits = logits + torch.log(spc)
+    loss = F.cross_entropy(input=logits, target=labels, reduction=reduction)
+    return loss
 
 
 class LRScheduler:
