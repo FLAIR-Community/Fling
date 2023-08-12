@@ -59,17 +59,19 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 - Support multiprocessing training on each client for better efficiency.
 - Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
 
-## Currently Supported Algorithms
+## Supported Algorithms
 
 ### Generic Federated Learning
 
 **FedAvg:** [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf)
 
-### **Personalized Federated Learning**
+### Personalized Federated Learning
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
 
 **pFedSD:** [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434)
+
+**FedRoD:** [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn)
 
 ## Acknowledgments
 

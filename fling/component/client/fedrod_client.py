@@ -50,9 +50,8 @@ class FedRoDClient(BaseClient):
         g_head, p_head = self.model(batch_x)
 
         # Calculate loss for p_head and g_head respectively.
-        g_loss = balanced_softmax_loss(batch_y, g_head, self.spc.to(self.device))
         p_loss = criterion(p_head, batch_y)
-        loss = g_loss + p_loss
+        loss = p_loss
 
         # Prediction should use p_head.
         y_pred = torch.argmax(p_head, dim=-1)
