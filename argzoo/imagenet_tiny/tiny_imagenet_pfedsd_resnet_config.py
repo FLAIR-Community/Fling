@@ -9,9 +9,9 @@ exp_args = dict(
     learn=dict(
         device='cuda:0',
         local_eps=5,
-        global_eps=200,
+        global_eps=150,
         batch_size=100,
-        optimizer=dict(name='sgd', lr=0.01, momentum=0.9),
+        optimizer=dict(name='sgd', lr=0.1, momentum=0.9),
         finetune_parameters=dict(name='all'),
         test_place=['before_aggregation'],
         lamda=0.5,  # the weight of self distillation loss

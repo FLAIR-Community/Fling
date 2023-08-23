@@ -8,10 +8,10 @@ exp_args = dict(
     ),
     learn=dict(
         device='cuda:0',
-        local_eps=8,
-        global_eps=40,
-        batch_size=32,
-        optimizer=dict(name='sgd', lr=0.02, momentum=0.9),
+        local_eps=5,
+        global_eps=150,
+        batch_size=100,
+        optimizer=dict(name='sgd', lr=0.1, momentum=0.9),
         # Only fine-tune parameters whose name contain the keyword "fedrod_p_head".
         finetune_parameters=dict(name='contain', keywords=['fedrod_p_head']),
     ),

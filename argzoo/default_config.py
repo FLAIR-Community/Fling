@@ -101,7 +101,7 @@ default_exp_args = dict(
         # ``num_proc`` refers to the number of processes used in your program.
         # For the default setting, if your os is linux, the multiprocessing mode is enabled.
         # You can overwrite the default settings by yourself.
-    ) if platform.system().lower() != 'linux' else dict(name='multiprocessing', num_proc=2),
+    ),
     # Other configurations.
     other=dict(
         # Frequency for testing. For example, `test_freq=3` means the performance is tested every 3 global epochs.

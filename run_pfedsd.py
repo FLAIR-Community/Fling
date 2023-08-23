@@ -44,3 +44,6 @@ def main():
     launch_diri(algo_name='pfedsd', dataset_name='tiny', base_args=exp_args, alphas=[0.1, 0.5, 1.0])
     launch_patho(algo_name='pfedsd', dataset_name='tiny', base_args=exp_args, alphas=[2])
 
+
+if __name__ == '__main__':
+    main()
