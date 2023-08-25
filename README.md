@@ -75,6 +75,11 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 
 **FedRoD:** [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn)
 
+## Feedback and Contribution
+
+- For any bugs, questions, feature requirements, feel free to propose them in [issues](https://github.com/kxzxvbk/Fling/issues)
+- For any contributions that can improve Fling (more algorithms or better system design), we warmly welcome you to propose them in a [pull request](https://github.com/kxzxvbk/Fling/pulls).
+
 ## Acknowledgments
 
 Special thanks to [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu), 
