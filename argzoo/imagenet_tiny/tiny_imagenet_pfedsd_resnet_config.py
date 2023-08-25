@@ -20,7 +20,7 @@ exp_args = dict(
     model=dict(
         name='resnet8',
         input_channel=3,
-        class_number=10,
+        class_number=200,
     ),
     client=dict(name='pfedsd_client', client_num=40),
     server=dict(name='base_server'),

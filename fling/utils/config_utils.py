@@ -13,10 +13,10 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 def save_config_file(config: dict, path: str) -> None:
     """
     Overview:
-        save configuration to python file
+        Save configuration to python file
     Arguments:
-        - config (:obj:`dict`): Config dict
-        - path (:obj:`str`): Path of target yaml
+        - config: Config dict
+        - path: Path of saved file
     """
     config_string = str(config)
     from yapf.yapflib.yapf_api import FormatCode
@@ -39,12 +39,12 @@ def compile_config(new_config: dict, seed: int) -> dict:
         new_config: user-defined config.
         seed: random seed.
     Returns:
-        result_confi: the compiled config diction.
+        result_config: the compiled config diction.
     """
     # Set random seed.
     seed_everything(seed)
     # Determine the multiprocessing backend.
-    mp.set_start_method('spawn')
+    mp.set_start_method('spawn', force=True)
 
     merged_config = deep_merge_dicts(default_exp_args, new_config)
     compile_data_augmentation_config(merged_config)
@@ -65,12 +65,13 @@ def compile_config(new_config: dict, seed: int) -> dict:
 def deep_merge_dicts(original: dict, new_dict: dict) -> dict:
     """
     Overview:
-        Merge two dicts by calling ``deep_update``
+        Merge two dicts by calling ``deep_update``. The key of ``original`` dict will be updated by ``new_dict``.
+        This is a recursive function.
     Arguments:
-        - original (:obj:`dict`): Dict 1.
-        - new_dict (:obj:`dict`): Dict 2.
+        - original: The dict to be updated.
+        - new_dict: the dict to update ``original``,
     Returns:
-        - merged_dict (:obj:`dict`): A new dict that is d1 and d2 deeply merged.
+        - merged_dict: A new dict that is d1 and d2 deeply merged.
     """
     original = original or {}
     new_dict = new_dict or {}
@@ -87,27 +88,21 @@ def deep_update(
         whitelist=None,
         override_all_if_type_changes=None
 ) -> dict:
-    """
+    r"""
     Overview:
         Update original dict with values from new_dict recursively.
     Arguments:
-        - original (:obj:`dict`): Dictionary with default values.
-        - new_dict (:obj:`dict`): Dictionary with values to be updated
-        - new_keys_allowed (:obj:`bool`): Whether new keys are allowed.
-        - whitelist (:obj:`Optional[List[str]]`):
+        - original: Dictionary with default values.
+        - new_dict: Dictionary with values to be updated
+        - new_keys_allowed: Whether new keys are allowed.
+        - whitelist:
             List of keys that correspond to dict
-            values where new subkeys can be introduced. This is only at the top
+            values where new sub-keys can be introduced. This is only at the top
             level.
-        - override_all_if_type_changes(:obj:`Optional[List[str]]`):
+        - override_all_if_type_changes:
             List of top level
             keys with value=dict, for which we always simply override the
             entire value (:obj:`dict`), if the "type" key in that value dict changes.
-
-    .. note::
-
-        If new key is introduced in new_dict, then if new_keys_allowed is not
-        True, an error will be thrown. Further, for sub-dicts, if the key is
-        in the whitelist, then new subkeys can be introduced.
     """
     whitelist = whitelist or []
     override_all_if_type_changes = override_all_if_type_changes or []
