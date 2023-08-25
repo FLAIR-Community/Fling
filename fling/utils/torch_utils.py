@@ -2,7 +2,7 @@ import math
 import pickle
 import random
 from functools import reduce
-from typing import Iterable
+from typing import Iterable, Union, Callable
 
 import numpy as np
 import torch
@@ -17,8 +17,7 @@ def get_optimizer(name: str, lr: float, momentum: float, weights: object) -> opt
     elif name.lower() == 'adam':
         return optim.Adam(params=weights, lr=lr)
     else:
-        print('Unrecognized optimizer: ' + name)
-        assert False
+        raise ValueError(f'Unrecognized optimizer: {name}')
 
 
 def get_params_number(net: nn.Module) -> int:
@@ -64,7 +63,7 @@ def calculate_mean_std(train_dataset: Iterable, test_dataset: Iterable) -> tuple
         return reduce(lambda x, y: x + y, res) / len(res), reduce(lambda x, y: x + y, res_std) / len(res)
 
 
-def get_finetune_parameters(model, finetune_args):
+def get_finetune_parameters(model: nn.Module, finetune_args: dict) -> list:
     if finetune_args.name == 'all':
         use_keys = model.state_dict().keys()
     elif finetune_args.name == 'contain':
@@ -142,9 +141,53 @@ class LRScheduler:
             raise ValueError(f'Unrecognized lr scheduler: {self.args.name}')
 
 
-def get_activation(name: str, **kwargs):
+def get_activation(name: str, **kwargs) -> Callable:
     func_dict = {'relu': nn.ReLU, 'tanh': nn.Tanh, 'leaky_relu': nn.LeakyReLU}
     try:
         return func_dict[name](**kwargs)
     except KeyError:
         raise ValueError(f'Unrecognized activation function name: {name}')
+
+
+def get_model_difference(
+        model_a_param: Union[dict, Iterable, torch.Tensor],
+        model_b_param: Union[dict, Iterable, torch.Tensor],
+        norm_p: int = 2
+) -> torch.Tensor:
+    r"""
+    Overview:
+        Calculation the model difference of ``model_a_param`` and ``model_b_param``.
+        The difference is calculated as the p-norm of ``model_a_param - model_b_param``
+    Arguments:
+        model_a_param: the parameters of model A.
+        model_b_param: the parameters of model B.
+        norm_p: the p-norm to calculate the difference.
+    Returns:
+        res: the calculated difference norm.
+    """
+    res = 0
+    if isinstance(model_a_param, torch.Tensor) and isinstance(model_b_param, torch.Tensor):
+        tmp_res = torch.norm(model_a_param - model_b_param, p=norm_p)
+        if torch.isnan(tmp_res) or torch.isinf(tmp_res):
+            raise ValueError('Nan or inf encountered in calculating norm.')
+        res += tmp_res
+    elif isinstance(model_a_param, dict) and isinstance(model_b_param, dict):
+        for key, val in model_a_param.items():
+            tmp_res = torch.norm(val - model_b_param[key], p=norm_p)
+            # Dealing with special conditions.
+            if torch.isnan(tmp_res) or torch.isinf(tmp_res):
+                continue
+            res += tmp_res
+    elif isinstance(model_a_param, Iterable) and isinstance(model_b_param, Iterable):
+        for para1, para2 in zip(model_a_param, model_b_param):
+            tmp_res = torch.norm(para1 - para2, p=norm_p)
+            # Dealing with special conditions.
+            if torch.isnan(tmp_res) or torch.isinf(tmp_res):
+                continue
+            res += tmp_res
+    else:
+        raise TypeError(
+            f'Unrecognized type for calculating model difference.'
+            f' Model A: {type(model_a_param)}, model B: {type(model_b_param)}'
+        )
+    return res
