@@ -15,7 +15,8 @@ import numpy as np
 class FedCACClient(BaseClient):
     """
     Overview:
-        This class is the base implementation of client in FedCAC.
+        This class is the base implementation of client in 'Bold but Cautious: Unlocking the Potential of Personalized
+        Federated Learning through Cautiously Aggressive Collaboration' (FedCAC).
     """
 
     def __init__(self, args, client_id, train_dataset, test_dataset=None):
@@ -43,10 +44,10 @@ class FedCACClient(BaseClient):
 
         return mean_monitor_variables
 
-    def evaluate_critical_parameter(self, prevModel, model, tau):
+    def evaluate_critical_parameter(self, prevModel: nn.Module, model: nn.Module, tau: int):
         r"""
-            Overview:
-                    Implement Eq.(5) and Eq.(6) in the paper
+        Overview:
+                Implement critical parameter selection (Eq.(5) and Eq.(6)) in the paper
         """
         global_mask = []    # mark non-critical parameter
         local_mask = [] # mark critical parameter
@@ -75,8 +76,10 @@ class FedCACClient(BaseClient):
                     thresh = new_metric.sort()[0][0]
 
             # Get the local mask and global mask
-            mask = (c >= thresh).type(torch.cuda.IntTensor)
-            global_mask.append((c < thresh).type(torch.cuda.IntTensor))
+            # mask = (c >= thresh).type(torch.cuda.IntTensor)
+            # global_mask.append((c < thresh).type(torch.cuda.IntTensor))
+            mask = (c >= thresh).int()
+            global_mask.append((c < thresh).int())
             local_mask.append(mask)
             critical_parameter.append(mask.view(-1))
         model.zero_grad()

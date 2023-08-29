@@ -22,8 +22,8 @@ class FedCACServerGroup(ParameterServerGroup):
 
     def sync(self) -> None:
         r"""
-            Overview:
-                    Perform the initialization steps in FedCAC (Eq.(11) in the paper)
+        Overview:
+                Perform the critical and non-critical parameter initialization steps in FedCAC.
         """
         if self.epoch == -1:
             super().sync()  # Called during system initialization
@@ -46,12 +46,11 @@ class FedCACServerGroup(ParameterServerGroup):
                 self.clients[client].customized_model.to('cpu')
             tempGlobalModel.to('cpu')
         self.epoch += 1
-        return
 
-    def get_customized_global_models(self):
+    def get_customized_global_models(self) -> int:
         r"""
-            Overview:
-                    Implement Eq.(7), Eq.(8) and Eq.(10) in the paper
+        Overview:
+                Aggregating customized global models for clients to collaborate critical parameters.
         """
         assert type(self.args.learn.beta) == int and self.args.learn.beta >= 1
         overlap_buffer = [[] for i in range(self.args.client.client_num)]

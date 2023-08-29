@@ -1,34 +1,16 @@
 from easydict import EasyDict
-import argparse
-def args_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tau', type=float, default=0.4, help='tau')
-    parser.add_argument('--beta', type=int, default=170, help='beta')
-    parser.add_argument('--noniid', type=str, default='dirichlet', help='noniid type')
-    parser.add_argument('--alpha', type=float, default=0.5, help='alpha')
-    parser.add_argument('--seed', type=int, default=1, help='seed')
-    args = parser.parse_args()
-    args.alpha = args.alpha if args.noniid == 'dirichlet' else int(args.alpha)
-    return args
 
-args = args_parser()
-tau = args.tau
-beta = args.beta
-noniid = args.noniid
-alpha = args.alpha
-seed = args.seed
+tau = 0.4
+beta = 170
+noniid = 'dirichlet'
+alpha = 0.1
+seed = 1
 
 exp_args = dict(
     data=dict(
         dataset='cifar100',
         data_path='./data/CIFAR100',
         sample_method=dict(name=noniid, alpha=alpha, train_num=500, test_num=100),
-        transforms=dict(
-            horizontal_flip=dict(p=0.5),
-            random_rotation=dict(degree=15),
-            to_tensor=dict(),
-            Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
-        ),
     ),
     learn=dict(
         device='cuda:0',
