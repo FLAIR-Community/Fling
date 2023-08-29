@@ -68,10 +68,10 @@ class FedProxClient(BaseClient):
             Training function. The global model should be updated.
         """
         self._copy_global_model(self.model)
-        ret = super(FedProxClient, self).train(lr=lr, device=device)
+        mean_monitor_variables = super(FedProxClient, self).train(lr=lr, device=device)
         # Reset the global model to save memory.
         self.glob_model = None
-        return ret
+        return mean_monitor_variables
 
     def finetune(self, lr, finetune_args, device=None, finetune_eps=None):
         r"""
@@ -79,7 +79,7 @@ class FedProxClient(BaseClient):
             Finetune function. The global model should be updated.
         """
         self._copy_global_model(self.model)
-        ret = super(FedProxClient, self).finetune(lr, finetune_args, device, finetune_eps)
+        info = super(FedProxClient, self).finetune(lr, finetune_args, device, finetune_eps)
         # Reset the global model to save memory.
         self.glob_model = None
-        return ret
+        return info
