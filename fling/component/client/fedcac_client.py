@@ -10,6 +10,7 @@ from fling.utils.registry_utils import CLIENT_REGISTRY
 from .base_client import BaseClient
 import torch.nn.functional as F
 import numpy as np
+from typing import Tuple
 
 @CLIENT_REGISTRY.register('fedcac_client')
 class FedCACClient(BaseClient):
@@ -44,10 +45,10 @@ class FedCACClient(BaseClient):
 
         return mean_monitor_variables
 
-    def evaluate_critical_parameter(self, prevModel: nn.Module, model: nn.Module, tau: int):
+    def evaluate_critical_parameter(self, prevModel: nn.Module, model: nn.Module, tau: int) -> Tuple[torch.Tensor, list, list]:
         r"""
         Overview:
-                Implement critical parameter selection (Eq.(5) and Eq.(6)) in the paper
+            Implement critical parameter selection.
         """
         global_mask = []    # mark non-critical parameter
         local_mask = [] # mark critical parameter
@@ -76,8 +77,6 @@ class FedCACClient(BaseClient):
                     thresh = new_metric.sort()[0][0]
 
             # Get the local mask and global mask
-            # mask = (c >= thresh).type(torch.cuda.IntTensor)
-            # global_mask.append((c < thresh).type(torch.cuda.IntTensor))
             mask = (c >= thresh).int()
             global_mask.append((c < thresh).int())
             local_mask.append(mask)

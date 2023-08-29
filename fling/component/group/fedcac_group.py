@@ -13,8 +13,8 @@ from fling.component.group import ParameterServerGroup
 @GROUP_REGISTRY.register('fedcac_group')
 class FedCACServerGroup(ParameterServerGroup):
     r"""
-        Overview:
-            Implementation of the group in FedCAC.
+    Overview:
+        Implementation of the group in FedCAC.
     """
     def __init__(self, args: dict, logger: Logger):
         super(FedCACServerGroup, self).__init__(args, logger)
@@ -23,7 +23,7 @@ class FedCACServerGroup(ParameterServerGroup):
     def sync(self) -> None:
         r"""
         Overview:
-                Perform the critical and non-critical parameter initialization steps in FedCAC.
+            Perform the critical and non-critical parameter initialization steps in FedCAC.
         """
         if self.epoch == -1:
             super().sync()  # Called during system initialization
@@ -50,7 +50,7 @@ class FedCACServerGroup(ParameterServerGroup):
     def get_customized_global_models(self) -> int:
         r"""
         Overview:
-                Aggregating customized global models for clients to collaborate critical parameters.
+            Aggregating customized global models for clients to collaborate critical parameters.
         """
         assert type(self.args.learn.beta) == int and self.args.learn.beta >= 1
         overlap_buffer = [[] for i in range(self.args.client.client_num)]
