@@ -20,8 +20,8 @@ exp_args = dict(
         optimizer=dict(name='sgd', lr=0.1, momentum=0.9),
         finetune_parameters=dict(name='all'),
         test_place=['after_aggregation', 'before_aggregation'],
-        tau=tau,   # the ratio of critical parameters in FedCAC
-        beta=beta,   # used to control the collaboration of critical parameters
+        tau=tau,  # the ratio of critical parameters in FedCAC
+        beta=beta,  # used to control the collaboration of critical parameters
     ),
     model=dict(
         name='resnet10',

@@ -12,6 +12,7 @@ import torch.nn.functional as F
 import numpy as np
 from typing import Tuple
 
+
 @CLIENT_REGISTRY.register('fedcac_client')
 class FedCACClient(BaseClient):
     """
@@ -26,8 +27,7 @@ class FedCACClient(BaseClient):
         """
         super(FedCACClient, self).__init__(args, client_id, train_dataset, test_dataset)
         self.critical_parameter = None  # record the critical parameter positions in FedCAC
-        self.customized_model = copy.deepcopy(self.model)   # customized global model
-
+        self.customized_model = copy.deepcopy(self.model)  # customized global model
 
     def train(self, lr, device=None):
         """
@@ -41,17 +41,19 @@ class FedCACClient(BaseClient):
 
         # select the critical parameters
         self.critical_parameter, self.global_mask, self.local_mask = self.evaluate_critical_parameter(
-            prevModel=initial_model, model=self.model, tau=self.args.learn.tau)
+            prevModel=initial_model, model=self.model, tau=self.args.learn.tau
+        )
 
         return mean_monitor_variables
 
-    def evaluate_critical_parameter(self, prevModel: nn.Module, model: nn.Module, tau: int) -> Tuple[torch.Tensor, list, list]:
+    def evaluate_critical_parameter(self, prevModel: nn.Module, model: nn.Module,
+                                    tau: int) -> Tuple[torch.Tensor, list, list]:
         r"""
         Overview:
             Implement critical parameter selection.
         """
-        global_mask = []    # mark non-critical parameter
-        local_mask = [] # mark critical parameter
+        global_mask = []  # mark non-critical parameter
+        local_mask = []  # mark critical parameter
         critical_parameter = []
 
         self.model.to(self.device)
@@ -71,7 +73,7 @@ class FedCACClient(BaseClient):
             # if threshold equals 0, select minimal nonzero element as threshold
             if thresh <= 1e-10:
                 new_metric = metric[metric > 1e-20]
-                if len(new_metric) == 0: # this means all items in metric are zero
+                if len(new_metric) == 0:  # this means all items in metric are zero
                     print(f'Abnormal!!! metric:{metric}')
                 else:
                     thresh = new_metric.sort()[0][0]

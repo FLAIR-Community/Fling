@@ -10,12 +10,14 @@ from fling.utils import Logger
 from fling.component.client import ClientTemplate
 from fling.component.group import ParameterServerGroup
 
+
 @GROUP_REGISTRY.register('fedcac_group')
 class FedCACServerGroup(ParameterServerGroup):
     r"""
     Overview:
         Implementation of the group in FedCAC.
     """
+
     def __init__(self, args: dict, logger: Logger):
         super(FedCACServerGroup, self).__init__(args, logger)
         self.epoch = -1  # To be consistent with the existing pipeline interface. group maintains a epoch counter itself.
@@ -61,8 +63,8 @@ class FedCACServerGroup(ParameterServerGroup):
                 if i == j:
                     continue
                 overlap_rate = 1 - torch.sum(
-                    torch.abs(self.clients[i].critical_parameter - self.clients[j].critical_parameter)) / float(
-                    torch.sum(self.clients[i].critical_parameter).cpu() * 2)
+                    torch.abs(self.clients[i].critical_parameter - self.clients[j].critical_parameter)
+                ) / float(torch.sum(self.clients[i].critical_parameter).cpu() * 2)
                 overlap_buffer[i].append(overlap_rate)
 
         # calculate the global threshold
@@ -79,14 +81,16 @@ class FedCACServerGroup(ParameterServerGroup):
             # find clients whose critical parameter locations are similar to client i
             index = 0
             for j in range(self.args.client.client_num):
-                if i == j: continue
+                if i == j:
+                    continue
                 if overlap_buffer[i][index] >= threshold:
                     collaboration_clients.append(j)
                 index += 1
 
             for key in w_customized_global.keys():
                 for client in collaboration_clients:
-                    if client == i: continue
+                    if client == i:
+                        continue
                     w_customized_global[key] += self.clients[client].model.state_dict()[key]
                 w_customized_global[key] = torch.div(w_customized_global[key], float(len(collaboration_clients)))
             self.clients[i].customized_model.load_state_dict(w_customized_global)
@@ -123,7 +127,3 @@ class FedCACServerGroup(ParameterServerGroup):
         self.logger.add_scalar('time/time_per_round', time_per_round, train_round)
 
         return trans_cost
-
-
-
-
