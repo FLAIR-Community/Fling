@@ -45,6 +45,9 @@ class FedRoDClient(BaseClient):
         loss.backward()
         optimizer.step()
 
+    def finetune_step(self, batch_data, criterion, monitor, optimizer):
+        return self.train_step(batch_data, criterion, monitor, optimizer)
+
     def test_step(self, batch_data, criterion, monitor):
         batch_x, batch_y = batch_data['x'], batch_data['y']
         g_head, p_head = self.model(batch_x)
