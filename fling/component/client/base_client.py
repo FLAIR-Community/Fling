@@ -80,6 +80,23 @@ class BaseClient(ClientTemplate):
         loss.backward()
         optimizer.step()
 
+    def finetune_step(self, batch_data, criterion, monitor, optimizer):
+        batch_x, batch_y = batch_data['x'], batch_data['y']
+        o = self.model(batch_x)
+        loss = criterion(o, batch_y)
+        y_pred = torch.argmax(o, dim=-1)
+
+        monitor.append(
+            {
+                'train_acc': torch.mean((y_pred == batch_y).float()).item(),
+                'train_loss': loss.item()
+            },
+            weight=batch_y.shape[0]
+        )
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
     def test_step(self, batch_data, criterion, monitor):
         batch_x, batch_y = batch_data['x'], batch_data['y']
         o = self.model(batch_x)
@@ -167,7 +184,7 @@ class BaseClient(ClientTemplate):
             for _, data in enumerate(self.train_dataloader):
                 preprocessed_data = self.preprocess_data(data)
                 # Update total sample number.
-                self.train_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor, optimizer=op)
+                self.finetune_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor, optimizer=op)
 
             # Test model every epoch.
             mean_monitor_variables = monitor.variable_mean()
