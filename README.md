@@ -73,6 +73,8 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 
 **pFedSD:** [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434)
 
+**FedCAC:** [Bold but Cautious: Unlocking the Potential of Personalized Federated Learning through Cautiously Aggressive Collaboration]()
+
 **FedRoD:** [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn)
 
 ## Feedback and Contribution
