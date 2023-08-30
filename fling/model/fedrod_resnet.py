@@ -1,8 +1,7 @@
 import torch
 from torch import Tensor
 import torch.nn as nn
-from typing import Type, Any, Callable, Union, List, Optional
-import torch.nn.functional as F
+from typing import Type, Any, Callable, Union, List, Optional, Tuple
 from fling.utils.registry_utils import MODEL_REGISTRY
 
 
@@ -178,6 +177,7 @@ class ResNet(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(features[len(layers) - 1] * block.expansion, class_number)
+        self.fedrod_p_head = nn.Linear(features[len(layers) - 1] * block.expansion, class_number)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -232,7 +232,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _forward_impl(self, x: Tensor) -> Tensor:
+    def _forward_impl(self, x: Tensor) -> Tuple:
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -242,43 +242,44 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
-        return x
+        g = self.fc(x)
+        p = self.fedrod_p_head(x) + g.detach()
+        return g, p
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tuple:
         return self._forward_impl(x)
 
 
-@MODEL_REGISTRY.register('resnet34')
-def resnet34(**kwargs: Any) -> ResNet:  # 34 = 2 + 2 * (3 + 4 + 6 + 3)
+@MODEL_REGISTRY.register('fedrod_resnet34')
+def fedrod_resnet34(**kwargs: Any) -> ResNet:  # 34 = 2 + 2 * (3 + 4 + 6 + 3)
     return ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
 
 
-@MODEL_REGISTRY.register('resnet50')
-def resnet50(**kwargs: Any) -> ResNet:  # 50 = 2 + 3 * (3 + 4 + 6 + 3)
+@MODEL_REGISTRY.register('fedrod_resnet50')
+def fedrod_resnet50(**kwargs: Any) -> ResNet:  # 50 = 2 + 3 * (3 + 4 + 6 + 3)
     return ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
-@MODEL_REGISTRY.register('resnet18')
-def resnet18(**kwargs: Any) -> ResNet:  # 18 = 2 + 2 * (2 + 2 + 2 + 2)
+@MODEL_REGISTRY.register('fedrod_resnet18')
+def fedrod_resnet18(**kwargs: Any) -> ResNet:  # 18 = 2 + 2 * (2 + 2 + 2 + 2)
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
 
-@MODEL_REGISTRY.register('resnet10')
-def resnet10(**kwargs: Any) -> ResNet:  # 10 = 2 + 2 * (1 + 1 + 1 + 1)
+@MODEL_REGISTRY.register('fedrod_resnet10')
+def fedrod_resnet10(**kwargs: Any) -> ResNet:  # 10 = 2 + 2 * (1 + 1 + 1 + 1)
     return ResNet(BasicBlock, [1, 1, 1, 1], **kwargs)
 
 
-@MODEL_REGISTRY.register('resnet8')
-def resnet8(**kwargs: Any) -> ResNet:  # 8 = 2 + 2 * (1 + 1 + 1)
+@MODEL_REGISTRY.register('fedrod_resnet8')
+def fedrod_resnet8(**kwargs: Any) -> ResNet:  # 8 = 2 + 2 * (1 + 1 + 1)
     return ResNet(BasicBlock, [1, 1, 1], **kwargs)
 
 
-@MODEL_REGISTRY.register('resnet6')
-def resnet6(**kwargs: Any) -> ResNet:  # 6 = 2 + 2 * (1 + 1)
+@MODEL_REGISTRY.register('fedrod_resnet6')
+def fedrod_resnet6(**kwargs: Any) -> ResNet:  # 6 = 2 + 2 * (1 + 1)
     return ResNet(BasicBlock, [1, 1], **kwargs)
 
 
-@MODEL_REGISTRY.register('resnet4')
-def resnet4(**kwargs: Any) -> ResNet:  # 4 = 2 + 2 * (1)
+@MODEL_REGISTRY.register('fedrod_resnet4')
+def fedrod_resnet4(**kwargs: Any) -> ResNet:  # 4 = 2 + 2 * (1)
     return ResNet(BasicBlock, [1], **kwargs)

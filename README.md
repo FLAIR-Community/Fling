@@ -59,19 +59,28 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 - Support multiprocessing training on each client for better efficiency.
 - Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
 
-## Currently Supported Algorithms
+## Supported Algorithms
 
 ### Generic Federated Learning
 
 **FedAvg:** [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf)
 
-### **Personalized Federated Learning**
+**FedProx:** [Federated Optimization in Heterogeneous Networks](https://arxiv.org/pdf/1812.06127.pdf)
+
+### Personalized Federated Learning
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
 
 **pFedSD:** [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434)
 
 **FedCAC:** [Bold but Cautious: Unlocking the Potential of Personalized Federated Learning through Cautiously Aggressive Collaboration]()
+
+**FedRoD:** [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn)
+
+## Feedback and Contribution
+
+- For any bugs, questions, feature requirements, feel free to propose them in [issues](https://github.com/kxzxvbk/Fling/issues)
+- For any contributions that can improve Fling (more algorithms or better system design), we warmly welcome you to propose them in a [pull request](https://github.com/kxzxvbk/Fling/pulls).
 
 ## Acknowledgments
 
@@ -91,4 +100,3 @@ Special thanks to [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](h
 
 ## License
 Fling is released under the Apache 2.0 license.
-
