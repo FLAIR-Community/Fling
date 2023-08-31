@@ -75,11 +75,13 @@ def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int
 
     client_indexes = [[] for _ in range(client_number)]
     random_state = np.random.RandomState(seed)
-
     class_idxs = [i for i in range(num_classes)]
+
+    # Sampling label distribution for each client
+    client_class_idxs = [random_state.choice(class_idxs, alpha, replace=False) for _ in range(client_number)]
+
     for i in range(client_number):
-        # Randomly select some classes to sample from.
-        class_idx = random_state.choice(class_idxs, alpha, replace=False)
+        class_idx = client_class_idxs[i]
         for j in class_idx:
             # Calculate number of samples for each class.
             select_num = int(sample_num / alpha)
