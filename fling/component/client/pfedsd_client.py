@@ -1,21 +1,19 @@
 import copy
-import random
 
 import torch
-from torch.utils.data import DataLoader
-import torch.nn as nn
+import torch.nn.functional as F
 
-from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
 from fling.utils.registry_utils import CLIENT_REGISTRY
 from .base_client import BaseClient
-import torch.nn.functional as F
 
 
 @CLIENT_REGISTRY.register('pfedsd_client')
 class pFedSDClient(BaseClient):
     """
     Overview:
-        This class is the base implementation of client in Federated Learning + lora.
+        This class is the base implementation of pFedSD, which is introduced in:
+        Personalized Edge Intelligence via Federated Self-Knowledge Distillation.
+        <link https://ieeexplore.ieee.org/abstract/document/9964434 link>
     """
 
     def __init__(self, args, client_id, train_dataset, test_dataset=None):

@@ -1,24 +1,25 @@
 from copy import deepcopy
+from typing import Tuple, List
 import torch.multiprocessing as mp
 
 from fling.component.client import ClientTemplate
 
 
-def _client_trainer(client: ClientTemplate, kwargs: dict) -> tuple:
+def _client_trainer(client: ClientTemplate, kwargs: dict) -> Tuple:
     # This is the function that each client will execute train function.
     # It will receive a task and its arguments, execute it, and return its result and the updated client.
     res = client.train(**kwargs)
     return res, client
 
 
-def _client_tester(client: ClientTemplate, kwargs: dict) -> tuple:
+def _client_tester(client: ClientTemplate, kwargs: dict) -> Tuple:
     # This is the function that each client will execute test function.
     # It will receive a task and its arguments, execute it, and return its result and the updated client.
     res = client.test(**kwargs)
     return res, client
 
 
-def _client_finetuner(client: ClientTemplate, kwargs: dict) -> tuple:
+def _client_finetuner(client: ClientTemplate, kwargs: dict) -> Tuple:
     # This is the function that each client will execute finetune function.
     # It will receive a task and its arguments, execute it, and return its result and the updated client.
     res = client.finetune(**kwargs)
@@ -47,7 +48,7 @@ class SerialLauncher:
         Use one process to serially execute operations all clients.
     """
 
-    def launch(self, clients: ClientTemplate, task_name: str, **kwargs) -> list:
+    def launch(self, clients: ClientTemplate, task_name: str, **kwargs) -> List:
         r"""
         Overview:
             Launch the tasks in each client.
@@ -92,7 +93,7 @@ class MultiProcessLauncher:
         """
         self.num_proc = num_proc
 
-    def launch(self, clients: list, task_name: str, **kwargs) -> list:
+    def launch(self, clients: List, task_name: str, **kwargs) -> List:
         r"""
         Overview:
             Launch the tasks in each client.

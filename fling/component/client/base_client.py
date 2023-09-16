@@ -2,9 +2,8 @@ import copy
 import random
 
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
-from typing import Iterable
 
 from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
 from fling.utils.registry_utils import CLIENT_REGISTRY
@@ -23,7 +22,7 @@ class BaseClient(ClientTemplate):
     If users want to define a new client class, it is recommended to inherit this class.
     """
 
-    def __init__(self, args: dict, client_id: int, train_dataset: Iterable, test_dataset: Iterable = None):
+    def __init__(self, args: dict, client_id: int, train_dataset: Dataset, test_dataset: Dataset = None):
         """
         Overview:
             Initializing train dataset, test dataset(for personalized settings).
@@ -126,9 +125,9 @@ class BaseClient(ClientTemplate):
 
         # Set optimizer, loss function.
         weights = self.model.parameters()
-        op = get_optimizer(
-            name=self.args.learn.optimizer.name, lr=lr, momentum=self.args.learn.optimizer.momentum, weights=weights
-        )
+        op = get_optimizer(weights=weights, **self.args.learn.optimizer)
+
+        # Set the loss function.
         criterion = nn.CrossEntropyLoss()
 
         monitor = VariableMonitor()
@@ -169,9 +168,7 @@ class BaseClient(ClientTemplate):
         weights = get_finetune_parameters(self.model, finetune_args=finetune_args)
 
         # Get optimizer and loss.
-        op = get_optimizer(
-            name=self.args.learn.optimizer.name, lr=lr, momentum=self.args.learn.optimizer.momentum, weights=weights
-        )
+        op = get_optimizer(weights=weights, **self.args.learn.optimizer)
         criterion = nn.CrossEntropyLoss()
 
         # Main loop.

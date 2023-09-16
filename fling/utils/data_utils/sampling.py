@@ -1,13 +1,14 @@
 from copy import deepcopy
+from typing import List
 import numpy as np
-from typing import Iterable
 
+from torch.utils.data.dataset import Dataset
 from torch.utils import data
 
 
 class NaiveDataset(data.Dataset):
 
-    def __init__(self, tot_data: Iterable, indexes: Iterable):
+    def __init__(self, tot_data: Dataset, indexes: List):
         self.tot_data = tot_data
         self.indexes = indexes
 
@@ -18,7 +19,7 @@ class NaiveDataset(data.Dataset):
         return len(self.indexes)
 
 
-def iid_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int) -> list:
+def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int) -> List:
     r"""
     Overview:
         Independent and identical (i.i.d) sampling method.
@@ -46,7 +47,7 @@ def iid_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: i
     return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
 
-def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int, alpha: int) -> list:
+def pathological_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int, alpha: int) -> List:
     r"""
     Overview:
         Pathological sampling method.
@@ -92,7 +93,7 @@ def pathological_sampling(dataset: Iterable, client_number: int, sample_num: int
     return [NaiveDataset(tot_data=dataset, indexes=client_indexes[i]) for i in range(client_number)]
 
 
-def dirichlet_sampling(dataset: Iterable, client_number: int, sample_num: int, seed: int, alpha: float) -> list:
+def dirichlet_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int, alpha: float) -> List:
     r"""
     Overview:
         Dirichlet sampling method.
@@ -152,7 +153,7 @@ sampling_methods = {
 }
 
 
-def data_sampling(dataset: Iterable, args: dict, seed: int, train: bool = True) -> object:
+def data_sampling(dataset: Dataset, args: dict, seed: int, train: bool = True) -> List:
     r"""
     Overview:
         Dirichlet sampling method.
