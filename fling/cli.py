@@ -48,8 +48,8 @@ def extra_arguments_callback(ctx: Context, param: Option, values: Iterable) -> D
 
 def seed_callback(ctx: Context, param: Option, values: str) -> List:
     # Callback function for --seed option.
-    seeds = values.split(',')
-    return [int(s) for s in seeds]
+    seeds = values.strip().split(',')
+    return [int(s.strip()) for s in seeds]
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -62,25 +62,35 @@ def seed_callback(ctx: Context, param: Option, values: str) -> List:
     is_eager=True,
     help="Show package's version information."
 )
-@click.option('-m', '--mode', type=str, help='Command mode')
-# arguments for: fling xxx_pipeline
+@click.argument('mode', type=str)
+# arguments for: fling run
 @click.option('-s', '--seed', type=str, help='Seeds number. Usage: --seed 0,1,2', default='0', callback=seed_callback)
 @click.option('-c', '--config', type=str, help='Path for config file')
-@click.option('-e', '--extra_arguments', multiple=True, callback=extra_arguments_callback,
-              help='Usage: --extra_arguments key1:value1 --add_arguments key2:value2')
+@click.option(
+    '-e',
+    '--extra_argument',
+    multiple=True,
+    callback=extra_arguments_callback,
+    help='Usage: --extra_argument key1:value1 --extra_argument key2:value2'
+)
 @click.option('-p', '--pipeline', type=str, help='The pipeline function of this command.')
 # arguments for: fling create / remove
 @click.option('-n', '--name', type=str, help='Command name to be created')
-@click.option('-a', '--argument_map', multiple=True, callback=add_arguments_callback,
-              help='Usage: --argument_map key1:value1 --argument_map key2:value2')
+@click.option(
+    '-a',
+    '--argument_map',
+    multiple=True,
+    callback=add_arguments_callback,
+    help='Usage: --argument_map key1:value1 --argument_map key2:value2'
+)
 def cli(
-        mode: str,
-        seed: List,
-        config: str,
-        extra_arguments: Dict,
-        name: str,
-        pipeline: str,
-        argument_map: Dict,
+    mode: str,
+    seed: List,
+    config: str,
+    extra_argument: Dict,
+    name: str,
+    pipeline: str,
+    argument_map: Dict,
 ):
     # fling create xxx
     if mode == 'create':
@@ -100,8 +110,10 @@ def cli(
 
     # fling run xxx
     if mode == 'run':
-        base_args = importlib.import_module('exp_args', package=config)
-        pipeline_func = importlib.import_module(pipeline, package='fling.pipeline')
+        if config.endswith('.py'):
+            config = config[:-3]
+        base_args = getattr(importlib.import_module(config.replace('/', '.')), 'exp_args')
+        pipeline_func = getattr(importlib.import_module('fling.pipeline'), pipeline)
         for s in seed:
             pipeline_func(args=deepcopy(base_args), seed=s)
         return
@@ -114,25 +126,25 @@ def cli(
         raise ValueError(f'Unrecognized command mode: {mode}')
 
     # Import the base arg file.
-    base_args = importlib.import_module('exp_args', package=config)
+    if config.endswith('.py'):
+        config = config[:-3]
+    base_args = getattr(importlib.import_module(config.replace('/', '.')), 'exp_args')
 
     # Update the base arg file using arguments passed in.
-    argument_map = commands[name]
-    for k, v in extra_arguments.items():
+    argument_map = commands[mode]
+    for k, v in extra_argument.items():
         if k not in argument_map.keys():
-            raise KeyError(f'The argument {k} is not defined in command {name}.')
-        set_nested_attr(base_args, extra_arguments[k], v)
+            raise KeyError(f'The argument {k} is not defined in command {mode}.')
+        v = auto_convert(v)
+        set_nested_attr(base_args, argument_map[k], v)
 
     # Get the pipeline function.
-    pipeline_func = importlib.import_module(pipeline, package='fling.pipeline')
+    pipeline_func = getattr(importlib.import_module('fling.pipeline'), pipeline)
     for s in seed:
         pipeline_func(args=deepcopy(base_args), seed=s)
 
 
-def create_command(
-        name: str,
-        add_arguments: Iterable
-):
+def create_command(name: str, add_arguments: Iterable):
     # Create a new command and add it into the command file.
     # Check whether the name is the same as built-in names.
     if name in ['run', 'remove', 'list', 'create', 'info']:
@@ -144,24 +156,25 @@ def create_command(
         with open(COMMAND_FILE, 'rb') as f:
             orig_command_dict = pickle.load(f)
         if name in orig_command_dict.keys():
-            raise KeyError('Current command name is already defined. Please use `fling list` to show all defined '
-                           'commands.')
+            raise KeyError(
+                'Current command name is already defined. Please use `fling list` to show all defined '
+                'commands.'
+            )
         orig_command_dict[name] = add_arguments
     else:
-        orig_command_dict = {
-            name: add_arguments
-        }
+        orig_command_dict = {name: add_arguments}
 
     with open(COMMAND_FILE, 'wb') as f:
         pickle.dump(orig_command_dict, f)
 
 
-def remove_command(
-        name: str
-):
+def remove_command(name: str):
     # Read the command database.
-    with open(COMMAND_FILE, 'rb') as f:
-        commands = pickle.load(f)
+    if not os.path.exists(COMMAND_FILE):
+        commands = {}
+    else:
+        with open(COMMAND_FILE, 'rb') as f:
+            commands = pickle.load(f)
 
     # Remove the command.
     if name not in commands:
@@ -175,8 +188,11 @@ def remove_command(
 
 def list_command():
     # Read the command database.
-    with open(COMMAND_FILE, 'rb') as f:
-        commands = pickle.load(f)
+    if not os.path.exists(COMMAND_FILE):
+        commands = {}
+    else:
+        with open(COMMAND_FILE, 'rb') as f:
+            commands = pickle.load(f)
 
     click.echo("Defined commands: \n" + ', '.join(list(commands.keys())))
 
@@ -184,8 +200,11 @@ def list_command():
 def command_info(name: str):
     from prettytable import PrettyTable
     # Read the command database.
-    with open(COMMAND_FILE, 'rb') as f:
-        commands = pickle.load(f)
+    if not os.path.exists(COMMAND_FILE):
+        commands = {}
+    else:
+        with open(COMMAND_FILE, 'rb') as f:
+            commands = pickle.load(f)
 
     # Remove the command.
     if name not in commands:
@@ -193,7 +212,15 @@ def command_info(name: str):
     arg_map = commands[name]
 
     tb = PrettyTable(["Mapping key", "Mapping destination"])
-    for k, v in arg_map:
+    for k, v in arg_map.items():
         tb.add_row([k, v])
 
     click.echo(tb)
+
+
+def auto_convert(var: str):
+    # Auto conversion.
+    try:
+        return eval(var)
+    except Exception:
+        return var

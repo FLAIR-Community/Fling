@@ -66,6 +66,7 @@ setup(
             'importlib-metadata<5.0.0',  # compatibility
         ]
     },
+    entry_points={'console_scripts': ['fling=fling.cli:cli']},
     classifiers=[
         "Intended Audience :: Science/Research",
         'License :: OSI Approved :: Apache Software License',
