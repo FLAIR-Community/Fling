@@ -1,6 +1,7 @@
+from typing import Dict
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from fling.utils import VariableMonitor
 from fling.utils.registry_utils import SERVER_REGISTRY
@@ -10,11 +11,11 @@ from .server_template import ServerTemplate
 @SERVER_REGISTRY.register('base_server')
 class BaseServer(ServerTemplate):
 
-    def __init__(self, args, test_dataset):
+    def __init__(self, args: Dict, test_dataset: Dataset):
         super(BaseServer, self).__init__(args, test_dataset)
         self.test_loader = DataLoader(test_dataset, batch_size=args.learn.batch_size, shuffle=True)
 
-    def apply_grad(self, grad, lr=1.):
+    def apply_grad(self, grad: Dict, lr: float = 1.) -> None:
         state_dict = self.glob_dict
         for k in grad:
             state_dict[k] = state_dict[k] + lr * grad[k]

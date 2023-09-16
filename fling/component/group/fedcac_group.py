@@ -1,13 +1,10 @@
 import time
 import copy
-
 import torch
 
-from fling.utils import get_params_number
 from fling.utils.compress_utils import *
 from fling.utils.registry_utils import GROUP_REGISTRY
 from fling.utils import Logger
-from fling.component.client import ClientTemplate
 from fling.component.group import ParameterServerGroup
 
 
@@ -20,7 +17,8 @@ class FedCACServerGroup(ParameterServerGroup):
 
     def __init__(self, args: dict, logger: Logger):
         super(FedCACServerGroup, self).__init__(args, logger)
-        self.epoch = -1  # To be consistent with the existing pipeline interface. group maintains a epoch counter itself.
+        # To be consistent with the existing pipeline interface. group maintains an epoch counter itself.
+        self.epoch = -1
 
     def sync(self) -> None:
         r"""

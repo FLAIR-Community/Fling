@@ -1,12 +1,12 @@
 import numpy as np
 import os
 import time
-from typing import Iterable
+from typing import Iterable, Dict, List
 
 from torch.utils.tensorboard import SummaryWriter
 
 
-def client_sampling(client_ids: Iterable, sample_rate: float) -> Iterable:
+def client_sampling(client_ids: Iterable, sample_rate: float) -> List:
     participated_clients = np.array(client_ids)
     participated_clients = sorted(
         list(np.random.choice(participated_clients, int(sample_rate * participated_clients.shape[0]), replace=False))
@@ -48,5 +48,5 @@ class VariableMonitor:
             self.dic[k].append(weight * item[k])
             self.length[k] += weight
 
-    def variable_mean(self) -> dict:
+    def variable_mean(self) -> Dict:
         return {k: sum(self.dic[k]) / self.length[k] for k in self.dic.keys()}

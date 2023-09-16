@@ -1,6 +1,7 @@
 import copy
-from typing import Iterable, Callable
+from typing import Callable, Iterable
 from torch.optim.optimizer import Optimizer
+from torch.utils.data.dataset import Dataset
 
 from fling.model import get_model
 from fling.utils import VariableMonitor
@@ -12,7 +13,7 @@ class ClientTemplate:
         Template of client in Federated Learning.
     """
 
-    def __init__(self, args: dict, client_id: int, train_dataset: Iterable, test_dataset: Iterable = None):
+    def __init__(self, args: dict, client_id: int, train_dataset: Dataset, test_dataset: Dataset = None):
         r"""
         Overview:
             Initialization for a client.

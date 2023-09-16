@@ -2,22 +2,23 @@ import math
 import pickle
 import random
 from functools import reduce
-from typing import Iterable, Union, Callable
+from typing import Union, Callable, Iterable
 
 import numpy as np
 import torch
 import torch.optim as optim
 import torch.nn as nn
+from torch.utils.data import Dataset
 import torch.nn.functional as F
 
 
-def get_optimizer(name: str, lr: float, momentum: float, weights: object) -> optim.Optimizer:
-    if name.lower() == 'sgd':
-        return optim.SGD(params=weights, momentum=momentum, lr=lr)
-    elif name.lower() == 'adam':
-        return optim.Adam(params=weights, lr=lr)
-    else:
+def get_optimizer(weights: object, **kwargs) -> optim.Optimizer:
+    # return the optimizer given optimizer config and model weights.
+    name = kwargs.pop('name')
+    optimizer_dict = {'sgd': optim.SGD, 'adam': optim.Adam}
+    if not name.lower() in optimizer_dict.keys():
         raise ValueError(f'Unrecognized optimizer: {name}')
+    return optimizer_dict[name.lower()](params=weights, **kwargs)
 
 
 def get_params_number(net: nn.Module) -> int:
@@ -46,7 +47,7 @@ def seed_everything(seed: int) -> None:
         torch.cuda.manual_seed(seed)
 
 
-def calculate_mean_std(train_dataset: Iterable, test_dataset: Iterable) -> tuple:
+def calculate_mean_std(train_dataset: Dataset, test_dataset: Dataset) -> tuple:
     if train_dataset[0][0].shape[0] == 1:
         res = []
         res_std = []

@@ -1,6 +1,8 @@
-from typing import Iterable
-from torch.utils.data import DataLoader
+from typing import Dict, Callable
+from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
+
+from fling.utils import Logger
 
 
 class ServerTemplate:
@@ -9,7 +11,7 @@ class ServerTemplate:
         Template of server in Federated Learning.
     """
 
-    def __init__(self, args: dict, test_dataset: Iterable):
+    def __init__(self, args: Dict, test_dataset: Dataset):
         r"""
         Overview:
             Initialization for a server.
@@ -25,7 +27,7 @@ class ServerTemplate:
         device = args.learn.device
         self.device = device
 
-    def apply_grad(self, grad: dict, lr: float = 1.) -> None:
+    def apply_grad(self, grad: Dict, lr: float = 1.) -> None:
         r"""
         Overview:
             Using the averaged gradient to update global model.
@@ -39,7 +41,7 @@ class ServerTemplate:
         for k in grad:
             state_dict[k] = state_dict[k] + lr * grad[k]
 
-    def test_step(self, model, batch_data, criterion, monitor) -> None:
+    def test_step(self, model: nn.Module, batch_data: Dict, criterion: Callable, monitor: Logger) -> None:
         r"""
         Overview:
             A step of local testing given one data batch.
@@ -52,7 +54,7 @@ class ServerTemplate:
         """
         raise NotImplementedError
 
-    def preprocess_data(self, data: Iterable) -> dict:
+    def preprocess_data(self, data: Dict) -> Dict:
         r"""
         Overview:
             Pre-process the data batch generated from dataset.
@@ -63,7 +65,7 @@ class ServerTemplate:
         """
         raise NotImplementedError
 
-    def test(self, model: nn.Module, test_loader: DataLoader = None) -> dict:
+    def test(self, model: nn.Module, test_loader: DataLoader = None) -> Dict:
         r"""
         Overview:
             The local testing process of a client.

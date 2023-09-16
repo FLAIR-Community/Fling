@@ -1,7 +1,7 @@
 import time
 
 from fling.utils import get_params_number
-from fling.utils.compress_utils import *
+from fling.utils.compress_utils import fed_avg
 from fling.utils.registry_utils import GROUP_REGISTRY
 from fling.utils import Logger
 from fling.component.client import ClientTemplate

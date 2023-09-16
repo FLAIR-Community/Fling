@@ -1,16 +1,12 @@
 import copy
-import random
-
-import torch
-from torch.utils.data import DataLoader
-import torch.nn as nn
-
-from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
-from fling.utils.registry_utils import CLIENT_REGISTRY
-from .base_client import BaseClient
-import torch.nn.functional as F
 import numpy as np
 from typing import Tuple
+
+import torch
+import torch.nn as nn
+
+from fling.utils.registry_utils import CLIENT_REGISTRY
+from .base_client import BaseClient
 
 
 @CLIENT_REGISTRY.register('fedcac_client')
