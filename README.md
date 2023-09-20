@@ -39,15 +39,13 @@ After successfully install Fling, users can start the first Fling experiment by 
 python argzoo/mnist/mnist_fedavg_cnn_toy_config.py
 ```
 
-This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds.
+Or using our cli util by:
 
-An example for personalized federated learning:
-
-```bash
-python argzoo/mnist/mnist_fedper_cnn_toy_config.py
+```shell
+fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline
 ```
 
-This config is a simplified version for conducting FedPer on the dataset MNIST and iterate for 4 communication rounds.
+This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds.
 
 For other algorithms and datasets, users can refer to `argzoo/` or customize your own configuration files.
 
