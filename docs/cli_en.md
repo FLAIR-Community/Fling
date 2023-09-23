@@ -1,4 +1,4 @@
-# Cli Usage in Fling
+# CLI Usage in Fling
 
 In this doc, we will introduce the usage of cli in Fling.
 
@@ -26,19 +26,24 @@ You can use `fling run` to start an experiment based on a config file. Here is a
 fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3
 ```
 
-Here are explanations about the meaning of each arguments.
+Here are explanations about the meaning of each argument.
 
 - -c / --config: the configuration file you want to start with.
 - -p / --pipeline: the pipeline you want to execute. This pipeline should be found in `fling.pipeline`.
-- -s / --seed: the seeds you want to run. It can be either a integer or several integers similar to the example. By default, this seed is set to be 0.
+- -s / --seed: the seeds you want to run. It can be either an integer or several integers similar to the example. By default, this seed is set to be 0.
+- -e / --extra_argument: the modification you want to do based on the configuration file. For example, ``-e learn.optimizer.lr:0.1`` , means that the learning rate is set to 0.1. Note that the priority of this method is higher than the configuration file, which means that the value of configuration file will be over-written.
 
 ## fling create
 
-In the standard implementation of Fling, we use a config file corresponding to a basic setting for each experiment. However, when we need to make extensive adjustments to one or several parameters in the config, we have to create a large number of config files. In this case, the aforementioned basic mode becomes overly cumbersome.
+When using the `-e` option in the `fling run` method to pass parameters, the keys for the parameters tend to be complex because our configuration files often have a multi-level structure. For example, if we want to modify the learning rate and the log path, the required command is:
 
-To address this issue, a common practice is to introduce parameter passing in the CLI (command-line interface), such as: `python main.py --lr 0.01`. However, since our configs often present a complex multi-layered structure, simple parameter passing makes it difficult to map the passed parameters to the values in the complex config.
+```shell
+fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
+-e learn.optimizer.lr:0.01 \
+-e other.logging_path:logging/toy_experiment
+```
 
-To solve this problem, we introduced the setting of "predefined commands". When defining these commands, we need to explicitly agree on the correspondence between the names of the passed parameters and the keys in the config. For example:
+To solve this problem, we allow users to customize the execution command, assigning a shorter and more understandable name to the parameter key they need. For example:
 
 ```shell
 fling create -n my_run \
@@ -46,16 +51,18 @@ fling create -n my_run \
 --argument_map log_path:other.logging_path
 ```
 
-Then you can use the predefined command to run your own experiments:
+In this example, we defined a command called `my_run`. In this command, we established a mapping relationship for parameter keys using the `-a/--argument_map` option: `learn.optimizer.lr` is mapped to `learning_rate` and `other.logging_path` is mapped to `log_path`. Next, to execute the defined `my_run` command, you can use the following method:
 
 ```shell
 fling my_run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
 --extra_argument learning_rate:0.1
 ```
 
+This clearly shows that by doing so, the key for passing parameters has been greatly simplified.
+
 Note:
 
-- If the keys defined in the `--argument_map` does not exist in your call on `my_run`, this argument will use the value in the original config file by default.
+- If the keys defined in the `-a/--argument_map` does not exist in your call on `my_run`, this argument will use the value in the original config file by default.
 
 ## fling list
 

@@ -12,6 +12,14 @@ COMMAND_FILE = './cli.tmp'  # File to save defined commands.
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
+def has_nested_attr(obj: object, attr_str: str) -> bool:
+    # This is for recursively attribute-seeking.
+    attrs = attr_str.split('.')
+    for attr in attrs[:-1]:
+        obj = getattr(obj, attr)
+    return hasattr(obj, attrs[-1])
+
+
 def set_nested_attr(obj: object, attr_str: str, value: object) -> None:
     # This is for recursively attribute-setting.
     attrs = attr_str.split('.')
@@ -113,6 +121,13 @@ def cli(
         if config.endswith('.py'):
             config = config[:-3]
         base_args = getattr(importlib.import_module(config.replace('/', '.')), 'exp_args')
+
+        for k, v in extra_argument.items():
+            v = auto_convert(v)
+            if not has_nested_attr(base_args, k):
+                raise KeyError(f"Can not find key: {k} in the config file.")
+            set_nested_attr(base_args, k, v)
+
         pipeline_func = getattr(importlib.import_module('fling.pipeline'), pipeline)
         for s in seed:
             pipeline_func(args=deepcopy(base_args), seed=s)
@@ -133,10 +148,11 @@ def cli(
     # Update the base arg file using arguments passed in.
     argument_map = commands[mode]
     for k, v in extra_argument.items():
-        if k not in argument_map.keys():
-            raise KeyError(f'The argument {k} is not defined in command {mode}.')
+        if k not in argument_map.keys() and not has_nested_attr(base_args, k):
+            raise KeyError(f'The argument {k} is not defined in command {mode}, and neither in the config file.')
         v = auto_convert(v)
-        set_nested_attr(base_args, argument_map[k], v)
+        dst_key = k if k not in argument_map.keys() else argument_map[k]
+        set_nested_attr(base_args, dst_key, v)
 
     # Get the pipeline function.
     pipeline_func = getattr(importlib.import_module('fling.pipeline'), pipeline)
