@@ -24,6 +24,8 @@ def save_config_file(config: dict, path: str) -> None:
     config_string = config_string.replace('inf,', 'float("inf"),')
     with open(path, "w") as f:
         f.write('exp_config = ' + config_string)
+    if config.other.print_config:
+        print('exp_config = ' + config_string + '\n')
 
 
 def compile_config(new_config: dict, seed: int) -> dict:

@@ -70,6 +70,12 @@ def seed_callback(ctx: Context, param: Option, values: str) -> List:
     is_eager=True,
     help="Show package's version information."
 )
+@click.option(
+    '-pc',
+    '--print_config',
+    is_flag=True,
+    help="Whether to print config in the command line."
+)
 @click.argument('mode', type=str)
 # arguments for: fling run
 @click.option('-s', '--seed', type=str, help='Seeds number. Usage: --seed 0,1,2', default='0', callback=seed_callback)
@@ -94,6 +100,7 @@ def seed_callback(ctx: Context, param: Option, values: str) -> List:
 def cli(
     mode: str,
     seed: List,
+    print_config: bool,
     config: str,
     extra_argument: Dict,
     name: str,
@@ -121,6 +128,8 @@ def cli(
         if config.endswith('.py'):
             config = config[:-3]
         base_args = getattr(importlib.import_module(config.replace('/', '.')), 'exp_args')
+        if print_config:
+            base_args.other.print_config = True
 
         for k, v in extra_argument.items():
             v = auto_convert(v)
@@ -144,6 +153,8 @@ def cli(
     if config.endswith('.py'):
         config = config[:-3]
     base_args = getattr(importlib.import_module(config.replace('/', '.')), 'exp_args')
+    if print_config:
+        base_args.other.print_config = True
 
     # Update the base arg file using arguments passed in.
     argument_map = commands[mode]

@@ -55,7 +55,8 @@ In this example, we defined a command called `my_run`. In this command, we estab
 
 ```shell
 fling my_run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
---extra_argument learning_rate:0.1
+--extra_argument learning_rate:0.1 \
+--extra_argument log_path:logging/toy_experiment
 ```
 
 This clearly shows that by doing so, the key for passing parameters has been greatly simplified.
