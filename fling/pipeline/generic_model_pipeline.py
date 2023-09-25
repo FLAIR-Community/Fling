@@ -75,9 +75,8 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
 
         # Logging train variables.
         mean_train_variables = train_monitor.variable_mean()
+        mean_train_variables.update({'trans_cost': trans_cost / 1e6, 'lr': cur_lr})
         logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
-        extra_info = {'trans_cost': trans_cost / 1e6, 'lr': cur_lr}
-        logger.add_scalars_dict(prefix='train', dic=extra_info, rnd=i)
 
         # Testing
         if i % args.other.test_freq == 0 and "after_aggregation" in args.learn.test_place:

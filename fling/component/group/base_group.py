@@ -105,8 +105,7 @@ class ParameterServerGroup:
             trans_cost = fed_avg(self.clients, self.server)
             self.sync()
         else:
-            print('Unrecognized compression method: ' + self.args.group.aggregation_method)
-            assert False
+            raise KeyError('Unrecognized compression method: ' + self.args.group.aggregation_method)
 
         # Add logger for time per round.
         # This time is the interval between two times of executing this ``aggregate()`` function.

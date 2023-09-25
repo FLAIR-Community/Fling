@@ -2,6 +2,7 @@ import numpy as np
 import os
 import time
 from typing import Iterable, Dict, List
+from prettytable import PrettyTable
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -25,13 +26,23 @@ class Logger(SummaryWriter):
         with open(self.txt_logger_path, mode='a') as f:
             f.write('[' + time.asctime(time.localtime(time.time())) + ']    ' + s + '\n')
 
+    def round(self, num: object, length: int = 5) -> object:
+        if isinstance(num, float):
+            return round(num, length)
+        else:
+            return num
+
     def add_scalars_dict(self, prefix: str, dic: dict, rnd: int) -> None:
-        str_repr = []
+        # Log in the tensorboard.
         for k in dic.keys():
             self.add_scalar(f'{prefix}/{k}', dic[k], rnd)
-            str_repr.append('{}: {:.2f}'.format(k, dic[k]))
-        txt_info = f'[{prefix.upper()}]\t'
-        self.logging(txt_info + '\t'.join(str_repr))
+
+        # Log in the command line.
+        tupled_dict = [(k, v) for k, v in dic.items()]
+        tb = PrettyTable(["Phase", "Round"] + [ii[0] for ii in tupled_dict])
+        tb.add_row([prefix, rnd] + [self.round(ii[1]) for ii in tupled_dict])
+        txt_info = str(tb)
+        self.logging(txt_info)
 
 
 class VariableMonitor:
