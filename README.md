@@ -23,6 +23,14 @@ cd Fling
 pip install -e .
 ```
 
+Finally, you can use
+
+```bash
+fling -v
+```
+
+to check whether Fling is successfully installed.
+
 ## Quick Start
 
 After successfully install Fling, users can start the first Fling experiment by using the following command. An example for generic federated learning:
@@ -31,15 +39,13 @@ After successfully install Fling, users can start the first Fling experiment by 
 python argzoo/mnist/mnist_fedavg_cnn_toy_config.py
 ```
 
-This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds.
+Or using our cli util by:
 
-An example for personalized federated learning:
-
-```bash
-python argzoo/mnist/mnist_fedper_cnn_toy_config.py
+```shell
+fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline
 ```
 
-This config is a simplified version for conducting FedPer on the dataset MNIST and iterate for 4 communication rounds.
+This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds.
 
 For other algorithms and datasets, users can refer to `argzoo/` or customize your own configuration files.
 
@@ -52,6 +58,8 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 [How to Add a New FL Algorithm](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_en.md) | [如何自定义联邦学习算法](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_zh.md)
 
 [How to Add a New Dataset](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_en.md) | [如何添加新数据集](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)
+
+[Cli Usage in Fling](https://github.com/kxzxvbk/Fling/blob/main/docs/cli_en.md) | [Fling 的 CLI 使用](https://github.com/kxzxvbk/Fling/blob/main/docs/cli_zh.md)
 
 ## Feature
 

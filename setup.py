@@ -47,7 +47,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         'setuptools<=66.1.1', 'yapf==0.29.0', 'torch>=1.7.0', 'torchvision', 'numpy>=1.18.0', 'easydict==1.9',
-        'tensorboard>=2.10.1', 'tqdm', 'timm'
+        'tensorboard>=2.10.1', 'tqdm', 'timm', 'click', 'prettytable'
     ],
     extras_require={
         'test': [
@@ -66,6 +66,7 @@ setup(
             'importlib-metadata<5.0.0',  # compatibility
         ]
     },
+    entry_points={'console_scripts': ['fling=fling.cli:cli']},
     classifiers=[
         "Intended Audience :: Science/Research",
         'License :: OSI Approved :: Apache Software License',
