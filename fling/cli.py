@@ -5,6 +5,7 @@ from typing import Iterable, Dict, List
 import click
 from click import Context, Option
 from copy import deepcopy
+from prettytable import PrettyTable
 
 from fling import __TITLE__, __VERSION__
 
@@ -225,7 +226,6 @@ def list_command():
 
 
 def command_info(name: str):
-    from prettytable import PrettyTable
     # Read the command database.
     if not os.path.exists(COMMAND_FILE):
         commands = {}
