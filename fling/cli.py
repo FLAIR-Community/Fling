@@ -2,6 +2,7 @@ import os
 import importlib
 import pickle
 from typing import Iterable, Dict, List
+import warnings
 import click
 from click import Context, Option
 from copy import deepcopy
@@ -71,12 +72,7 @@ def seed_callback(ctx: Context, param: Option, values: str) -> List:
     is_eager=True,
     help="Show package's version information."
 )
-@click.option(
-    '-pc',
-    '--print_config',
-    is_flag=True,
-    help="Whether to print config in the command line."
-)
+@click.option('-pc', '--print_config', is_flag=True, help="Whether to print config in the command line.")
 @click.argument('mode', type=str)
 # arguments for: fling run
 @click.option('-s', '--seed', type=str, help='Seeds number. Usage: --seed 0,1,2', default='0', callback=seed_callback)
@@ -135,7 +131,7 @@ def cli(
         for k, v in extra_argument.items():
             v = auto_convert(v)
             if not has_nested_attr(base_args, k):
-                raise KeyError(f"Can not find key: {k} in the config file.")
+                warnings.warn(f"Can not find key: {k} in the config file.")
             set_nested_attr(base_args, k, v)
 
         pipeline_func = getattr(importlib.import_module('fling.pipeline'), pipeline)
@@ -161,7 +157,7 @@ def cli(
     argument_map = commands[mode]
     for k, v in extra_argument.items():
         if k not in argument_map.keys() and not has_nested_attr(base_args, k):
-            raise KeyError(f'The argument {k} is not defined in command {mode}, and neither in the config file.')
+            warnings.warn(f'The argument {k} is not defined in command {mode}, and neither in the config file.')
         v = auto_convert(v)
         dst_key = k if k not in argument_map.keys() else argument_map[k]
         set_nested_attr(base_args, dst_key, v)
