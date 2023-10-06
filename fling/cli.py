@@ -72,12 +72,7 @@ def seed_callback(ctx: Context, param: Option, values: str) -> List:
     is_eager=True,
     help="Show package's version information."
 )
-@click.option(
-    '-pc',
-    '--print_config',
-    is_flag=True,
-    help="Whether to print config in the command line."
-)
+@click.option('-pc', '--print_config', is_flag=True, help="Whether to print config in the command line.")
 @click.argument('mode', type=str)
 # arguments for: fling run
 @click.option('-s', '--seed', type=str, help='Seeds number. Usage: --seed 0,1,2', default='0', callback=seed_callback)
