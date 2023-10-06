@@ -1,4 +1,5 @@
 import time
+import torch
 
 from fling.utils import get_params_number
 from fling.utils.compress_utils import fed_avg
@@ -68,7 +69,15 @@ class ParameterServerGroup:
         # Step 2.
         self.logger.logging(f'Weights for federated training: {fed_keys}')
         glob_dict = {k: self.clients[0].model.state_dict()[k] for k in fed_keys}
+
+        # Resume from the checkpoint if needed.
+        if self.args.other.resume_path is not None:
+            sd = dict(torch.load(self.args.other.resume_path))
+            for k, v in sd.items():
+                if k in glob_dict.keys():
+                    glob_dict[k] = v
         self.server.glob_dict = glob_dict
+
         self.set_fed_keys()
 
         # Step 3.
