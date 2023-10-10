@@ -125,7 +125,7 @@ class ClientTemplate:
         """
         raise NotImplementedError
 
-    def finetune(self, lr: float, finetune_args: dict, device: str, finetune_eps: int) -> list:
+    def finetune(self, lr: float, finetune_args: dict, device: str, finetune_eps: int, override: bool) -> list:
         r"""
         Overview:
             The local fine-tuning process of a client.
@@ -133,9 +133,10 @@ class ClientTemplate:
             - lr: learning rate of the training.
             - finetune_args: arguments for fine-tuning.
             - device: device for operating this function.
-            - finetune_eps: epochs for finetuning.
+            - finetune_eps: epochs for fine-tuning.
+            - override: whether to override ``self.model`` using the fine-tuning result.
         Returns:
-            - A list of dictions containing fine-tuning results.
+            - A list of diction containing fine-tuning results.
         """
         raise NotImplementedError
 

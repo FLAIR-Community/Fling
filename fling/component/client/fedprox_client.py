@@ -73,13 +73,13 @@ class FedProxClient(BaseClient):
         self.glob_model = None
         return mean_monitor_variables
 
-    def finetune(self, lr, finetune_args, device=None, finetune_eps=None):
+    def finetune(self, lr, finetune_args, device=None, finetune_eps=None, override=False):
         r"""
         Overview:
             Finetune function. The global model should be updated.
         """
         self._copy_global_model(self.model)
-        info = super(FedProxClient, self).finetune(lr, finetune_args, device, finetune_eps)
+        info = super(FedProxClient, self).finetune(lr, finetune_args, device, finetune_eps, override)
         # Reset the global model to save memory.
         self.glob_model = None
         return info
