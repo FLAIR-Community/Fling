@@ -150,20 +150,25 @@ class BaseClient(ClientTemplate):
 
         return mean_monitor_variables
 
-    def finetune(self, lr, finetune_args, device=None, finetune_eps=None):
+    def finetune(self, lr, finetune_args, device=None, finetune_eps=None, override=False):
         """
         Finetune function. In this function, the local model will not be changed, but will return the finetune results.
         """
+        # Back-up variables.
         if device is not None:
             device_bak = self.device
             self.device = device
-        model_bak = copy.deepcopy(self.model)
+        if not override:
+            model_bak = copy.deepcopy(self.model)
+
+        # Get default ``finetune_eps``.
+        if finetune_eps is None:
+            finetune_eps = self.args.learn.local_eps
+
         self.model.train()
         self.model.to(self.device)
 
-        info = []
-
-        # Get weights to be finetuned.
+        # Get weights to be fine-tuned.
         # For calculating train loss and train acc.
         weights = get_finetune_parameters(self.model, finetune_args=finetune_args)
 
@@ -172,8 +177,7 @@ class BaseClient(ClientTemplate):
         criterion = nn.CrossEntropyLoss()
 
         # Main loop.
-        if finetune_eps is None:
-            finetune_eps = self.args.learn.local_eps
+        info = []
         for epoch in range(finetune_eps):
             self.model.train()
             self.model.to(self.device)
@@ -188,7 +192,12 @@ class BaseClient(ClientTemplate):
             mean_monitor_variables.update(self.test())
             info.append(mean_monitor_variables)
 
-        self.model = model_bak
+        # Retrieve the back-up variables.
+        if not override:
+            self.model = model_bak
+        else:
+            # Put the model to cpu after training to save GPU memory.
+            self.model.to('cpu')
         if device is not None:
             self.device = device_bak
 
