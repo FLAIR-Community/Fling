@@ -26,6 +26,7 @@ class FeedForward(nn.Module):
     Interfaces:
         ``__init__``, ``forward``.
     """
+
     def __init__(self, dim: int, hidden_dim: int, dropout: float = 0.):
         """
         Overview:
@@ -38,11 +39,7 @@ class FeedForward(nn.Module):
         """
         super().__init__()
         self.net = nn.Sequential(
-            nn.LayerNorm(dim),
-            nn.Linear(dim, hidden_dim),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim, dim),
+            nn.LayerNorm(dim), nn.Linear(dim, hidden_dim), nn.GELU(), nn.Dropout(dropout), nn.Linear(hidden_dim, dim),
             nn.Dropout(dropout)
         )
 
@@ -66,6 +63,7 @@ class Attention(nn.Module):
     Interfaces:
         ``__init__``, ``forward``.
     """
+
     def __init__(self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.):
         """
         Overview:
@@ -86,15 +84,12 @@ class Attention(nn.Module):
 
         self.norm = nn.LayerNorm(dim)
 
-        self.attend = nn.Softmax(dim = -1)
+        self.attend = nn.Softmax(dim=-1)
         self.dropout = nn.Dropout(dropout)
 
-        self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
+        self.to_qkv = nn.Linear(dim, inner_dim * 3, bias=False)
 
-        self.to_out = nn.Sequential(
-            nn.Linear(inner_dim, dim),
-            nn.Dropout(dropout)
-        ) if project_out else nn.Identity()
+        self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout)) if project_out else nn.Identity()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -108,9 +103,9 @@ class Attention(nn.Module):
         x = self.norm(x)
 
         # Calculate qkv.
-        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        qkv = self.to_qkv(x).chunk(3, dim=-1)
         # Add a new axis: head.
-        q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h = self.heads), qkv)
+        q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h=self.heads), qkv)
 
         dots = torch.matmul(q, k.transpose(-1, -2)) * self.scale
 
@@ -131,6 +126,7 @@ class Transformer(nn.Module):
     Interfaces:
         ``__init__``, ``forward``.
     """
+
     def __init__(self, dim: int, depth: int, heads: int, dim_head: int, mlp_dim: int, dropout: float = 0.):
         """
         Overview:
@@ -148,10 +144,14 @@ class Transformer(nn.Module):
         self.norm = nn.LayerNorm(dim)
         self.layers = nn.ModuleList([])
         for _ in range(depth):
-            self.layers.append(nn.ModuleList([
-                Attention(dim, heads = heads, dim_head = dim_head, dropout = dropout),
-                FeedForward(dim, mlp_dim, dropout = dropout)
-            ]))
+            self.layers.append(
+                nn.ModuleList(
+                    [
+                        Attention(dim, heads=heads, dim_head=dim_head, dropout=dropout),
+                        FeedForward(dim, mlp_dim, dropout=dropout)
+                    ]
+                )
+            )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -181,20 +181,23 @@ class ViT(nn.Module):
     Interfaces:
         ``__init__``, ``forward``.
     """
-    def __init__(self, *,
-                 image_size: Union[int, Tuple[int, int]],
-                 patch_size: Union[int, Tuple[int, int]],
-                 class_number: int,
-                 dim: int,
-                 depth: int,
-                 heads: int,
-                 mlp_dim: int,
-                 pool: str = 'cls',
-                 input_channel: int = 3,
-                 dim_head: int = 64,
-                 dropout: float = 0.,
-                 emb_dropout: float = 0.
-                 ):
+
+    def __init__(
+        self,
+        *,
+        image_size: Union[int, Tuple[int, int]],
+        patch_size: Union[int, Tuple[int, int]],
+        class_number: int,
+        dim: int,
+        depth: int,
+        heads: int,
+        mlp_dim: int,
+        pool: str = 'cls',
+        input_channel: int = 3,
+        dim_head: int = 64,
+        dropout: float = 0.,
+        emb_dropout: float = 0.
+    ):
         """
         Overview:
             Initialize the ViT module using the given arguments.
@@ -229,7 +232,7 @@ class ViT(nn.Module):
 
         # Embedding layers.
         self.to_patch_embedding = nn.Sequential(
-            Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patch_height, p2 = patch_width),
+            Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1=patch_height, p2=patch_width),
             nn.LayerNorm(patch_dim),
             nn.Linear(patch_dim, dim),
             nn.LayerNorm(dim),
@@ -264,7 +267,7 @@ class ViT(nn.Module):
         b, n, _ = x.shape
 
         # Add the cls token to all images in this batch.
-        cls_tokens = repeat(self.cls_token, '1 1 d -> b 1 d', b = b)
+        cls_tokens = repeat(self.cls_token, '1 1 d -> b 1 d', b=b)
         x = torch.cat((cls_tokens, x), dim=1)
 
         # Add position encoding.
@@ -273,7 +276,7 @@ class ViT(nn.Module):
 
         x = self.transformer(x)
 
-        x = x.mean(dim = 1) if self.pool == 'mean' else x[:, 0]
+        x = x.mean(dim=1) if self.pool == 'mean' else x[:, 0]
 
         x = self.to_latent(x)
         return self.mlp_head(x)
@@ -286,14 +289,7 @@ if __name__ == '__main__':
 
     # Construct the model.
     model = MODEL_REGISTRY.build(
-        "vit",
-        image_size=128,
-        patch_size=16,
-        class_number=10,
-        dim=64,
-        depth=4,
-        heads=4,
-        mlp_dim=128
+        "vit", image_size=128, patch_size=16, class_number=10, dim=64, depth=4, heads=4, mlp_dim=128
     )
 
     y = model(x)
