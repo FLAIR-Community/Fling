@@ -21,13 +21,14 @@ class ClientTemplate:
         Template of client in Federated Learning.
     """
 
-    def __init__(self, args: dict, train_dataset: Iterable, client_id: int) -> None:
+    def __init__(self, args: dict, client_id: int, train_dataset: Dataset, test_dataset: Dataset = None):
         r"""
         Overview:
             Initialization for a client.
         Arguments:
             - args: dict type arguments.
-            - train_dataset: private dataset.
+            - train_dataset: private dataset for training
+            - test_dataset: private dataset for testing (Optional)
             - client_id: unique id for this client.
         Returns:
             - None
@@ -51,7 +52,7 @@ class ClientTemplate:
         Returns:
             - None
         """
-        self.fed_keys = keys
+        self.fed_keys = list(keys)
 
     def update_model(self, dic: dict) -> None:
         r"""
@@ -109,7 +110,7 @@ class ClientTemplate:
         """
         raise NotImplementedError
 
-    def preprocess_data(self, data: Iterable) -> dict:
+    def preprocess_data(self, data: dict) -> dict:
         r"""
         Overview:
             Pre-process the data batch generated from dataset.
@@ -132,7 +133,7 @@ class ClientTemplate:
         """
         raise NotImplementedError
 
-    def finetune(self, lr: float, finetune_args: dict, device: str, finetune_eps: int) -> list:
+    def finetune(self, lr: float, finetune_args: dict, device: str, finetune_eps: int, override: bool) -> list:
         r"""
         Overview:
             The local fine-tuning process of a client.
@@ -140,9 +141,10 @@ class ClientTemplate:
             - lr: learning rate of the training.
             - finetune_args: arguments for fine-tuning.
             - device: device for operating this function.
-            - finetune_eps: epochs for finetuning.
+            - finetune_eps: epochs for fine-tuning.
+            - override: whether to override ``self.model`` using the fine-tuning result.
         Returns:
-            - A list of dictions containing fine-tuning results.
+            - A list of diction containing fine-tuning results.
         """
         raise NotImplementedError
 
@@ -154,7 +156,6 @@ class ClientTemplate:
             - A diction containing testing results.
         """
         raise NotImplementedError
-
 ```
 
 ### Server
@@ -165,7 +166,8 @@ class ServerTemplate:
     Overview:
         Template of server in Federated Learning.
     """
-    def __init__(self, args: dict, test_dataset: Iterable) -> None:
+
+    def __init__(self, args: Dict, test_dataset: Dataset):
         r"""
         Overview:
             Initialization for a server.
@@ -181,7 +183,7 @@ class ServerTemplate:
         device = args.learn.device
         self.device = device
 
-    def apply_grad(self, grad: dict, lr: float = 1.) -> None:
+    def apply_grad(self, grad: Dict, lr: float = 1.) -> None:
         r"""
         Overview:
             Using the averaged gradient to update global model.
@@ -195,7 +197,7 @@ class ServerTemplate:
         for k in grad:
             state_dict[k] = state_dict[k] + lr * grad[k]
 
-    def test_step(self, model, batch_data, criterion, monitor) -> None:
+    def test_step(self, model: nn.Module, batch_data: Dict, criterion: Callable, monitor: Logger) -> None:
         r"""
         Overview:
             A step of local testing given one data batch.
@@ -208,7 +210,7 @@ class ServerTemplate:
         """
         raise NotImplementedError
 
-    def preprocess_data(self, data: Iterable) -> dict:
+    def preprocess_data(self, data: Dict) -> Dict:
         r"""
         Overview:
             Pre-process the data batch generated from dataset.
@@ -219,7 +221,7 @@ class ServerTemplate:
         """
         raise NotImplementedError
 
-    def test(self, model: nn.Module, test_loader: DataLoader = None) -> test:
+    def test(self, model: nn.Module, test_loader: DataLoader = None) -> Dict:
         r"""
         Overview:
             The local testing process of a client.
@@ -229,7 +231,6 @@ class ServerTemplate:
             - A diction containing testing results.
         """
         raise NotImplementedError
-
 ```
 
 ### Group
@@ -241,7 +242,7 @@ class ParameterServerGroup:
         Base implementation of the group in federated learning.
     """
 
-    def __init__(self, args: dict, logger: VariableMonitor) -> None:
+    def __init__(self, args: dict, logger: Logger):
         r"""
         Overview:
             Lazy initialization of group.
@@ -257,6 +258,7 @@ class ParameterServerGroup:
         self.server = None
         self.args = args
         self.logger = logger
+        self._time = time.time()
 
     def initialize(self) -> None:
         r"""
@@ -294,7 +296,15 @@ class ParameterServerGroup:
         # Step 2.
         self.logger.logging(f'Weights for federated training: {fed_keys}')
         glob_dict = {k: self.clients[0].model.state_dict()[k] for k in fed_keys}
+
+        # Resume from the checkpoint if needed.
+        if self.args.other.resume_path is not None:
+            sd = dict(torch.load(self.args.other.resume_path))
+            for k, v in sd.items():
+                if k in glob_dict.keys():
+                    glob_dict[k] = v
         self.server.glob_dict = glob_dict
+
         self.set_fed_keys()
 
         # Step 3.
@@ -331,8 +341,14 @@ class ParameterServerGroup:
             trans_cost = fed_avg(self.clients, self.server)
             self.sync()
         else:
-            print('Unrecognized compression method: ' + self.args.group.aggregation_method)
-            assert False
+            raise KeyError('Unrecognized compression method: ' + self.args.group.aggregation_method)
+
+        # Add logger for time per round.
+        # This time is the interval between two times of executing this ``aggregate()`` function.
+        time_per_round = time.time() - self._time
+        self._time = time.time()
+        self.logger.add_scalar('time/time_per_round', time_per_round, train_round)
+
         return trans_cost
 
     def flush(self) -> None:
@@ -365,7 +381,6 @@ class ParameterServerGroup:
         """
         for client in self.clients:
             client.set_fed_keys(self.server.glob_dict.keys())
-
 ```
 
 ## Pipeline

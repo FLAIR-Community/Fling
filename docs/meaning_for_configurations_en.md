@@ -120,7 +120,12 @@ default_exp_args = dict(
         # What is the logging directory of this experiment.
         # If the directory does not exist, it will be created automatically.
         # If the directory already exists, some parts might be over-written, which should be carefully inspected.
-        logging_path='./logging/default_experiment'
+        logging_path='./logging/default_experiment',
+        # The saved model checkpoint to start from. If it is set to ``None``, the training process
+        # will start from scratch.
+        resume_path=None,
+        # Whether to print config is the command line.
+        print_config=False,
     ),
 )
 ```

@@ -6,7 +6,7 @@ If you want to add a new dataset to Fling, please refer to the following steps.
 
 ### Step 1: Add a dataset file
 
-In this step, you are required to define a dataset in `fling/dataset` . An example is `fling/dataset/cifar10.py`, which is shown as below:
+In this step, you are required to define a dataset in `fling/dataset` . An example is `fling/dataset/cifar100.py`, which is shown as below:
 
 ```python
 from torch.utils.data import Dataset
@@ -54,7 +54,7 @@ Notice that:
 When you add a new dataset file, don't forget to import it in `fling.dataset.__init__.py`:
 
 ```python
-from .cifar10 import CIFAR10Dataset
+from .cifar100 import CIFAR100Dataset
 ```
 
 ### Step 3: Prepare your configuration file
@@ -63,8 +63,8 @@ After the previous steps, you can write your configuration file now to use your 
 
 ```python
 data=dict(
-        dataset='cifar10',
-        data_path='./data/CIFAR10',
+        dataset='cifar100',
+        data_path='./data/CIFAR100',
         sample_method=dict(name='iid', train_num=500, test_num=100)
 ),
 ```

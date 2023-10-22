@@ -72,8 +72,8 @@ By typing `fling list` in the command line, you can list all the predefined comm
 
 ## fling remove
 
-By typing `fling remove -n CMD_NAME` in the command line, you can remove predefined command CMD_NAME in your current environment.
+By typing `fling remove -n CMD_NAME` in the command line, you can remove predefined command `CMD_NAME` in your current environment.
 
 ## fling info
 
-By typing `fling info CMD_NAME` in the command line, you can list the detailed argument map of the command CMD_NAME in your environment.
+By typing `fling info CMD_NAME` in the command line, you can list the detailed argument map of the command `CMD_NAME` in your environment.
