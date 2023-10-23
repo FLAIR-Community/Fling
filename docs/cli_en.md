@@ -2,7 +2,7 @@
 
 In this doc, we will introduce the usage of cli in Fling.
 
-## version
+## Check the version of Fling
 
 You can use:
 
@@ -30,7 +30,7 @@ Here are explanations about the meaning of each argument.
 
 - -c / --config: the configuration file you want to start with.
 - -p / --pipeline: the pipeline you want to execute. This pipeline should be found in `fling.pipeline`.
-- -s / --seed: the seeds you want to run. It can be either an integer or several integers similar to the example. By default, this seed is set to be 0.
+- -s / --seed: the seeds you want to run. It is used to generate pseudo-random numbers, which is responsible for tasks such as model parameter initialization and sampling data for each client during experiments. It can be either an integer or several integers similar to the example. By default, this seed is set to be 0.
 - -e / --extra_argument: the modification you want to do based on the configuration file. For example, ``-e learn.optimizer.lr:0.1`` , means that the learning rate is set to 0.1. Note that the priority of this method is higher than the configuration file, which means that the value of configuration file will be over-written.
 - -pc / --print_config: if this flag is included, the exp config will be printed in the command line.
 

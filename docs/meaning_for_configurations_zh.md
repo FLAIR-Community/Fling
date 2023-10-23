@@ -1,6 +1,6 @@
 # 配置文件各字段含义
 
-## 一个示例
+## 默认配置实例
 
 在本文档中，我们提供了一个完整的配置文件，并解释了每个键的含义。
 
@@ -12,119 +12,119 @@
 import platform
 
 default_exp_args = dict(
-    # Configurations about data.
+    # 数据集的相关配置
     data=dict(
-        # Name for dataset. Must be registered in `DATASET_REGISTRY`.
+        # 数据集的名称，必须在`DATASET_REGISTRY`中注册。
         dataset='cifar10',
-        # Root path for dataset.
+        # 数据集的根路径。
         data_path='./data',
-        # Image transformation methods, such as: Random Resized Crop(RRC), Resize, Color Jitter ...
-        # The key ``include_default=True`` means that the default data-augmentation will be applied.
+        # 图像转换方法，如：随机调整大小剪裁（RRC），尺寸调整，颜色调整...
+        # 键``include_default=True``表示应用默认的数据增强方法。
         transforms=dict(include_default=True),
-        # How datasets distribute across all clients.
+        # 数据集在所有客户端中的分布方式。
         sample_method=dict(
+            # 'iid' 表示独立同分布（Independent and Identically Distributed）。
             name='iid',
-            # Default training number for each client is 500.
+            # 每个客户端的默认训练样本数量为500。
             train_num=500,
-            # Default testing number for each client is 500.
+            # 每个客户端的默认测试样本数量为100。
             test_num=100
         )
     ),
-    # Configurations about learning process.
+    # 学习过程的相关配置
     learn=dict(
-        # Running device for deep learning model. If only CPU is available, set this key to be "cpu".
+        # 运行深度学习模型的设备。如果只有CPU可用，将此键设置为"cpu"。
         device='0',
-        # Number of local epochs in each training round of each client.
+        # 每个客户端每轮训练的本地周期数。
         local_eps=8,
-        # Number of global epochs (training rounds) in the total FL process.
+        # 整体联邦学习过程中的全局周期数（训练轮数）。
         global_eps=40,
-        # Batch size for local training, testing and fine-tuning.
+        # 本地训练、测试和微调的批次大小。
         batch_size=32,
-        # Test place for federated learning. Options: 'before_aggregation', 'after_aggregation'
+        # 联邦学习进行测试的时机。可选项有：'before_aggregation'，'after_aggregation'
         test_place=['after_aggregation'],
-        # Optimizer used in local training.
+        # 本地训练中使用的优化器。
         optimizer=dict(
-            # Name for optimizer.
+            # 优化器的名称。
             name='sgd',
-            # Learning rate of the optimizer.
+            # 优化器的学习率。
             lr=0.02,
-            # Momentum of the SGD optimizer.
+            # SGD优化器的动量。
             momentum=0.9
         ),
-        # Learning rate scheduler. For each global epoch, use a dynamic learning rate.
+        # 学习率调度器。即对于每个全局周期使用动态变化的学习率。
         scheduler=dict(
-            # Default to be "fix", which means learning rate used in each global epoch is identical.
+            # 默认为"fix"，表示每个全局周期中使用的学习率保持相同。
             name='fix'
         ),
-        # What parameters should be fine-tuned.
+        # 哪些参数应该进行微调。
         finetune_parameters=dict(
-            # For default case, every parameter should be fine-tuned.
+            # 对于默认情况，应该对所有参数进行微调。
             name='all'
         ),
     ),
-    # Configurations about models.
+    # 模型的相关配置
     model=dict(
-        # Name for model used. Must be registered in `MODEL_REGISTRY`.
+        # 使用的模型的名称。必须在`MODEL_REGISTRY`中注册。
         name='resnet8',
-        # Arguments used in initializing corresponding model.
-        # Channel of input image.
+        # 用于初始化相应模型的参数：
+        # 输入图像的通道数。
         input_channel=3,
-        # Number of classes, i.e. the dimension for output logits.
+        # 类别数，即输出 logits 的维度。
         class_number=10,
     ),
-    # Configurations about client.
+    # 客户端的相关配置
     client=dict(
-        # Name for client used. Must be registered in `CLIENT_REGISTRY`.
+        # 使用的客户端的名称。必须在`CLIENT_REGISTRY`中注册。
         name='base_client',
-        # Number of clients.
+        # 客户端数量。
         client_num=30,
-        # The ratio of clients participated in each global epoch. For instance, if `sample_rate=0.5`,
-        # only half of all clients will join federated learning in each global epoch.
+        # 每个全局周期中参与联邦学习的客户端比例。例如，若`sample_rate=0.5`，
+        # 则每个全局周期中只有一半的客户端参与联邦学习。
         sample_rate=1,
-        # The fraction ratio of test samples in total samples. For instance, if `val_frac=0.2`, this means
-        # 20% of total data samples will be regarded as local validation dataset, and 80% for training dataset.
+        # 测试样本在总样本中的比例。例如，若`val_frac=0.2`，这意味着
+        # 有20%的总数据样本将被用作本地验证数据集，剩下80%用作训练数据集。
         val_frac=0,
     ),
-    # Configurations about server.
+    # 服务器的相关配置
     server=dict(
-        # Name for server used. Must be registered in `SERVER_REGISTRY`.
+        # 使用的服务器的名称。必须在`SERVER_REGISTRY`中注册。
         name='base_server'
     ),
-    # Configurations about server.
+    # 群组的相关配置
     group=dict(
-        # Name for group used. Must be registered in `GROUP_REGISTRY`.
+        # 使用的群组的名称。必须在`GROUP_REGISTRY`中注册。
         name='base_group',
-        # How parameters in each client aggregate. Default to be "avg", which means a simple average.
+        # 每个客户端中的参数进行聚合的方式。默认为"avg"，表示做简单平均。
         aggregation_method='avg',
-        # What parameters in each client should be aggregated.
+        # 哪些客户端中的参数应该进行聚合。
         aggregation_parameters=dict(
-            # For default case, every parameter should be aggregated.
+            # 对于默认情况，应聚合所有参数。
             name='all'
         ),
     ),
-    # Launcher configurations.
+    # 启动程序的相关配置
     launcher=dict(
-        # For the simplest launcher, serial is the suitable choice.
+        # 对于最简单的启动程序，串行是较合适的选择。
         name='serial'
-        # If you want to use multiprocess to accelerate the training process, you can use the following setting.
+        # 如果您想使用多进程加速训练过程，可以使用以下设置：
         # name='multiprocessing',
         # num_proc=2
-        # ``num_proc`` refers to the number of processes used in your program.
-        # For the default setting, if your os is linux, the multiprocessing mode is enabled.
-        # You can overwrite the default settings by yourself.
+        # ``num_proc``指的是程序中运行的进程数量。
+        # 对于默认设置，如果您的操作系统是Linux，将启用多进程模式。
+        # 您可以自行覆写默认设置。
     ) if platform.system().lower() != 'linux' else dict(name='multiprocessing', num_proc=2),
-    # Other configurations.
+    # 其他配置
     other=dict(
-        # Frequency for testing. For example, `test_freq=3` means the performance is tested every 3 global epochs.
+        # 测试的频率。例如，`test_freq=3`表示每3个全局周期进行一次性能测试。
         test_freq=3,
-        # What is the logging directory of this experiment.
-        # If the directory does not exist, it will be created automatically.
-        # If the directory already exists, some parts might be over-written, which should be carefully inspected.
+        # 本实验的日志目录。
+        # 如果目录不存在，将自动创建。
+        # 如果目录已经存在，一些部分可能会被覆盖，应仔细检查。
         logging_path='./logging/default_experiment',
-        # The saved model checkpoint to start from. If it is set to ``None``, the training process
-        # will start from scratch.
+        # 保存的模型检查点以用于从特定位置开始训练。如果设置为``None``，训练过程将从头开始。
         resume_path=None,
-        # Whether to print config is the command line.
+        # 是否在命令行中打印实验配置。
         print_config=False,
     ),
 )
@@ -155,7 +155,7 @@ scheduler=dict(
 
 ```python
 finetune_parameters=dict(
-    # This means to only fine-tune parameters whose names have keywords listed in `keywords`
+    # This means to only fine-tune parameters whose names have keywords listed in `keywords`.
     name='contain',
     keywords=['fc', 'bn']
 )
@@ -165,7 +165,7 @@ finetune_parameters=dict(
 
 ```python
 finetune_parameters=dict(
-    # This means to only fine-tune parameters except those whose names have keywords listed in `keywords`
+    # This means to only fine-tune parameters except those whose names have keywords listed in `keywords`.
     name='except',
     keywords=['fc', 'bn']
 )
@@ -173,9 +173,31 @@ finetune_parameters=dict(
 
 `group.aggregation_parameters` 控制在联邦学习框架下应该聚合哪些参数，对于它的设置和上面所述的 `learn.finetune_parameters` 是类似的。
 
+为直观表示参数 `learn.finetune_parameters` 和 `group.aggregation_parameters` 两者之间含义和用法的区别，这里以 **FedPer** 算法的配置文件 [`cifar10_fedper_resnet_config.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py) 为例，其中对上述两种参数的定义部分如下：
+
+```python
+exp_args = dict(
+    learn=dict(
+        # Only fine-tune parameters whose name contain the keyword "fc".
+        finetune_parameters=dict(
+            name='contain',
+            keywords=['fc']),
+    ),
+    group=dict(
+        # Only aggregate parameters whose name does not contain the keyword "fc".
+        aggregation_parameters=dict(
+            name='except',
+            keywords=['fc'],
+        ),
+    )
+)
+```
+
+在这样的设置下进行联邦学习时，`group.aggregation_parameters` 参数使得所有客户端共享关键字 "fc" 以外的参数，而 `learn.finetune_parameters` 参数使得每个客户端能够对属于自己的、包含关键字 "fc" 的参数进行微调。
+
 ### launcher
 
-- 除了 "serial" 外，`launcher.name` 键还有其他用途。在除了 Linux 以外的操作系统上，默认配置 "serial" 意味着每个客户端上的所有操作都是串行执行的，这可能不够高效。我们可以使用多进程方法加速这个过程。
+- 除了 "serial" 外，`launcher.name` 键还有其他模式。在除了 Linux 以外的操作系统上，默认配置 "serial" 意味着每个客户端上的所有操作都是串行执行的，这可能不够高效。我们可以使用多进程方法加速这个过程。
 - 在 Linux 系统上，默认的 `launcher.name` 是 "multiprocessing"，进程数为 `num_proc=2`：
 
 ```python
@@ -198,7 +220,18 @@ launcher=dict(
 
 ### data.transforms
 
-- `include_default` 键用于指定是否包括默认的数据增强方法。例如，如果您正在使用 CIFAR100 数据集并设置 `include_default=True` ，那么您使用的实际数据变换将是：
+- `include_default` 键用于指定是否包括默认的数据增强方法。例如，CIFAR100 数据集的默认数据增强方法定义在 [`fling/dataset/cifar100.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py) ，具体内容为：
+
+```python
+default_augmentation = dict(
+    horizontal_flip=dict(p=0.5),
+    random_rotation=dict(degree=15),
+    Normalize=dict(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+    random_crop=dict(size=32, padding=4),
+)
+```
+
+因此如果您正在使用 CIFAR100 数据集并设置 `include_default=True` ，那么您使用的实际数据变换将是：
 
 ```python
 transforms=dict(
@@ -209,7 +242,7 @@ transforms=dict(
 )
 ```
 
-它在默认的数据增强中定义（[此处](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py)）。请注意，对于不同的数据集，默认的数据增强可以是不同的，甚至可能为 None。
+请注意，对于不同的数据集，默认的数据增强可以是不同的，甚至可能为 None。
 
 - 如果您想禁用默认的数据变换，只需使用 `include_default=False` 并定义您自己的方法：
 

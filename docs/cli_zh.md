@@ -2,7 +2,7 @@
 
 在这份文档中，我们将介绍 Fling 中命令行界面（CLI）的使用方式。
 
-## 版本
+## 查看Fling的版本
 
 您可以使用如下命令：
 
@@ -16,7 +16,7 @@ fling -v
 fling --version
 ```
 
-以列出您当前已安装的 Fling 版本。同时也可以检查 Fling 是否成功安装。
+以查看您当前已安装的 Fling 版本。同时也可以检查 Fling 是否成功安装。
 
 ## fling run 命令
 
@@ -30,7 +30,7 @@ fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_p
 
 - -c / --config：您想要使用的配置文件。
 - -p / --pipeline：您想要执行的 pipeline。此 pipeline 应包含在 `fling.pipeline` 中。
-- -s / --seed：您想要运行的 seeds。它可以是一个整数，也可以是类似示例中的多个整数。默认情况下，该 seed 被设定为0。
+- -s / --seed：您想要设置的 seeds 。它用以生成伪随机数，在实验中负责模型参数初始化、各客户端的数据采样等。它可以是一个整数，也可以是类似示例中的多个整数。默认情况下，该 seed 被设定为0。
 - -e / --extra_argument：您想要在配置文件的基础上进行的修改。例如 ``-e learn.optimizer.lr:0.1`` ，意味着学习率被设置为0.1。需注意的是：此方法的优先级高于配置文件，意味着配置文件的值将被覆盖。
 - -pc / --print_config：如果命令中包含此参数，则将会在命令行中把实验配置打印出来。
 
