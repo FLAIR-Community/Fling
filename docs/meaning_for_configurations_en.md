@@ -1,6 +1,6 @@
 # Meanings for Each Configuration Key
 
-## An Example
+## Default Configuration Instance
 
 In this document, we provide a complete configuration file and explain the meanings of each key.
 
@@ -120,7 +120,12 @@ default_exp_args = dict(
         # What is the logging directory of this experiment.
         # If the directory does not exist, it will be created automatically.
         # If the directory already exists, some parts might be over-written, which should be carefully inspected.
-        logging_path='./logging/default_experiment'
+        logging_path='./logging/default_experiment',
+        # The saved model checkpoint to start from. If it is set to ``None``, the training process
+        # will start from scratch.
+        resume_path=None,
+        # Whether to print config is the command line.
+        print_config=False,
     ),
 )
 ```
@@ -150,7 +155,7 @@ This key controls what parameters should be finetuned. Beside "all", the key `le
 
 ```python
 finetune_parameters=dict(
-    # This means to only fine-tune parameters whose names have keywords listed in `keywords`
+    # This means to only fine-tune parameters whose names have keywords listed in `keywords`.
     name='contain',
     keywords=['fc', 'bn']
 )
@@ -160,7 +165,7 @@ On the opposite, if you want to fine-tune parameters whose names **except** keyw
 
 ```python
 finetune_parameters=dict(
-    # This means to only fine-tune parameters except those whose names have keywords listed in `keywords`
+    # This means to only fine-tune parameters except those whose names have keywords listed in `keywords`.
     name='except',
     keywords=['fc', 'bn']
 )
@@ -168,9 +173,31 @@ finetune_parameters=dict(
 
 The setting for `group.aggregation_parameters` , which controls what parameters should be aggregated under the framework of Federated Learning, is similar.
 
+To show the differences in meaning and usage between the parameters `learn.finetune_parameters` and `group.aggregation_parameters`, let's take the configuration file of the **FedPer** algorithm, [`cifar10_fedper_resnet_config.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py), as an example. The definitions of these two parameters in the configuration file are as follows:
+
+```python
+exp_args = dict(
+    learn=dict(
+        # Only fine-tune parameters whose name contain the keyword "fc".
+        finetune_parameters=dict(
+            name='contain',
+            keywords=['fc']),
+    ),
+    group=dict(
+        # Only aggregate parameters whose name does not contain the keyword "fc".
+        aggregation_parameters=dict(
+            name='except',
+            keywords=['fc'],
+        ),
+    )
+)
+```
+
+In this setup for Federated Learning, the `group.aggregation_parameters` allows all clients to share parameters except those containing the "fc" keyword, while the `learn.finetune_parameters` parameter enables each client to fine-tune its own parameters that contain the "fc" keyword.
+
 ### launcher
 
-- Beside "serial", the key `launcher.name` has other usages. On os other than Linux, the default configuration "serial" means that all operations on each client is executed serially, which can be not efficient enough. We can use the multiprocessing method to accelerate this process.
+- Beside "serial", the key `launcher.name` has other modes. On os other than Linux, the default configuration "serial" means that all operations on each client is executed serially, which can be not efficient enough. We can use the multiprocessing method to accelerate this process.
 - On Linux system, the default `launcher.name` is "multiprocessing" and number of processes `num_proc=2`:
 
 ```python
@@ -204,7 +231,7 @@ transforms=dict(
 )
 ```
 
-, which is defined in the default augmentation [here](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py). Note that for different datasets, the default augmentations can be different and can be even None.
+, which is defined in the default augmentation [`fling/dataset/cifar100.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py). Note that for different datasets, the default augmentations can be different and can be even None.
 
 - If users want to disable the default transforms, just use `include_default=False` and define your own methods:
 
