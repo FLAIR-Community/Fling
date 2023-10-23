@@ -23,11 +23,11 @@ class pFedSDClient(BaseClient):
         super(pFedSDClient, self).__init__(args, client_id, train_dataset, test_dataset)
         self.local_model_pre = None  # record the local model in the previous round, used for distillation in pfedsd
 
-    def train(self, lr, device=None):
+    def train(self, lr, device=None, train_args=None):
         """
         Local training.
         """
-        mean_monitor_variables = super().train(lr, device)
+        mean_monitor_variables = super().train(lr, device, train_args=train_args)
         # record the local model in this round
         self.local_model_pre = copy.deepcopy(self.model)
 
