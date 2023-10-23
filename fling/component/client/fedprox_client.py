@@ -62,13 +62,13 @@ class FedProxClient(BaseClient):
         loss.backward()
         optimizer.step()
 
-    def train(self, lr, device=None):
+    def train(self, lr, device=None, train_args=None):
         r"""
         Overview:
             Training function. The global model should be updated.
         """
         self._copy_global_model(self.model)
-        mean_monitor_variables = super(FedProxClient, self).train(lr=lr, device=device)
+        mean_monitor_variables = super(FedProxClient, self).train(lr=lr, device=device, train_args=train_args)
         # Reset the global model to save memory.
         self.glob_model = None
         return mean_monitor_variables

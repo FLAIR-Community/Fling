@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
 
-from fling.utils import get_optimizer, VariableMonitor, get_finetune_parameters
+from fling.utils import get_optimizer, VariableMonitor, get_parameters
 from fling.utils.registry_utils import CLIENT_REGISTRY
 from .client_template import ClientTemplate
 
@@ -113,7 +113,7 @@ class BaseClient(ClientTemplate):
     def preprocess_data(self, data):
         return {'x': data['input'].to(self.device), 'y': data['class_id'].to(self.device)}
 
-    def train(self, lr, device=None):
+    def train(self, lr, device=None, train_args=None):
         """
         Local training.
         """
@@ -124,7 +124,10 @@ class BaseClient(ClientTemplate):
         self.model.to(self.device)
 
         # Set optimizer, loss function.
-        weights = self.model.parameters()
+        if train_args is None:
+            weights = self.model.parameters()
+        else:
+            weights = get_parameters(self.model, parameter_args=train_args)
         op = get_optimizer(weights=weights, **self.args.learn.optimizer)
 
         # Set the loss function.
@@ -170,7 +173,7 @@ class BaseClient(ClientTemplate):
 
         # Get weights to be fine-tuned.
         # For calculating train loss and train acc.
-        weights = get_finetune_parameters(self.model, finetune_args=finetune_args)
+        weights = get_parameters(self.model, parameter_args=finetune_args)
 
         # Get optimizer and loss.
         op = get_optimizer(weights=weights, **self.args.learn.optimizer)
