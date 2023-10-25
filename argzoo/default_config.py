@@ -37,8 +37,6 @@ default_exp_args = dict(
             name='sgd',
             # Learning rate of the optimizer.
             lr=0.02,
-            # Momentum of the SGD optimizer.
-            momentum=0.9
         ),
         # Learning rate scheduler. For each global epoch, use a dynamic learning rate.
         scheduler=dict(
