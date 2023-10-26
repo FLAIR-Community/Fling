@@ -1,0 +1,2 @@
+python fedpart_args/mnist_fedpart_cnn_iid_config.py
+python fedpart_args/mnist_fedpart_cnn_noniid_config.py

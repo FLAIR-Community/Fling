@@ -16,7 +16,18 @@ def get_train_args(rnd: int) -> Dict:
     Overview:
         Given the current training round ``rnd``, decide the trainable parameters.
     """
-    return EasyDict({"name": "all", "keywords": []})
+    rnd2str = {
+        0: ['layers.0'],
+        1: ['layers.2'],
+        2: ['layers.4'],
+        3: ['fc.1']
+    }
+    rounds_per_key = 2
+    total_len = len(list(rnd2str.keys()))
+    if rnd < 5:
+        return EasyDict({"name": "all"})
+    rnd -= 5
+    return EasyDict({"name": "contain", "keywords": rnd2str[(rnd // rounds_per_key) % total_len]})
 
 
 def get_aggr_args(rnd: int) -> Dict:
@@ -24,7 +35,18 @@ def get_aggr_args(rnd: int) -> Dict:
     Overview:
         Given the current training round ``rnd``, decide the aggregation parameters.
     """
-    return EasyDict({"name": "all", "keywords": []})
+    rnd2str = {
+        0: ['layers.0'],
+        1: ['layers.2'],
+        2: ['layers.4'],
+        3: ['fc.1']
+    }
+    rounds_per_key = 2
+    total_len = len(list(rnd2str.keys()))
+    if rnd < 5:
+        return EasyDict({"name": "all"})
+    rnd -= 5
+    return EasyDict({"name": "contain", "keywords": rnd2str[(rnd // rounds_per_key) % total_len]})
 
 
 def partial_model_pipeline(args: dict, seed: int = 0) -> None:
