@@ -11,6 +11,34 @@ from fling.utils.data_utils import data_sampling
 from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler, get_launcher
 
 
+def get_train_args_resnet(rnd: int) -> Dict:
+    """
+    Overview:
+        Given the current training round ``rnd``, decide the trainable parameters.
+    """
+    rnd2str = {
+        0: ['conv1'],
+        1: ['layers.0.0.conv1'],
+        2: ['layers.0.0.conv2'],
+        3: ['layers.1.0.conv1'],
+        4: ['layers.1.0.conv2'],
+        5: ['layers.1.0.downsample.0'],
+        6: ['layers.2.0.conv1'],
+        7: ['layers.2.0.conv2'],
+        8: ['layers.2.0.downsample.0'],
+        9: ['fc']
+    }
+    rounds_per_key = 2
+    total_len = len(list(rnd2str.keys()))
+    if rnd < 5:
+        return EasyDict({"name": "all"})
+    rnd -= 5
+    print('index: ' + str((rnd // rounds_per_key) % total_len))
+    return EasyDict({"name": "contain", "keywords": rnd2str[(rnd // rounds_per_key) % total_len]})
+
+def get_aggr_args_resnet(rnd: int) -> Dict:
+    return get_train_args_resnet(rnd)
+
 def get_train_args(rnd: int) -> Dict:
     """
     Overview:
@@ -88,8 +116,8 @@ def partial_model_pipeline(args: dict, seed: int = 0) -> None:
     # Training loop
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
-        train_args = get_train_args(rnd=i)
-        aggr_args = get_aggr_args(rnd=i)
+        train_args = get_train_args_resnet(rnd=i)
+        aggr_args = get_aggr_args_resnet(rnd=i)
 
         # Initialize variable monitor.
         train_monitor = VariableMonitor()
