@@ -350,13 +350,10 @@ class ParameterServerGroup:
         self._time = time.time()
         self.logger.add_scalar('time/time_per_round', time_per_round, train_round)
 
-<<<<<<< HEAD
-=======
         if aggr_parameter_args is not None:
             for client in self.clients:
                 client.set_fed_keys(fed_keys_bak)
 
->>>>>>> b9233a6a88a5c9c0d4a7bdd4a1bad951e858be2e
         return trans_cost
 
     def flush(self) -> None:
