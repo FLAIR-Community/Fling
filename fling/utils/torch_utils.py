@@ -2,7 +2,7 @@ import math
 import pickle
 import random
 from functools import reduce
-from typing import Union, Callable, Iterable
+from typing import Union, Callable, Iterable, List, Dict
 
 import numpy as np
 import torch
@@ -64,19 +64,19 @@ def calculate_mean_std(train_dataset: Dataset, test_dataset: Dataset) -> tuple:
         return reduce(lambda x, y: x + y, res) / len(res), reduce(lambda x, y: x + y, res_std) / len(res)
 
 
-def get_finetune_parameters(model: nn.Module, finetune_args: dict) -> list:
-    if finetune_args.name == 'all':
+def get_parameters(model: nn.Module, parameter_args: dict, return_dict: bool = False) -> Union[List, Dict]:
+    if parameter_args.name == 'all':
         use_keys = model.state_dict().keys()
-    elif finetune_args.name == 'contain':
-        keywords = finetune_args.keywords
+    elif parameter_args.name == 'contain':
+        keywords = parameter_args.keywords
         use_keys = []
         for kw in keywords:
             for k in model.state_dict():
                 if kw in k:
                     use_keys.append(k)
         use_keys = list(set(use_keys))
-    elif finetune_args.name == 'except':
-        keywords = finetune_args.keywords
+    elif parameter_args.name == 'except':
+        keywords = parameter_args.keywords
         use_keys = []
         for kw in keywords:
             for k in model.state_dict():
@@ -84,12 +84,18 @@ def get_finetune_parameters(model: nn.Module, finetune_args: dict) -> list:
                     use_keys.append(k)
         use_keys = list(set(model.state_dict().keys()) - set(use_keys))
     else:
-        raise ValueError(f'Unrecognized finetune parameter name: {finetune_args.name}')
+        raise ValueError(f'Unrecognized finetune parameter name: {parameter_args.name}')
 
-    res = []
-    for key, param in model.named_parameters():
-        if key in use_keys:
-            res.append(param)
+    if not return_dict:
+        res = []
+        for key, param in model.named_parameters():
+            if key in use_keys:
+                res.append(param)
+    else:
+        res = {}
+        for key, param in model.named_parameters():
+            if key in use_keys:
+                res[key] = param
     return res
 
 

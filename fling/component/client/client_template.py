@@ -113,7 +113,7 @@ class ClientTemplate:
         """
         raise NotImplementedError
 
-    def train(self, lr: float, device: str) -> dict:
+    def train(self, lr: float, device: str, train_args: dict = None) -> dict:
         r"""
         Overview:
             The local training process of a client.

@@ -25,7 +25,7 @@ class FedCACClient(BaseClient):
         self.critical_parameter = None  # record the critical parameter positions in FedCAC
         self.customized_model = copy.deepcopy(self.model)  # customized global model
 
-    def train(self, lr, device=None):
+    def train(self, lr, device=None, train_args=None):
         """
         Local training.
         """
@@ -33,7 +33,7 @@ class FedCACClient(BaseClient):
         initial_model = copy.deepcopy(self.model)
 
         # local update for several local epochs
-        mean_monitor_variables = super().train(lr, device)
+        mean_monitor_variables = super().train(lr, device, train_args)
 
         # select the critical parameters
         self.critical_parameter, self.global_mask, self.local_mask = self.evaluate_critical_parameter(

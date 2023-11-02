@@ -15,6 +15,15 @@ A detailed introduction of these three components is shown as below:
 ### Client
 
 ```python
+import copy
+from typing import Callable, Iterable
+from torch.optim.optimizer import Optimizer
+from torch.utils.data.dataset import Dataset
+
+from fling.model import get_model
+from fling.utils import VariableMonitor
+
+
 class ClientTemplate:
     r"""
     Overview:
@@ -121,7 +130,7 @@ class ClientTemplate:
         """
         raise NotImplementedError
 
-    def train(self, lr: float, device: str) -> dict:
+    def train(self, lr: float, device: str, train_args: dict = None) -> dict:
         r"""
         Overview:
             The local training process of a client.
@@ -264,7 +273,7 @@ class ParameterServerGroup:
         r"""
         Overview:
             In this function, several things will be done:
-            1) Set ``fed_key`` in each client is determined, determine which parameters shoul be included for federated
+            1) Set ``fed_key`` in each client is determined, determine which parameters should be included for federated
         learning.
             2) ``glob_dict`` in the server is determined, which is exactly a state dict with all keys in ``fed_keys``.
             3) Each client local model will be updated by ``glob_dict``.
@@ -272,26 +281,9 @@ class ParameterServerGroup:
             - None
         """
         # Step 1.
-        if self.args.group.aggregation_parameters.name == 'all':
-            fed_keys = self.clients[0].model.state_dict().keys()
-        elif self.args.group.aggregation_parameters.name == 'contain':
-            keywords = self.args.group.aggregation_parameters.keywords
-            fed_keys = []
-            for kw in keywords:
-                for k in self.clients[0].model.state_dict():
-                    if kw in k:
-                        fed_keys.append(k)
-            fed_keys = list(set(fed_keys))
-        elif self.args.group.aggregation_parameters.name == 'except':
-            keywords = self.args.group.aggregation_parameters.keywords
-            fed_keys = []
-            for kw in keywords:
-                for k in self.clients[0].model.state_dict():
-                    if kw in k:
-                        fed_keys.append(k)
-            fed_keys = list(set(self.clients[0].model.state_dict().keys()) - set(fed_keys))
-        else:
-            raise ValueError(f'Unrecognized aggregation_parameters.name: {self.args.group.aggregation_parameters.name}')
+        fed_keys = get_parameters(
+            self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True
+        ).keys()
 
         # Step 2.
         self.logger.logging(f'Weights for federated training: {fed_keys}')
@@ -328,15 +320,24 @@ class ParameterServerGroup:
         """
         self.clients.append(client)
 
-    def aggregate(self, train_round: int) -> int:
+    def aggregate(self, train_round: int, aggr_parameter_args: dict = None) -> int:
         r"""
         Overview:
             Aggregate all client models.
         Arguments:
             - train_round: current global epochs.
+            - aggr_parameter_args: What parameters should be aggregated. If set to ``None``, the initialized setting \
+                will be used.
         Returns:
             - trans_cost: uplink communication cost.
         """
+        # Pick out the parameters for aggregation if needed.
+        if aggr_parameter_args is not None:
+            fed_keys_bak = self.clients[0].fed_keys
+            new_fed_keys = get_parameters(self.clients[0].model, aggr_parameter_args, return_dict=True).keys()
+            for client in self.clients:
+                client.set_fed_keys(new_fed_keys)
+
         if self.args.group.aggregation_method == 'avg':
             trans_cost = fed_avg(self.clients, self.server)
             self.sync()
@@ -349,6 +350,13 @@ class ParameterServerGroup:
         self._time = time.time()
         self.logger.add_scalar('time/time_per_round', time_per_round, train_round)
 
+<<<<<<< HEAD
+=======
+        if aggr_parameter_args is not None:
+            for client in self.clients:
+                client.set_fed_keys(fed_keys_bak)
+
+>>>>>>> b9233a6a88a5c9c0d4a7bdd4a1bad951e858be2e
         return trans_cost
 
     def flush(self) -> None:
@@ -375,7 +383,7 @@ class ParameterServerGroup:
     def set_fed_keys(self) -> None:
         r"""
         Overview:
-            Set `fed_keys` of each client, deterimine which parameters should be included for federated learning
+            Set `fed_keys` of each client, determine which parameters should be included for federated learning
         Returns:
             - None
         """
