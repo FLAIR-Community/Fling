@@ -18,9 +18,9 @@ exp_args = dict(
         queue_len=1,
     ),
     model=dict(
-        name='resnet50',
+        name='resnet8',
         input_channel=3,
-        linear_hidden_dims=[1000, 1000, 256],
+        # linear_hidden_dims=[256],
         class_number=100
     ),
     client=dict(name='fedmoon_client', client_num=10),

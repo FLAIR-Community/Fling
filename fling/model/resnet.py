@@ -188,7 +188,7 @@ class ResNet(nn.Module):
             self.mlp = nn.Sequential(*self.mlp)
             self.fc = nn.Linear(linear_hidden_dims[-1], class_number)
         else:
-            self.mlp = None
+            self.mlp = nn.Identity()
             self.fc = nn.Sequential(nn.Flatten(), nn.Linear(features[len(layers) - 1] * block.expansion, class_number))
 
         for m in self.modules():
@@ -244,7 +244,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _forward_impl(self, x: Tensor, mode='compute-logit') -> Tensor:
+    def _forward_impl(self, x: Tensor, mode: str = 'compute-logit') -> Tensor:
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -254,15 +254,16 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        if self.mlp:
-            x = self.mlp(x)
+        x = self.mlp(x)
         y = self.fc(x)
-        if mode == 'compute-feature-logit':
+        if mode == 'compute-logit':
+            return y
+        elif mode == 'compute-feature-logit':
             return x, y
         else:
             return y
 
-    def forward(self, x: Tensor, mode='compute-logit') -> Tensor:
+    def forward(self, x: Tensor, mode: str = 'compute-logit') -> Tensor:
         return self._forward_impl(x, mode)
 
 

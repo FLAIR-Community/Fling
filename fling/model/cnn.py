@@ -43,16 +43,17 @@ class CNNModel(nn.Module):
             self.mlp = nn.Sequential(*self.mlp)
             self.fc = nn.Linear(linear_hidden_dims[-1], class_number)
         else:
-            self.mlp = None
+            self.mlp = nn.Identity()
             self.fc = nn.Sequential(nn.Flatten(), nn.Linear(hidden_dims[-1], class_number))
 
     def forward(self, x, mode='compute-logit'):
         x = self.layers(x)
         x = self.glp(x)
-        if self.mlp:
-            x = self.mlp(x)
+        x = self.mlp(x)
         y = self.fc(x)
-        if mode == 'compute-feature-logit':
+        if mode == 'compute-logit':
+            return y
+        elif mode == 'compute-feature-logit':
             return x, y
         else:
             return y
