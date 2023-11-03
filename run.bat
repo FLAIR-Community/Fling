@@ -1,2 +1,2 @@
-python fedpart_args/mnist_fedpart_cnn_iid_config.py
-python fedpart_args/mnist_fedpart_cnn_noniid_config.py
+python fedpart_args/cifar10_fedavg_resnet8_non_iid.py
+python fedpart_args/cifar10_fedpart_resnet8_non_iid.py
