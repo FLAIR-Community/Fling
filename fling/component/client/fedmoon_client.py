@@ -25,20 +25,25 @@ class FedMOONClient(BaseClient):
         self.glob_model = None
         # The variable to store the previous models.
         self.prev_models = []
+        # The max length of prev_models
+        self.queue_len = self.args.learn.queue_len
 
     def _store_prev_model(self, model: nn.Module) -> None:
         r"""
         Overview:
             Store the prev model for fedmoon loss calculation.
         """
-        self.prev_models.append(copy.deepcopy(model.to(self.device)))
+        if len(self.prev_models) >= self.queue_len:
+            self.prev_models.pop(0)
+        self.prev_models.append(copy.deepcopy(model))
+
 
     def _store_global_model(self, model: nn.Module) -> None:
         r"""
         Overview:
             Store the global model for fedmoon loss calculation.
         """
-        self.glob_model = copy.deepcopy(model.to(self.device))
+        self.glob_model = copy.deepcopy(model)
 
     def train_step(self, batch_data, criterion, monitor, optimizer):
         r"""
@@ -46,16 +51,19 @@ class FedMOONClient(BaseClient):
             Training step. The loss of fedmoon should be added to the original loss.
         """
         batch_x, batch_y = batch_data['x'], batch_data['y']
-        z, o = self.model(batch_x)
+        z, o = self.model(batch_x, mode='compute-feature-logit')
         main_loss = criterion(o, batch_y)
         # Calculate fedmoon loss.
         cos = nn.CosineSimilarity(dim=-1)
-        z_glob, _ = self.glob_model(batch_x)
+        self.glob_model.to(self.device)
+        with torch.no_grad():
+            z_glob, _ = self.glob_model(batch_x, mode='compute-feature-logit')
         z_i = cos(z, z_glob)
         logits = z_i.reshape(-1, 1)
         for prev_model in self.prev_models:
             prev_model.to(self.device)
-            z_prev, _ = prev_model(batch_x)
+            with torch.no_grad():
+                z_prev, _ = prev_model(batch_x, mode='compute-feature-logit')
             nega = cos(z, z_prev)
             logits = torch.cat((logits, nega.reshape(-1, 1)), dim=1)
         logits /= self.t
@@ -70,7 +78,7 @@ class FedMOONClient(BaseClient):
             {
                 'train_acc': torch.mean((y_pred == batch_y).float()).item(),
                 'main_loss': main_loss.item(),
-                'fedmoon_loss': fedmoon_loss.item(),
+                'fedmoon_loss': self.mu * fedmoon_loss.item(),
                 'total_loss': loss.item(),
             },
             weight=batch_y.shape[0]
@@ -89,7 +97,7 @@ class FedMOONClient(BaseClient):
         self._store_global_model(self.model)
         mean_monitor_variables = super(FedMOONClient, self).train(lr=lr, device=device)
         # Reset the global model to save memory.
-        self.glob_model = None
+        del self.glob_model
         # Store the current model as prev model in next round
         self._store_prev_model(self.model)
         return mean_monitor_variables

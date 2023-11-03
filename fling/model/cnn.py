@@ -15,10 +15,11 @@ class CNNModel(nn.Module):
         kernel_sizes=[5, 3, 3],
         paddings=[2, 1, 1],
         hidden_dims=[32, 32, 32],
-        activation='relu',
+        linear_hidden_dims=[],
+        activation='relu'
     ):
         super(CNNModel, self).__init__()
-
+        
         self.layers = []
         self.layers.append(nn.Conv2d(input_channel, hidden_dims[0], kernel_size=kernel_sizes[0], padding=paddings[0]))
         self.layers.append(get_activation(name=activation))
@@ -32,10 +33,26 @@ class CNNModel(nn.Module):
 
         self.glp = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.fc = nn.Sequential(nn.Flatten(), nn.Linear(hidden_dims[-1], class_number))
+        if len(linear_hidden_dims):
+            self.mlp = []
+            self.mlp.append(nn.Flatten())
+            self.mlp.append(nn.Linear(hidden_dims[-1], linear_hidden_dims[0]))
+            for i in range(len(linear_hidden_dims) - 1):
+                self.mlp.append(get_activation(name=activation))
+                self.mlp.append(nn.Linear(linear_hidden_dims[i], linear_hidden_dims[i + 1]))
+            self.mlp = nn.Sequential(*self.mlp)
+            self.fc = nn.Linear(linear_hidden_dims[-1], class_number)
+        else:
+            self.mlp = None
+            self.fc = nn.Sequential(nn.Flatten(), nn.Linear(hidden_dims[-1], class_number))
 
-    def forward(self, x):
+    def forward(self, x, mode='compute-logit'):
         x = self.layers(x)
         x = self.glp(x)
-        x = self.fc(x)
-        return x
+        if self.mlp:
+            x = self.mlp(x)
+        y = self.fc(x)
+        if mode == 'compute-feature-logit':
+            return x, y
+        else:
+            return y
