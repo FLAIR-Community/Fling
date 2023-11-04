@@ -26,15 +26,16 @@ exp_args = dict(
         name='base_group',
         aggregation_method='avg',
         aggregation_parameters=dict(
-            name='all',
+            name='except',
+            keywords=['fc']
         ),
     ),
-    other=dict(test_freq=1, logging_path='./logging/cifar10_fedpart_per_resnet8_non_iid')
+    other=dict(test_freq=1, logging_path='./logging/cifar10_fedper_resnet8_non_iid')
 )
 
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
-    from fling.pipeline import partial_model_pipeline
+    from fling.pipeline import personalized_model_pipeline
 
-    partial_model_pipeline(exp_args, seed=0)
+    personalized_model_pipeline(exp_args, seed=0)

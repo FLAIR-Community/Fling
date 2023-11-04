@@ -1,2 +1,2 @@
-python fedpart_args/cifar10_fedavg_resnet8_non_iid.py
+python fedpart_args/cifar10_fedper_resnet8_non_iid.py
 python fedpart_args/cifar10_fedpart_resnet8_non_iid.py

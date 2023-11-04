@@ -73,7 +73,10 @@ def get_train_args_resnet(rnd: int) -> Dict:
 
 
 def get_aggr_args_resnet(rnd: int) -> Dict:
-    return get_train_args_resnet_v1(rnd)
+    tmp = get_train_args_resnet_v1(rnd)
+    if 'fc' in tmp['keywords']:
+        tmp['keywords'].remove('fc')
+    return tmp
 
 
 def get_train_args(rnd: int) -> Dict:
