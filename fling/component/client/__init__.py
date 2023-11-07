@@ -5,3 +5,4 @@ from .pfedsd_client import pFedSDClient
 from .fedcac_client import FedCACClient
 from .fedrod_client import FedRoDClient
 from .fedprox_client import FedProxClient
+from .fedamp_client import FedAMPClient

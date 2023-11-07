@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import time
+import torch
 from typing import Iterable, Dict, List
 from prettytable import PrettyTable
 
@@ -14,6 +15,13 @@ def client_sampling(client_ids: Iterable, sample_rate: float) -> List:
     )
     return participated_clients
 
+def weight_flatten(model) -> torch.Tensor:
+    params = []
+    for u in model.parameters():
+        params.append(u.view(-1))
+    params = torch.cat(params)
+
+    return params
 
 class Logger(SummaryWriter):
 
