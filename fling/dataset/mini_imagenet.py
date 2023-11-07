@@ -17,7 +17,7 @@ class MiniImagenetDataset(Dataset):
     _mean = [x / 255.0 for x in [120.39586422, 115.59361427, 104.54012653]]
     _std = [x / 255.0 for x in [70.68188272, 68.27635443, 72.54505529]]
     default_augmentation = dict(
-        random_resized_crop=dict(size=84, scale=(0.1, 1.0), ratio=(3. / 4., 4. / 3.)),
+        random_resized_crop=dict(size=(84, 84), scale=(0.1, 1.0), ratio=(3. / 4., 4. / 3.)),
         color_jitter=dict(brightness=0.4, contrast=0.4, saturation=0.4),
         horizontal_flip=dict(p=0.5),
         Normalize=dict(mean=_mean, std=_std),

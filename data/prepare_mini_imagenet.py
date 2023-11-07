@@ -38,7 +38,8 @@ if __name__ == '__main__':
 
     data_load_all = {}
     data_load_all['image_data'] = np.concatenate(
-        (train_data['image_data'], val_data['image_data'], test_data['image_data']))
+        (train_data['image_data'], val_data['image_data'], test_data['image_data'])
+    )
     data_load_all['class_dict'] = copy.deepcopy(train_data['class_dict'])
     data_load_all['class_dict'].update(val_data['class_dict'])
     data_load_all['class_dict'].update(test_data['class_dict'])
