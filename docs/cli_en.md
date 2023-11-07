@@ -23,7 +23,7 @@ To list the current of Fling you have installed. It is also a method to check wh
 You can use `fling run` to start an experiment based on a config file. Here is an example:
 
 ```shell
-fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3
+fling run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3
 ```
 
 Here are explanations about the meaning of each argument.
@@ -39,7 +39,7 @@ Here are explanations about the meaning of each argument.
 When using the `-e` option in the `fling run` method to pass parameters, the keys for the parameters tend to be complex because our configuration files often have a multi-level structure. For example, if we want to modify the learning rate and the log path, the required command is:
 
 ```shell
-fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
+fling run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
 -e learn.optimizer.lr:0.01 \
 -e other.logging_path:logging/toy_experiment
 ```
@@ -55,7 +55,7 @@ fling create -n my_run \
 In this example, we defined a command called `my_run`. In this command, we established a mapping relationship for parameter keys using the `-a/--argument_map` option: `learn.optimizer.lr` is mapped to `learning_rate` and `other.logging_path` is mapped to `log_path`. Next, to execute the defined `my_run` command, you can use the following method:
 
 ```shell
-fling my_run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
+fling my_run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
 --extra_argument learning_rate:0.1 \
 --extra_argument log_path:logging/toy_experiment
 ```

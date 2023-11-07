@@ -23,7 +23,7 @@ fling --version
 您可以使用 `fling run` 来根据配置文件启动一次实验。以下是一个用法示例：
 
 ```shell
-fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3
+fling run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3
 ```
 
 以下是关于每个参数的含义解释。
@@ -39,7 +39,7 @@ fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_p
 当在 `fling run` 命令中使用 `-e` 选项传递参数时，由于我们的配置文件通常具有多层结构，参数的键名往往会很复杂。例如，如果我们要修改学习率和训练记录的路径，所需的命令是：
 
 ```shell
-fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
+fling run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
 -e learn.optimizer.lr:0.01 \
 -e other.logging_path:logging/toy_experiment
 ```
@@ -55,7 +55,7 @@ fling create -n my_run \
 在上面示例中，我们定义了一个名为 `my_run` 的命令。在此命令中，我们使用 `-a/--argument_map` 选项建立了参数键名的映射关系：`learn.optimizer.lr` 映射到 `learning_rate`，而 `other.logging_path` 映射到 `log_path`。接下来，要执行已定义的 `my_run` 命令，您可以使用如下方法：
 
 ```shell
-fling my_run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
+fling my_run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline -s 1,2,3 \
 --extra_argument learning_rate:0.1 \
 --extra_argument log_path:logging/toy_experiment
 ```
