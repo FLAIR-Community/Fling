@@ -38,7 +38,7 @@ setup(
     keywords='Federated Learning Framework',
     packages=[
         *find_packages(include=('fling', 'fling.*')),
-        *find_packages(include=('argzoo', 'argzoo.*')),
+        *find_packages(include=('flzoo', 'flzoo.*')),
     ],
     package_data={
         package_name: ['*.yaml', '*.xml', '*cfg', '*SC2Map']

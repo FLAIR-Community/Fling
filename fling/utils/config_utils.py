@@ -5,7 +5,7 @@ from easydict import EasyDict
 
 import torch.multiprocessing as mp
 
-from argzoo.default_config import default_exp_args
+from flzoo.default_config import default_exp_args
 from fling.utils import seed_everything
 from fling.utils.registry_utils import DATASET_REGISTRY
 
