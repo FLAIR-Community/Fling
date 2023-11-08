@@ -38,7 +38,7 @@ setup(
     keywords='Federated Learning Framework',
     packages=[
         *find_packages(include=('fling', 'fling.*')),
-        *find_packages(include=('argzoo', 'argzoo.*')),
+        *find_packages(include=('flzoo', 'flzoo.*')),
     ],
     package_data={
         package_name: ['*.yaml', '*.xml', '*cfg', '*SC2Map']
@@ -47,7 +47,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         'setuptools<=66.1.1', 'yapf==0.29.0', 'torch>=1.7.0', 'torchvision', 'numpy>=1.18.0', 'easydict==1.9',
-        'tensorboard>=2.10.1', 'tqdm', 'timm', 'click', 'prettytable', 'einops'
+        'tensorboard>=2.10.1', 'tqdm', 'timm', 'click', 'prettytable', 'einops', 'scipy'
     ],
     extras_require={
         'test': [

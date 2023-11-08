@@ -36,13 +36,13 @@ to check whether Fling is successfully installed.
 After successfully install Fling, users can start the first Fling experiment by using the following command. An example for generic federated learning:
 
 ```bash
-python argzoo/mnist/mnist_fedavg_cnn_toy_config.py
+python flzoo/mnist/mnist_fedavg_cnn_toy_config.py
 ```
 
 Or using our cli util by:
 
 ```shell
-fling run -c argzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline
+fling run -c flzoo/mnist/mnist_fedper_cnn_toy_config.py -p personalized_model_pipeline
 ```
 
 This config is a simplified version for conducting FedAvg on the dataset MNIST and iterate for 4 communication rounds.
