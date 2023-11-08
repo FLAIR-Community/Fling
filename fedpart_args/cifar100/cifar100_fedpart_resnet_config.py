@@ -16,7 +16,7 @@ exp_args = dict(
     client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(name='base_group', aggregation_method='avg'),
-    other=dict(test_freq=3, logging_path='./logging/cifar100_fedpart_resnet_iid')
+    other=dict(test_freq=1, logging_path='./logging/cifar100_fedpart_resnet_iid')
 )
 
 exp_args = EasyDict(exp_args)
