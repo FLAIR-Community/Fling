@@ -38,44 +38,12 @@ def get_train_args_resnet_v1(rnd: int) -> Dict:
     return EasyDict({"name": "contain", "keywords": rnd2str[(rnd // rounds_per_key) % total_len]})
 
 
-def get_train_args_resnet_v2(rnd: int) -> Dict:
-    """
-    Overview:
-        Given the current training round ``rnd``, decide the trainable parameters.
-    """
-    # Total 197.6M
-    rnd2str = {
-        0: ['pre_conv'],  # 1.5
-        1: ['layers.0.0.conv1', 'layers.0.0.bn1'],  # 5.898
-        2: ['layers.0.0.conv2', 'layers.0.0.bn2'],  # 5.898
-        3: ['layers.1.0.conv1', 'layers.1.0.bn1'],  # 11.8
-        4: ['layers.1.0.conv2', 'layers.1.0.bn2'],  # 23.59
-        5: ['layers.1.0.downsample'],  # 1.311
-        6: ['layers.2.0.conv1', 'layers.2.0.bn1'],  # 47.19
-        7: ['layers.2.0.conv2', 'layers.2.0.bn2'],  # 94.37
-        8: ['layers.2.0.downsample'],  # 5.243
-        9: ['fc']  # 0.411
-    }
-    res = ['pre_conv', 'downsample', 'fc']
-
-
-    rounds_per_key = 2
-    total_len = len(list(rnd2str.keys()))
-    if rnd < 5:
-        return EasyDict({"name": "all"})
-    rnd -= 5
-    print('index: ' + str((rnd // rounds_per_key) % total_len))
-    return EasyDict({"name": "contain", "keywords": rnd2str[(rnd // rounds_per_key) % total_len]})
-
-
 def get_train_args_resnet(rnd: int) -> Dict:
     return get_train_args_resnet_v1(rnd)
 
 
 def get_aggr_args_resnet(rnd: int) -> Dict:
     tmp = get_train_args_resnet_v1(rnd)
-    if 'fc' in tmp['keywords']:
-        tmp['keywords'].remove('fc')
     return tmp
 
 
