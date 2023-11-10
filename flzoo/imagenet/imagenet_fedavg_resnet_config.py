@@ -1,11 +1,7 @@
 from easydict import EasyDict
 
 exp_args = dict(
-    data=dict(
-        dataset='imagenet',
-        data_path='./data/imagenet',
-        sample_method=dict(name='iid')
-    ),
+    data=dict(dataset='imagenet', data_path='./data/imagenet', sample_method=dict(name='iid')),
     learn=dict(
         device='cuda:0', local_eps=8, global_eps=90, batch_size=256, optimizer=dict(name='sgd', lr=0.1, momentum=0.9)
     ),

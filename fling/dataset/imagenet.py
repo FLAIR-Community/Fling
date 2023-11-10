@@ -39,11 +39,15 @@ class ImagenetDataset(Dataset):
                 db_path = os.path.join(cfg.data.data_path, 'train.lmdb')
             else:
                 db_path = os.path.join(cfg.data.data_path, 'val.lmdb')
-            self.env = lmdb.open(db_path, subdir=os.path.isdir(cfg.data.data_path),
-                                 readonly=True, lock=False, readahead=False, meminit=False)
-            with self.env.begin(write=False) as txn:
+            self.db_path = db_path
+            env = lmdb.open(db_path, subdir=False, readonly=True, lock=False, max_readers=16, create=False)
+            with env.begin(write=False) as txn:
                 self.length = pickle.loads(txn.get(b'__len__'))
                 self.keys = pickle.loads(txn.get(b'__keys__'))
+
+    def _open_lmdb(self):
+        env = lmdb.open(self.db_path, subdir=False, readonly=True, create=False, max_readers=16, lock=False)
+        self.txn = env.begin(buffers=True)
 
     def __len__(self) -> int:
         return self.length
@@ -52,9 +56,9 @@ class ImagenetDataset(Dataset):
         if not self.use_lmdb:
             return {'input': self.dataset[item][0], 'class_id': self.dataset[item][1]}
         else:
-            env = self.env
-            with env.begin(write=False) as txn:
-                byte_flow = txn.get(self.keys[item])
+            if not hasattr(self, 'txn'):
+                self._open_lmdb()
+            byte_flow = self.txn.get(self.keys[item])
             unpacked = pickle.loads(byte_flow)
             img, label = unpacked[0], unpacked[1]
             return {'input': self.transform(img), 'class_id': label}

@@ -38,9 +38,7 @@ def folder2lmdb(dpath: str, name: str, write_frequency: int = 5000, num_workers:
     """
     directory = os.path.expanduser(os.path.join(dpath, name))
     print("Loading dataset from %s" % directory)
-    trans = transforms.Compose([
-        transforms.Resize((256, 256))
-    ])
+    trans = transforms.Compose([transforms.Resize((256, 256))])
     dataset = ImageFolder(directory, transform=trans)
     data_loader = DataLoader(dataset, num_workers=num_workers, collate_fn=lambda x: x)
 
@@ -48,9 +46,7 @@ def folder2lmdb(dpath: str, name: str, write_frequency: int = 5000, num_workers:
     isdir = os.path.isdir(lmdb_path)
 
     print("Generate LMDB to %s" % lmdb_path)
-    db = lmdb.open(lmdb_path, subdir=isdir,
-                   map_size=1099511627776 * 2, readonly=False,
-                   meminit=False, map_async=True)
+    db = lmdb.open(lmdb_path, subdir=isdir, map_size=1099511627776 * 2, readonly=False, meminit=False, map_async=True)
 
     print(len(dataset), len(data_loader))
     txn = db.begin(write=True)
