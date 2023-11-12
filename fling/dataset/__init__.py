@@ -4,4 +4,5 @@ from .mnist import MNISTDataset
 from .tiny_imagenet import TinyImagenetDataset
 from .mini_imagenet import MiniImagenetDataset
 from .imagenet import ImagenetDataset
+from .ag_news import AGNewsDataset
 from .build_dataset import get_dataset

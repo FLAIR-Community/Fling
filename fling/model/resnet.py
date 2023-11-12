@@ -5,6 +5,18 @@ from typing import Type, Any, Callable, Union, List, Optional
 from fling.utils.registry_utils import MODEL_REGISTRY
 
 
+class FedRodHead(nn.Module):
+    def __init__(self, input_dim, class_number):
+        super(FedRodHead, self).__init__()
+        self.fedrod_g_head = nn.Linear(input_dim, class_number)
+        self.fedrod_p_head = nn.Linear(input_dim, class_number)
+
+    def forward(self, x):
+        g = self.fedrod_g_head(x)
+        p = self.fedrod_p_head(x) + g.detach()
+        return g, p
+
+
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
     return nn.Conv2d(
@@ -136,6 +148,7 @@ class ResNet(nn.Module):
             self,
             block: Type[Union[BasicBlock, Bottleneck]],
             layers: List[int],
+            fedrod_head: bool = False,
             features: List[int] = [64, 128, 256, 512],
             input_channel: int = 3,
             class_number: int = 1000,
@@ -176,7 +189,11 @@ class ResNet(nn.Module):
         self.layers = nn.Sequential(*self.layers)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(features[len(layers) - 1] * block.expansion, class_number)
+
+        if not fedrod_head:
+            self.fc = nn.Linear(features[len(layers) - 1] * block.expansion, class_number)
+        else:
+            self.fc = FedRodHead(input_dim=features[len(layers) - 1] * block.expansion, class_number=class_number)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
