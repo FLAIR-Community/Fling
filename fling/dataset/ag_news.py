@@ -2,41 +2,64 @@ from torchtext.datasets import AG_NEWS
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import Dataset
+import torch
 
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
-@DATASET_REGISTRY('ag_news')
+@DATASET_REGISTRY.register('ag_news')
 class AGNewsDataset(Dataset):
+    vocab = None
+
     def __init__(self, cfg: dict, train: bool):
         super(AGNewsDataset, self).__init__()
         self.train = train
         self.cfg = cfg
         split = 'train' if self.train else 'test'
-        self.dataset = AG_NEWS(cfg.data.data_path, split=split)
+        self.dataset = list(AG_NEWS(cfg.data.data_path, split=split))
         self.tokenizer = get_tokenizer("basic_english")
-        self.max_length = cfg.data.max_length
+        self.max_length = cfg.data.get('max_length', float('inf'))
 
-        # Prepare vocabulary tabular.
         def _yield_tokens(data_iter):
             for _, text in data_iter:
-                yield self.tokenizer(text)
+                dat = self.tokenizer(text)
+                yield dat
 
-        self.vocab = build_vocab_from_iterator(_yield_tokens(iter(self.dataset)), speicals=['<unk>', '<pad>'])
-        self.vocab.set_default_index(self.vocab["<unk>"])
+        # Prepare vocabulary tabular.
+        if AGNewsDataset.vocab is None:
+            AGNewsDataset.vocab = build_vocab_from_iterator(
+                _yield_tokens(iter(self.dataset)), specials=['<unk>', '<pad>'], min_freq=5
+            )
+            AGNewsDataset.vocab.set_default_index(self.vocab["<unk>"])
 
-        self.process_text = lambda x: self.vocab(self.tokenizer(x))
-        self.process_label = lambda x: int(x) - 1
-        print(f'Dataset Generated. Total vocabs: {len(self.vocab)}')
+        real_max_len = max([len(self._process_text((self.dataset[i][1]))) for i in range(len(self.dataset))])
+        self.max_length = min(self.max_length, real_max_len)
+
+        print(
+            f'Dataset Generated. Total vocab size: {len(self.vocab)}; '
+            f'Max length of the input: {self.max_length}; '
+            f'Dataset length: {len(self.dataset)}.'
+        )
+
+    def _process_text(self, x):
+        return AGNewsDataset.vocab(self.tokenizer(x))
+
+    def _process_label(self, x):
+        return int(x) - 1
+
+    def __len__(self):
+        return len(self.dataset)
 
     def __getitem__(self, item):
         label, text = self.dataset[item]
-        label = self.process_label(label)
-        text = self.process_text(text)
+        label = self._process_label(label)
+        text = self._process_text(text)
 
         if len(text) > self.max_length:
             text = text[:self.max_length]
         else:
             text += [self.vocab['<pad>']] * (self.max_length - len(text))
 
-        return {'input': text, 'class_id': label}
+        assert len(text) == self.max_length
+
+        return {'input': torch.LongTensor(text), 'class_id': label}

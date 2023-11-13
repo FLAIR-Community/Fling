@@ -15,12 +15,7 @@ exp_args = dict(
         # Only fine-tune parameters whose name contain the keyword "fedrod_p_head".
         finetune_parameters=dict(name='contain', keywords=['fedrod_p_head']),
     ),
-    model=dict(
-        name='resnet8',
-        input_channel=3,
-        class_number=10,
-        fedrod_head=True
-    ),
+    model=dict(name='resnet8', input_channel=3, class_number=10, fedrod_head=True),
     client=dict(name='fedrod_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(
