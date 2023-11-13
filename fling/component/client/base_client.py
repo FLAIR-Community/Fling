@@ -137,7 +137,6 @@ class BaseClient(ClientTemplate):
 
         # Main training loop.
         for epoch in range(self.args.learn.local_eps):
-            print(f'Epoch: {epoch}')
             for _, data in enumerate(self.train_dataloader):
                 preprocessed_data = self.preprocess_data(data)
                 # Update total sample number.
