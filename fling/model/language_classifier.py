@@ -688,8 +688,6 @@ class TransformerClassifier(nn.Module):
     def init_weights(self) -> None:
         initrange = 0.1
         self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.classifier.bias.data.zero_()
-        self.classifier.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, src: Tensor) -> Tensor:
         """
