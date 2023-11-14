@@ -80,8 +80,20 @@ class MultiheadAttention(nn.Module):
     bias_k: Optional[torch.Tensor]
     bias_v: Optional[torch.Tensor]
 
-    def __init__(self, embed_dim, num_heads, dropout=0., bias=True, add_bias_kv=False, add_zero_attn=False,
-                 kdim=None, vdim=None, batch_first=False, device=None, dtype=None) -> None:
+    def __init__(
+            self,
+            embed_dim,
+            num_heads,
+            dropout=0.,
+            bias=True,
+            add_bias_kv=False,
+            add_zero_attn=False,
+            kdim=None,
+            vdim=None,
+            batch_first=False,
+            device=None,
+            dtype=None
+    ) -> None:
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
         self.embed_dim = embed_dim
@@ -154,7 +166,8 @@ class MultiheadAttention(nn.Module):
             need_weights: bool = True,
             attn_mask: Optional[Tensor] = None,
             average_attn_weights: bool = True,
-            is_causal : bool = False) -> Tuple[Tensor, Optional[Tensor]]:
+            is_causal: bool = False
+    ) -> Tuple[Tensor, Optional[Tensor]]:
         r"""
     Args:
         query: Query embeddings of shape :math:`(L, E_q)` for unbatched input, :math:`(L, N, E_q)` when ``batch_first=False``
@@ -246,6 +259,7 @@ class MultiheadAttention(nn.Module):
         elif query.is_nested and (key_padding_mask is not None or attn_mask is not None):
             why_not_fast_path = "supplying both src_key_padding_mask and src_mask at the same time \
                                  is not supported with NestedTensor input"
+
         elif torch.is_autocast_enabled():
             why_not_fast_path = "autocast is enabled"
 
@@ -266,29 +280,23 @@ class MultiheadAttention(nn.Module):
             elif not all([(x is None or x.is_cuda or 'cpu' in str(x.device)) for x in tensor_args]):
                 why_not_fast_path = "some Tensor argument is neither CUDA nor CPU"
             elif torch.is_grad_enabled() and any([x is not None and x.requires_grad for x in tensor_args]):
-                why_not_fast_path = ("grad is enabled and at least one of query or the "
-                                     "input/output projection weights or biases requires_grad")
+                why_not_fast_path = (
+                    "grad is enabled and at least one of query or the "
+                    "input/output projection weights or biases requires_grad"
+                )
             if not why_not_fast_path:
                 merged_mask, mask_type = self.merge_masks(attn_mask, key_padding_mask, query)
 
                 return torch._native_multi_head_attention(
-                    query,
-                    key,
-                    value,
-                    self.embed_dim,
-                    self.num_heads,
-                    self.in_proj_weight,
-                    self.in_proj_bias,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
-                    merged_mask,
-                    need_weights,
-                    average_attn_weights,
-                    mask_type)
+                    query, key, value, self.embed_dim, self.num_heads, self.in_proj_weight, self.in_proj_bias,
+                    self.out_proj.weight, self.out_proj.bias, merged_mask, need_weights, average_attn_weights, mask_type
+                )
 
         any_nested = query.is_nested or key.is_nested or value.is_nested
-        assert not any_nested, ("MultiheadAttention does not support NestedTensor outside of its fast path. " +
-                                f"The fast path was not hit because {why_not_fast_path}")
+        assert not any_nested, (
+            "MultiheadAttention does not support NestedTensor outside of its fast path. " +
+            f"The fast path was not hit because {why_not_fast_path}"
+        )
 
         if self.batch_first and is_batched:
             # make sure that the transpose op does not affect the "is" property
@@ -303,30 +311,52 @@ class MultiheadAttention(nn.Module):
 
         if not self._qkv_same_embed_dim:
             attn_output, attn_output_weights = F.multi_head_attention_forward(
-                query, key, value, self.embed_dim, self.num_heads,
-                self.in_proj_weight, self.in_proj_bias,
-                self.bias_k, self.bias_v, self.add_zero_attn,
-                self.dropout, self.out_proj.weight, self.out_proj.bias,
+                query,
+                key,
+                value,
+                self.embed_dim,
+                self.num_heads,
+                self.in_proj_weight,
+                self.in_proj_bias,
+                self.bias_k,
+                self.bias_v,
+                self.add_zero_attn,
+                self.dropout,
+                self.out_proj.weight,
+                self.out_proj.bias,
                 training=self.training,
-                key_padding_mask=key_padding_mask, need_weights=need_weights,
+                key_padding_mask=key_padding_mask,
+                need_weights=need_weights,
                 attn_mask=attn_mask,
                 use_separate_proj_weight=True,
-                q_proj_weight=self.q_proj_weight, k_proj_weight=self.k_proj_weight,
+                q_proj_weight=self.q_proj_weight,
+                k_proj_weight=self.k_proj_weight,
                 v_proj_weight=self.v_proj_weight,
                 average_attn_weights=average_attn_weights,
-                is_causal=is_causal)
+                is_causal=is_causal
+            )
         else:
             attn_output, attn_output_weights = F.multi_head_attention_forward(
-                query, key, value, self.embed_dim, self.num_heads,
-                self.in_proj_weight, self.in_proj_bias,
-                self.bias_k, self.bias_v, self.add_zero_attn,
-                self.dropout, self.out_proj.weight, self.out_proj.bias,
+                query,
+                key,
+                value,
+                self.embed_dim,
+                self.num_heads,
+                self.in_proj_weight,
+                self.in_proj_bias,
+                self.bias_k,
+                self.bias_v,
+                self.add_zero_attn,
+                self.dropout,
+                self.out_proj.weight,
+                self.out_proj.bias,
                 training=self.training,
                 key_padding_mask=key_padding_mask,
                 need_weights=need_weights,
                 attn_mask=attn_mask,
                 average_attn_weights=average_attn_weights,
-                is_causal=is_causal)
+                is_causal=is_causal
+            )
         if self.batch_first and is_batched:
             return attn_output.transpose(1, 0), attn_output_weights
         else:
@@ -436,14 +466,22 @@ class TransformerEncoderLayer(nn.Module):
     """
     __constants__ = ['batch_first', 'norm_first']
 
-    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
-                 activation: Union[str, Callable[[Tensor], Tensor]] = F.relu,
-                 layer_norm_eps: float = 1e-5, batch_first: bool = False, norm_first: bool = False,
-                 device=None, dtype=None) -> None:
+    def __init__(
+            self,
+            d_model: int,
+            nhead: int,
+            dim_feedforward: int = 2048,
+            dropout: float = 0.1,
+            activation: Union[str, Callable[[Tensor], Tensor]] = F.relu,
+            layer_norm_eps: float = 1e-5,
+            batch_first: bool = False,
+            norm_first: bool = False,
+            device=None,
+            dtype=None
+    ) -> None:
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
-        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout, batch_first=batch_first,
-                                            **factory_kwargs)
+        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout, batch_first=batch_first, **factory_kwargs)
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward, **factory_kwargs)
         self.dropout = nn.Dropout(dropout)
@@ -479,7 +517,8 @@ class TransformerEncoderLayer(nn.Module):
             src: Tensor,
             src_mask: Optional[Tensor] = None,
             src_key_padding_mask: Optional[Tensor] = None,
-            is_causal: bool = False) -> Tensor:
+            is_causal: bool = False
+    ) -> Tensor:
         r"""Pass the input through the encoder layer.
 
         Args:
@@ -506,9 +545,9 @@ class TransformerEncoderLayer(nn.Module):
             why_not_sparsity_fast_path = f"input not batched; expected src.dim() of 3 but got {src.dim()}"
         elif self.training:
             why_not_sparsity_fast_path = "training is enabled"
-        elif not self.self_attn.batch_first :
+        elif not self.self_attn.batch_first:
             why_not_sparsity_fast_path = "self_attn.batch_first was not True"
-        elif not self.self_attn._qkv_same_embed_dim :
+        elif not self.self_attn._qkv_same_embed_dim:
             why_not_sparsity_fast_path = "self_attn._qkv_same_embed_dim was not True"
         elif not self.activation_relu_or_gelu:
             why_not_sparsity_fast_path = "activation_relu_or_gelu was not True"
@@ -544,8 +583,10 @@ class TransformerEncoderLayer(nn.Module):
             elif not all((x.is_cuda or 'cpu' in str(x.device)) for x in tensor_args):
                 why_not_sparsity_fast_path = "some Tensor argument is neither CUDA nor CPU"
             elif torch.is_grad_enabled() and any(x.requires_grad for x in tensor_args):
-                why_not_sparsity_fast_path = ("grad is enabled and at least one of query or the "
-                                              "input/output projection weights or biases requires_grad")
+                why_not_sparsity_fast_path = (
+                    "grad is enabled and at least one of query or the "
+                    "input/output projection weights or biases requires_grad"
+                )
 
             if not why_not_sparsity_fast_path:
                 merged_mask, mask_type = self.self_attn.merge_masks(src_mask, src_key_padding_mask, src)
@@ -583,12 +624,8 @@ class TransformerEncoderLayer(nn.Module):
         return x
 
     # self-attention block
-    def _sa_block(self, x: Tensor,
-                  attn_mask: Optional[Tensor], key_padding_mask: Optional[Tensor]) -> Tensor:
-        x = self.self_attn(x, x, x,
-                           attn_mask=attn_mask,
-                           key_padding_mask=key_padding_mask,
-                           need_weights=False)[0]
+    def _sa_block(self, x: Tensor, attn_mask: Optional[Tensor], key_padding_mask: Optional[Tensor]) -> Tensor:
+        x = self.self_attn(x, x, x, attn_mask=attn_mask, key_padding_mask=key_padding_mask, need_weights=False)[0]
         return self.dropout1(x)
 
     # feed forward block
@@ -622,8 +659,17 @@ class PositionalEncoding(nn.Module):
 @MODEL_REGISTRY('transformer_classifier')
 class TransformerClassifier(nn.Module):
 
-    def __init__(self, vocab_size: int, hidden_dim: int = 200, n_head: int = 2, ffn_dim: int = 2,
-                 n_layers: int = 4, class_number: int = 5, dropout: float = 0.1, fedrod_head: bool = False):
+    def __init__(
+        self,
+        vocab_size: int,
+        hidden_dim: int = 200,
+        n_head: int = 2,
+        ffn_dim: int = 2,
+        n_layers: int = 4,
+        class_number: int = 5,
+        dropout: float = 0.1,
+        fedrod_head: bool = False
+    ):
         super().__init__()
         self.pos_encoder = PositionalEncoding(hidden_dim, dropout)
         encoder_layers = TransformerEncoderLayer(hidden_dim, n_head, ffn_dim, dropout)

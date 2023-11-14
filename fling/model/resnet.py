@@ -6,6 +6,7 @@ from fling.utils.registry_utils import MODEL_REGISTRY
 
 
 class FedRodHead(nn.Module):
+
     def __init__(self, input_dim, class_number):
         super(FedRodHead, self).__init__()
         self.fedrod_g_head = nn.Linear(input_dim, class_number)

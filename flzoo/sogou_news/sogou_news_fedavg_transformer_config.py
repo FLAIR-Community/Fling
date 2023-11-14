@@ -2,8 +2,8 @@ from easydict import EasyDict
 
 exp_args = dict(
     data=dict(
-        dataset='ag_news',
-        data_path='./data/ag_news',
+        dataset='sogou_news',
+        data_path='./data/sogou_news',
         sample_method=dict(name='dirichlet', alpha=1, train_num=0, test_num=0)
     ),
     learn=dict(
@@ -17,7 +17,7 @@ exp_args = dict(
     client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(name='base_group', aggregation_method='avg'),
-    other=dict(test_freq=3, logging_path='./logging/agnews_fedavg_transformer')
+    other=dict(test_freq=3, logging_path='./logging/sogou_news_fedavg_transformer')
 )
 
 exp_args = EasyDict(exp_args)

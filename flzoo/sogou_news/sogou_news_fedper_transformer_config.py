@@ -2,8 +2,8 @@ from easydict import EasyDict
 
 exp_args = dict(
     data=dict(
-        dataset='ag_news',
-        data_path='./data/ag_news',
+        dataset='sogou_news',
+        data_path='./data/sogou_news',
         sample_method=dict(name='dirichlet', alpha=1, train_num=0, test_num=0)
     ),
     learn=dict(
@@ -29,7 +29,7 @@ exp_args = dict(
             keywords=['classifier'],
         ),
     ),
-    other=dict(test_freq=3, logging_path='./logging/agnews_fedper_transformer')
+    other=dict(test_freq=3, logging_path='./logging/sogou_news_fedper_transformer')
 )
 
 exp_args = EasyDict(exp_args)

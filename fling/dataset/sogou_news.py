@@ -1,4 +1,4 @@
-from torchtext.datasets import AG_NEWS
+from torchtext.datasets import SogouNews
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import Dataset
@@ -6,15 +6,15 @@ from torch.utils.data import Dataset
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
-@DATASET_REGISTRY('ag_news')
-class AGNewsDataset(Dataset):
+@DATASET_REGISTRY('sogou_news')
+class SogouNewsDataset(Dataset):
 
     def __init__(self, cfg: dict, train: bool):
-        super(AGNewsDataset, self).__init__()
+        super(SogouNewsDataset, self).__init__()
         self.train = train
         self.cfg = cfg
         split = 'train' if self.train else 'test'
-        self.dataset = AG_NEWS(cfg.data.data_path, split=split)
+        self.dataset = SogouNews(cfg.data.data_path, split=split)
         self.tokenizer = get_tokenizer("basic_english")
         self.max_length = cfg.data.max_length
 
