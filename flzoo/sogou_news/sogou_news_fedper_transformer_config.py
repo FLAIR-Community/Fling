@@ -30,6 +30,7 @@ exp_args = dict(
             keywords=['classifier'],
         ),
     ),
+    launcher=dict(name='serial'),
     other=dict(test_freq=3, logging_path='./logging/sogou_news_fedper_transformer')
 )
 
