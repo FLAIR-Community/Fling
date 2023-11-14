@@ -4,7 +4,7 @@ exp_args = dict(
     data=dict(
         dataset='sogou_news',
         data_path='./data/sogou_news',
-        sample_method=dict(name='dirichlet', alpha=1, train_num=0, test_num=0),
+        sample_method=dict(name='dirichlet', alpha=1, train_num=5000, test_num=500),
         max_length=512
     ),
     learn=dict(
@@ -13,7 +13,7 @@ exp_args = dict(
     model=dict(
         name='transformer_classifier',
         class_number=5,
-        vocab_size=10,
+        vocab_size=75143,
     ),
     client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
