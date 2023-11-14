@@ -4,10 +4,11 @@ exp_args = dict(
     data=dict(
         dataset='sogou_news',
         data_path='./data/sogou_news',
-        sample_method=dict(name='dirichlet', alpha=1, train_num=0, test_num=0)
+        sample_method=dict(name='dirichlet', alpha=1, train_num=0, test_num=0),
+        max_length=512
     ),
     learn=dict(
-        device='cuda:0', local_eps=8, global_eps=40, batch_size=32, optimizer=dict(name='sgd', lr=0.02, momentum=0.9)
+        device='cuda:0', local_eps=8, global_eps=40, batch_size=256, optimizer=dict(name='sgd', lr=0.02, momentum=0.9)
     ),
     model=dict(
         name='language_classifier',
@@ -24,4 +25,5 @@ exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
     from fling.pipeline import generic_model_pipeline
+
     generic_model_pipeline(exp_args, seed=0)
