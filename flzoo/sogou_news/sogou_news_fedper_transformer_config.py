@@ -16,7 +16,7 @@ exp_args = dict(
         finetune_parameters=dict(name='contain', keywords=['classifier']),
     ),
     model=dict(
-        name='language_classifier',
+        name='transformer_classifier',
         class_number=5,
         vocab_size=10,
     ),

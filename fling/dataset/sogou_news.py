@@ -3,6 +3,7 @@ from torchtext.datasets import SogouNews
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import Dataset
+import csv
 
 from fling.utils.registry_utils import DATASET_REGISTRY
 
@@ -16,9 +17,9 @@ class SogouNewsDataset(Dataset):
         self.train = train
         self.cfg = cfg
         split = 'train' if self.train else 'test'
+        csv.field_size_limit(int(1e8))
         self.dataset = list(SogouNews(cfg.data.data_path, split=split))
-        # self.tokenizer = get_tokenizer("basic_english")
-        self.tokenizer = lambda x: x.split(' ')
+        self.tokenizer = get_tokenizer("basic_english")
         self.max_length = cfg.data.get('max_length', float('inf'))
 
         def _yield_tokens(data_iter):

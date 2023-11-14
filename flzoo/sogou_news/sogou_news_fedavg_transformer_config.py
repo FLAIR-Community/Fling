@@ -11,7 +11,7 @@ exp_args = dict(
         device='cuda:0', local_eps=8, global_eps=40, batch_size=256, optimizer=dict(name='sgd', lr=0.02, momentum=0.9)
     ),
     model=dict(
-        name='language_classifier',
+        name='transformer_classifier',
         class_number=5,
         vocab_size=10,
     ),
