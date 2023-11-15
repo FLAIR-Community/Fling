@@ -10,7 +10,7 @@ exp_args = dict(
     learn=dict(
         device='cuda:0',
         local_eps=8,
-        global_eps=40,
+        global_eps=15,
         batch_size=256,
         optimizer=dict(name='sgd', lr=0.02, momentum=0.9),
         finetune_parameters=dict(name='contain', keywords=['fedrod_p_head']),
@@ -27,7 +27,7 @@ exp_args = dict(
         ),
     ),
     launcher=dict(name='serial'),
-    other=dict(test_freq=3, logging_path='./logging/sogou_news_fedrod_transformer')
+    other=dict(test_freq=1, logging_path='./logging/sogou_news_fedrod_transformer')
 )
 
 exp_args = EasyDict(exp_args)
