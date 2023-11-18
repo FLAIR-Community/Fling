@@ -75,6 +75,8 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 
 **FedProx:** [Federated Optimization in Heterogeneous Networks](https://arxiv.org/pdf/1812.06127.pdf)
 
+**FedMOON:** [Model-Contrastive Federated Learning](https://openaccess.thecvf.com/content/CVPR2021/papers/Li_Model-Contrastive_Federated_Learning_CVPR_2021_paper.pdf)
+
 ### Personalized Federated Learning
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)

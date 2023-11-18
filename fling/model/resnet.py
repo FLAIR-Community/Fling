@@ -137,6 +137,7 @@ class ResNet(nn.Module):
             block: Type[Union[BasicBlock, Bottleneck]],
             layers: List[int],
             features: List[int] = [64, 128, 256, 512],
+            linear_hidden_dims: List[int] = [],
             input_channel: int = 3,
             class_number: int = 1000,
             zero_init_residual: bool = False,
@@ -176,7 +177,19 @@ class ResNet(nn.Module):
         self.layers = nn.Sequential(*self.layers)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(features[len(layers) - 1] * block.expansion, class_number)
+
+        if len(linear_hidden_dims):
+            self.mlp = []
+            self.mlp.append(nn.Flatten())
+            self.mlp.append(nn.Linear(features[len(layers) - 1] * block.expansion, linear_hidden_dims[0]))
+            for i in range(len(linear_hidden_dims) - 1):
+                self.mlp.append(nn.ReLU(inplace=True))
+                self.mlp.append(nn.Linear(linear_hidden_dims[i], linear_hidden_dims[i + 1]))
+            self.mlp = nn.Sequential(*self.mlp)
+            self.fc = nn.Linear(linear_hidden_dims[-1], class_number)
+        else:
+            self.mlp = nn.Identity()
+            self.fc = nn.Sequential(nn.Flatten(), nn.Linear(features[len(layers) - 1] * block.expansion, class_number))
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -231,7 +244,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _forward_impl(self, x: Tensor) -> Tensor:
+    def _forward_impl(self, x: Tensor, mode: str = 'compute-logit') -> Tensor:
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -241,11 +254,17 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
-        return x
+        x = self.mlp(x)
+        y = self.fc(x)
+        if mode == 'compute-logit':
+            return y
+        elif mode == 'compute-feature-logit':
+            return x, y
+        else:
+            return y
 
-    def forward(self, x: Tensor) -> Tensor:
-        return self._forward_impl(x)
+    def forward(self, x: Tensor, mode: str = 'compute-logit') -> Tensor:
+        return self._forward_impl(x, mode)
 
 
 @MODEL_REGISTRY.register('resnet34')
