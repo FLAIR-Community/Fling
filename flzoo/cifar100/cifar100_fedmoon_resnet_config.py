@@ -20,7 +20,6 @@ exp_args = dict(
     model=dict(
         name='resnet8',
         input_channel=3,
-        # linear_hidden_dims=[256],
         class_number=100
     ),
     client=dict(name='fedmoon_client', client_num=10),
