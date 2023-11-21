@@ -1,0 +1,4 @@
+python fedpart_args/cifar100/cifar100_fedavg_resnet_config.py
+python fedpart_args/cifar100/cifar100_fedpart_resnet_config.py
+python fedpart_args/tiny_imagenet/tiny_imagenet_fedavg_resnet_config.py
+python fedpart_args/tiny_imagenet/tiny_imagenet_fedpart_resnet_config.py

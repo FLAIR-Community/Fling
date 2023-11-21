@@ -75,7 +75,7 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
 
         # Logging train variables.
         mean_train_variables = train_monitor.variable_mean()
-        mean_train_variables.update({'trans_cost': trans_cost / 1e6, 'lr': cur_lr})
+        mean_train_variables.update({'trans_cost(MB)': trans_cost / 1e6, 'lr': cur_lr})
         logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
 
         # Testing
