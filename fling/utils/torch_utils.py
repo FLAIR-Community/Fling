@@ -88,14 +88,15 @@ def get_parameters(model: nn.Module, parameter_args: dict, return_dict: bool = F
 
     if not return_dict:
         res = []
-        for key, param in model.named_parameters():
+        for key in model.state_dict().keys():
             if key in use_keys:
-                res.append(param)
+                res.append(model.state_dict()[key])
     else:
         res = {}
-        for key, param in model.named_parameters():
+        for key in model.state_dict().keys():
             if key in use_keys:
-                res[key] = param
+                res[key] = model.state_dict()[key]
+
     return res
 
 
