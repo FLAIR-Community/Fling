@@ -111,6 +111,7 @@ def partial_model_pipeline(args: dict, seed: int = 0) -> None:
     launcher = get_launcher(args)
 
     # Training loop
+    n_iteration = 0
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
         train_args = get_train_args_resnet(rnd=i)
@@ -129,7 +130,7 @@ def partial_model_pipeline(args: dict, seed: int = 0) -> None:
         # Use multiprocessing for acceleration.
         train_results = launcher.launch(
             clients=[group.clients[j] for j in participated_clients],
-            lr=cur_lr, task_name='train', train_args=train_args
+            lr=cur_lr, task_name='train', train_args=train_args, ret_full_log=True
         )
 
         for item in train_results:
@@ -137,21 +138,13 @@ def partial_model_pipeline(args: dict, seed: int = 0) -> None:
 
         # Testing
         if i % args.other.test_freq == 0 and "before_aggregation" in args.learn.test_place:
-            test_monitor = VariableMonitor()
-
-            # Testing for each client and add results to the monitor
-            # Use multiprocessing for acceleration.
-            test_results = launcher.launch(
-                clients=[group.clients[j] for j in range(args.client.client_num)], task_name='test'
-            )
-            for item in test_results:
-                test_monitor.append(item)
-
-            # Get mean results across each client.
-            mean_test_variables = test_monitor.variable_mean()
+            test_result = group.server.test(model=group.clients[0].model)
 
             # Logging test variables.
-            logger.add_scalars_dict(prefix='before_aggregation_test', dic=mean_test_variables, rnd=i)
+            logger.add_scalars_dict(prefix='before_aggregation_test', dic=test_result, rnd=i)
+
+            # Saving model checkpoints.
+            torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))
 
         # Aggregate parameters in each client.
         trans_cost = group.aggregate(i, aggr_parameter_args=aggr_args)
@@ -159,25 +152,22 @@ def partial_model_pipeline(args: dict, seed: int = 0) -> None:
         # Logging for train variables.
         mean_train_variables = train_monitor.variable_mean()
         mean_train_variables.update({'trans_cost(MB)': trans_cost / 1e6, 'lr': cur_lr})
-        logger.add_scalars_dict(prefix='train', dic=mean_train_variables, rnd=i)
+        for k in mean_train_variables.keys():
+            item = mean_train_variables[k]
+            if isinstance(item, float):
+                logger.add_scalar(f'train/{k}', item, i)
+            else:
+                length = len(item)
+                for j in range(length):
+                    logger.add_scalar(f'train/{k}', item[j], n_iteration + j)
+        n_iteration += length
 
         # Testing
         if i % args.other.test_freq == 0 and "after_aggregation" in args.learn.test_place:
-            test_monitor = VariableMonitor()
-
-            # Testing for each client and add results to the monitor
-            # Use multiprocessing for acceleration.
-            test_results = launcher.launch(
-                clients=[group.clients[j] for j in range(args.client.client_num)], task_name='test'
-            )
-            for item in test_results:
-                test_monitor.append(item)
-
-            # Get mean results across each client.
-            mean_test_variables = test_monitor.variable_mean()
+            test_result = group.server.test(model=group.clients[0].model)
 
             # Logging test variables.
-            logger.add_scalars_dict(prefix='after_aggregation_test', dic=mean_test_variables, rnd=i)
+            logger.add_scalars_dict(prefix='after_aggregation_test', dic=test_result, rnd=i)
 
             # Saving model checkpoints.
             torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))

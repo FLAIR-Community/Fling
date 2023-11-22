@@ -113,7 +113,7 @@ class BaseClient(ClientTemplate):
     def preprocess_data(self, data):
         return {'x': data['input'].to(self.device), 'y': data['class_id'].to(self.device)}
 
-    def train(self, lr, device=None, train_args=None):
+    def train(self, lr, device=None, train_args=None, ret_full_log=False):
         """
         Local training.
         """
@@ -151,7 +151,10 @@ class BaseClient(ClientTemplate):
         if device is not None:
             self.device = device_bak
 
-        return mean_monitor_variables
+        if not ret_full_log:
+            return mean_monitor_variables
+        else:
+            return monitor.dic
 
     def finetune(self, lr, finetune_args, device=None, finetune_eps=None, override=False):
         """

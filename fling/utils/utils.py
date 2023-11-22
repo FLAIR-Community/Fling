@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import time
-from typing import Iterable, Dict, List
+from typing import Iterable, Dict, List, Any
 from prettytable import PrettyTable
 
 from torch.utils.tensorboard import SummaryWriter
@@ -32,17 +32,18 @@ class Logger(SummaryWriter):
         else:
             return num
 
-    def add_scalars_dict(self, prefix: str, dic: dict, rnd: int) -> None:
+    def add_scalars_dict(self, prefix: str, dic: dict, rnd: int, enable_logger: bool = True) -> None:
         # Log in the tensorboard.
         for k in dic.keys():
             self.add_scalar(f'{prefix}/{k}', dic[k], rnd)
 
-        # Log in the command line.
-        tupled_dict = [(k, v) for k, v in dic.items()]
-        tb = PrettyTable(["Phase", "Round"] + [ii[0] for ii in tupled_dict])
-        tb.add_row([prefix, rnd] + [self.round(ii[1]) for ii in tupled_dict])
-        txt_info = str(tb)
-        self.logging(txt_info)
+        if enable_logger:
+            # Log in the command line.
+            tupled_dict = [(k, v) for k, v in dic.items()]
+            tb = PrettyTable(["Phase", "Round"] + [ii[0] for ii in tupled_dict])
+            tb.add_row([prefix, rnd] + [self.round(ii[1]) for ii in tupled_dict])
+            txt_info = str(tb)
+            self.logging(txt_info)
 
 
 class VariableMonitor:
@@ -59,5 +60,13 @@ class VariableMonitor:
             self.dic[k].append(weight * item[k])
             self.length[k] += weight
 
+    def _mean(self, item: List, length: int) -> Any:
+        if len(item) == 0:
+            return 0.
+        if isinstance(item[0], int) or isinstance(item[0], float):
+            return sum(item) / length
+        if isinstance(item[0], list):
+            return [sum([item[j][i] for j in range(len(item))]) / length for i in range(len(item[0]))]
+
     def variable_mean(self) -> Dict:
-        return {k: sum(self.dic[k]) / self.length[k] for k in self.dic.keys()}
+        return {k: self._mean(self.dic[k], self.length[k]) for k in self.dic.keys()}
