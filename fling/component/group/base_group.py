@@ -4,7 +4,7 @@ import torch
 from fling.utils import get_params_number
 from fling.utils.compress_utils import fed_avg
 from fling.utils.registry_utils import GROUP_REGISTRY
-from fling.utils import Logger, get_parameters
+from fling.utils import Logger, get_weights
 from fling.component.client import ClientTemplate
 
 
@@ -45,8 +45,8 @@ class ParameterServerGroup:
             - None
         """
         # Step 1.
-        fed_keys = get_parameters(
-            self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True
+        fed_keys = get_weights(
+            self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True, include_non_param=True
         ).keys()
 
         # Step 2.
@@ -98,7 +98,8 @@ class ParameterServerGroup:
         # Pick out the parameters for aggregation if needed.
         if aggr_parameter_args is not None:
             fed_keys_bak = self.clients[0].fed_keys
-            new_fed_keys = get_parameters(self.clients[0].model, aggr_parameter_args, return_dict=True).keys()
+            new_fed_keys = get_weights(self.clients[0].model, aggr_parameter_args,
+                                       return_dict=True, include_non_param=True).keys()
             for client in self.clients:
                 client.set_fed_keys(new_fed_keys)
 
