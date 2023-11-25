@@ -49,24 +49,30 @@ class Logger(SummaryWriter):
 class VariableMonitor:
 
     def __init__(self):
-        self.length = {}
+        self.weight = {}
         self.dic = {}
 
     def append(self, item: dict, weight: float = 1) -> None:
         for k in item.keys():
             if k not in self.dic.keys():
                 self.dic[k] = []
-                self.length[k] = 0
-            self.dic[k].append(weight * item[k])
-            self.length[k] += weight
+                self.weight[k] = []
+            self.dic[k].append(item[k])
+            self.weight[k].append(weight)
 
-    def _mean(self, item: List, length: int) -> Any:
+    def _mean(self, item: List, weight: List) -> Any:
         if len(item) == 0:
             return 0.
         if isinstance(item[0], int) or isinstance(item[0], float):
-            return sum(item) / length
+            return sum([item[i] * weight[i] for i in range(len(item))]) / sum(weight)
         if isinstance(item[0], list):
-            return [sum([item[j][i] for j in range(len(item))]) / length for i in range(len(item[0]))]
+            res = []
+            for i in range(len(item[0])):
+                it = [item[j][i] for j in range(len(item))]
+                ws = [weight[j] for j in range(len(item))]
+                tmp = sum([ws[j] * it[j] for j in range(len(it))]) / sum(ws)
+                res.append(tmp)
+            return res
 
     def variable_mean(self) -> Dict:
-        return {k: self._mean(self.dic[k], self.length[k]) for k in self.dic.keys()}
+        return {k: self._mean(self.dic[k], self.weight[k]) for k in self.dic.keys()}
