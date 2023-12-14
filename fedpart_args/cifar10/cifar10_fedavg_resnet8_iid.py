@@ -28,6 +28,7 @@ exp_args = dict(
         aggregation_parameters=dict(
             name='all',
         ),
+        include_non_param=False
     ),
     other=dict(test_freq=1, logging_path='./logging/cifar10_fedavg_resnet8_iid')
 )
