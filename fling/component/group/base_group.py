@@ -46,7 +46,8 @@ class ParameterServerGroup:
         """
         # Step 1.
         fed_keys = get_weights(
-            self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True, include_non_param=True
+            self.clients[0].model, self.args.group.aggregation_parameters,
+            return_dict=True, include_non_param=self.args.group.include_non_param
         ).keys()
 
         # Step 2.
