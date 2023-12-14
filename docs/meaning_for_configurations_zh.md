@@ -102,6 +102,8 @@ default_exp_args = dict(
             # 对于默认情况，应聚合所有参数。
             name='all'
         ),
+        # 决定是否需要聚合非参数的值，如：BN 层的 ``running_mean``, ``running_var`` 等。
+        include_non_param=True,
     ),
     # 启动程序的相关配置
     launcher=dict(

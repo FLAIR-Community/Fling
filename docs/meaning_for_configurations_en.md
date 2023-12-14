@@ -101,6 +101,8 @@ default_exp_args = dict(
             # For default case, every parameter should be aggregated.
             name='all'
         ),
+        # Whether to aggregate non-parameter values. Such as ``running_mean``, ``running_var`` in BN layers.
+        include_non_param=True,
     ),
     # Launcher configurations.
     launcher=dict(
