@@ -4,4 +4,5 @@ from .mnist import MNISTDataset
 from .tiny_imagenet import TinyImagenetDataset
 from .mini_imagenet import MiniImagenetDataset
 from .imagenet import ImagenetDataset
+from .domainnet import DomainNetDataset
 from .build_dataset import get_dataset
