@@ -24,8 +24,8 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
 
     # Construct logger.
     logger = Logger(args.other.logging_path)
-    
-# edition: train_sets[domain]
+
+    # edition: train_sets[domain]
     # Load dataset.
     train_set = {}
     test_set = {}
@@ -33,6 +33,8 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
         train_set[domain] = get_cross_domain_dataset(args, domain=domain, train=True)
         test_set[domain] = get_cross_domain_dataset(args, domain=domain, train=False)
     # Split dataset into clients.
+
+
 # edition: train_sets[domain][user id]
     train_sets = {}
     test_sets = {}
@@ -44,12 +46,19 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
     group = get_group(args, logger)
     group.server = get_server(args, test_dataset=test_set)
 
-# edition:according to num_user per domain to create client
-# to make sure every client have an unique id
+    # edition:according to num_user per domain to create client
+    # to make sure every client have an unique id
     client_id = 0
     for domain in args.data.domains:
         for i in range(args.num_users):
-            group.append(get_client(args=args, client_id=client_id, train_dataset=train_sets[domain][i], test_dataset=test_sets[domain][i]))
+            group.append(
+                get_client(
+                    args=args,
+                    client_id=client_id,
+                    train_dataset=train_sets[domain][i],
+                    test_dataset=test_sets[domain][i]
+                )
+            )
             client_id += 1
     group.initialize()
 
@@ -65,7 +74,7 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
         # Initialize variable monitor.
         train_monitor = VariableMonitor()
 
-# edition: calculate total client_num = domains * num_users
+        # edition: calculate total client_num = domains * num_users
         client_num = len(args.data.domains) * args.num_users
         # Random sample participated clients in each communication round.
         participated_clients = client_sampling(range(client_num), args.client.sample_rate)
@@ -87,9 +96,7 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
 
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
-            test_results = launcher.launch(
-                clients=[group.clients[j] for j in range(client_num)], task_name='test'
-            )
+            test_results = launcher.launch(clients=[group.clients[j] for j in range(client_num)], task_name='test')
             for item in test_results:
                 test_monitor.append(item)
 
@@ -113,9 +120,7 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
 
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
-            test_results = launcher.launch(
-                clients=[group.clients[j] for j in range(client_num)], task_name='test'
-            )
+            test_results = launcher.launch(clients=[group.clients[j] for j in range(client_num)], task_name='test')
             for item in test_results:
                 test_monitor.append(item)
 

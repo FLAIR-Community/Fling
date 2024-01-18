@@ -7,11 +7,11 @@ default_exp_args = dict(
         dataset='cifar10',
         # Root path for dataset.
         data_path='./data',
-        
+
         # domains for cross-domain datasets
         domains=['clipart', 'infograph', 'painting', 'quickdraw', 'real', 'sketch'],
         #base_dir for loading datasets
-        base_dir = 'D:/VScode/FL/Data/DomainNet/',
+        base_dir='D:/VScode/FL/Data/DomainNet/',
 
         # Image transformation methods, such as: Random Resized Crop(RRC), Resize, Color Jitter ...
         # The key ``include_default=True`` means that the default data-augmentation will be applied.
