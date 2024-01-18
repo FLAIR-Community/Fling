@@ -9,11 +9,11 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register('domainnet')
 class DomainNetDataset(Dataset):
-    def __init__(self, base_dir, domain, train: bool, train_num=105, test_num=-1):
+    def __init__(self, cfg: dict, domain, train: bool, train_num=105, test_num=-1):
         super(DomainNetDataset, self).__init__()
 
         # Load data using load_domainnet function
-        train_imgs, train_labels, test_imgs, test_labels = load_domainnet(base_dir=base_dir, domain=domain, train_num=train_num, test_num=test_num)
+        train_imgs, train_labels, test_imgs, test_labels = load_domainnet(base_dir=cfg.data.base_dir, domain=domain, train_num=train_num, test_num=test_num)
 
         # Set class attributes
         self.domain = domain
@@ -56,7 +56,7 @@ def load_domainnet(base_dir, domain, train_num=105, test_num=-1):
     test_paths, test_text_labels = np.load('{}DomainNet/split/{}_test.pkl'.format(base_dir, domain), allow_pickle=True)
 
     label_dict = {'bird': 0, 'feather': 1, 'headphones': 2, 'ice_cream': 3, 'teapot': 4, 'tiger': 5, 'whale': 6,
-                  'windmill': 7, 'wine_glass': 8, 'zebra': 9}
+                'windmill': 7, 'wine_glass': 8, 'zebra': 9}
 
     # transform text labels to digit labels
     train_labels = [label_dict[text] for text in train_text_labels]

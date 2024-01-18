@@ -46,6 +46,20 @@ def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: in
 
     return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
+def cross_domain_iid_sampling(dataset: Dataset, num_users: int)-> List:
+    """
+    Sample I.I.D. client data from dataset
+    :param dataset:
+    :param num_users:number of users per domain
+    :return: dict of image index
+    """
+    num_items = int(len(dataset)/num_users)
+    dict_users, all_idxs = {}, [i for i in range(len(dataset))]
+    for i in range(num_users):
+        dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
+        all_idxs = list(set(all_idxs) - dict_users[i])
+
+    return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
 def pathological_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int, alpha: int) -> List:
     r"""
@@ -106,7 +120,7 @@ def dirichlet_sampling(dataset: Dataset, client_number: int, sample_num: int, se
          ``len(dataset) // client_number``.
         seed: dynamic seed.
         alpha: the argument alpha in dirichlet sampling with range (0, +inf).
-         A smaller alpha means the distributions sampled are more imbalanced.
+        A smaller alpha means the distributions sampled are more imbalanced.
     Returns:
         A list of datasets for each client.
     """
@@ -150,6 +164,7 @@ def dirichlet_sampling(dataset: Dataset, client_number: int, sample_num: int, se
 # Supported sampling methods.
 sampling_methods = {
     'iid': iid_sampling,
+    'cross_domain_iid': cross_domain_iid_sampling,
     'dirichlet': dirichlet_sampling,
     'pathological': pathological_sampling,
 }
@@ -180,4 +195,8 @@ def data_sampling(dataset: Dataset, args: dict, seed: int, train: bool = True) -
         sampling_func = sampling_methods[sampling_name]
     except KeyError:
         raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
-    return sampling_func(dataset, args.client.client_num, sample_num, seed, **sampling_config)
+    
+    if sampling_name == 'cross_domain_iid':
+        return sampling_func(dataset, args.client.num_users, seed, **sampling_config)
+    else:
+        return sampling_func(dataset, args.client.client_num, sample_num, seed, **sampling_config)

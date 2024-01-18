@@ -1,0 +1,9 @@
+1)创建一个名为cross_domain_model_pipeline的.py文件，代表新制作的pipeline
+    1.1 在加载数据集的时候，使用新的get_cross_domain_dataset函数，获得跨域数据集（通过遍历每一个domain，获得字典）
+    1.2 在iid采样部分，使用新制作的cross_domain_iid的采样方法, 获得每个域num_user个数据集列表
+    1.3 在创建client的部分，是根据每个domain和num_user去进行创建train_sets[domain][num_user]
+    1.4 通过domain数*num_user算出total_client的个数，以便后续的筛选和训练测试
+2)新的get_cross_domain_dataset函数是增加了domain这个接口，为了方便加载数据集(在init中进行了声明)
+3)为了方便处理cross_domain的数据集,在default_config中增加了三个argument(domains,base_dir,num_users)
+4)已经加入了一个domainnet数据集用来进行测试，并在init中进行了声明
+
