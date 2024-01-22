@@ -64,8 +64,10 @@ def calculate_mean_std(train_dataset: Dataset, test_dataset: Dataset) -> tuple:
         return reduce(lambda x, y: x + y, res) / len(res), reduce(lambda x, y: x + y, res_std) / len(res)
 
 
-def get_weights(model: nn.Module, parameter_args: dict,
-                return_dict: bool = False, include_non_param: bool = False) -> Union[List, Dict]:
+def get_weights(model: nn.Module,
+                parameter_args: dict,
+                return_dict: bool = False,
+                include_non_param: bool = False) -> Union[List, Dict]:
     """
     Overview:
         Get model parameters, using the given ``parameter_args``.

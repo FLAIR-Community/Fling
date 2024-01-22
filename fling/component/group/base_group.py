@@ -98,8 +98,9 @@ class ParameterServerGroup:
         # Pick out the parameters for aggregation if needed.
         if aggr_parameter_args is not None:
             fed_keys_bak = self.clients[0].fed_keys
-            new_fed_keys = get_weights(self.clients[0].model, aggr_parameter_args,
-                                       return_dict=True, include_non_param=True).keys()
+            new_fed_keys = get_weights(
+                self.clients[0].model, aggr_parameter_args, return_dict=True, include_non_param=True
+            ).keys()
             for client in self.clients:
                 client.set_fed_keys(new_fed_keys)
 

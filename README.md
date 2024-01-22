@@ -66,6 +66,7 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 - Support for a variety of algorithms and datasets.
 - Support multiprocessing training on each client for better efficiency.
 - Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
+- Strong visualization utilities. See [demo](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/visualize_utils/demo) for detailed information.
 
 ## Supported Algorithms
 
