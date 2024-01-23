@@ -19,7 +19,7 @@ class CNNModel(nn.Module):
         activation='relu'
     ):
         super(CNNModel, self).__init__()
-        
+
         self.layers = []
         self.layers.append(nn.Conv2d(input_channel, hidden_dims[0], kernel_size=kernel_sizes[0], padding=paddings[0]))
         self.layers.append(get_activation(name=activation))

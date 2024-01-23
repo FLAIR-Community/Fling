@@ -14,14 +14,10 @@ exp_args = dict(
         optimizer=dict(name='sgd', lr=0.01, momentum=0.9),
         # The weight of fedmoon loss.
         mu=1,
-        temperature=0.5,    
+        temperature=0.5,
         queue_len=1,
     ),
-    model=dict(
-        name='resnet8',
-        input_channel=3,
-        class_number=100
-    ),
+    model=dict(name='resnet8', input_channel=3, class_number=100),
     client=dict(name='fedmoon_client', client_num=10),
     server=dict(name='base_server'),
     group=dict(name='base_group', aggregation_method='avg'),
