@@ -227,11 +227,6 @@ def get_model_difference(
     return res
 
 
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
-
-
 class TVLoss(nn.Module):
 
     def __init__(self):
