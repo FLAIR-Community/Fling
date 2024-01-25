@@ -39,8 +39,8 @@ class FedCACServerGroup(ParameterServerGroup):
                 for (name1, param1), (name2, param2), (name3, param3) in zip(
                         self.clients[client].model.named_parameters(), tempGlobalModel.named_parameters(),
                         self.clients[client].customized_model.named_parameters()):
-                    param1.data = self.clients[client].local_mask[index].float() * param3.data + \
-                                  self.clients[client].global_mask[index].float() * param2.data
+                    param1.data = self.clients[client].local_mask[index].to(self.args.learn.device).float() * param3.data + \
+                                  self.clients[client].global_mask[index].to(self.args.learn.device).float() * param2.data
                     index += 1
                 self.clients[client].model.to('cpu')
                 self.clients[client].customized_model.to('cpu')
@@ -61,8 +61,8 @@ class FedCACServerGroup(ParameterServerGroup):
                 if i == j:
                     continue
                 overlap_rate = 1 - torch.sum(
-                    torch.abs(self.clients[i].critical_parameter - self.clients[j].critical_parameter)
-                ) / float(torch.sum(self.clients[i].critical_parameter).cpu() * 2)
+                    torch.abs(self.clients[i].critical_parameter.to(self.args.learn.device) - self.clients[j].critical_parameter.to(self.args.learn.device))
+                ) / float(torch.sum(self.clients[i].critical_parameter.to(self.args.learn.device)).cpu() * 2)
                 overlap_buffer[i].append(overlap_rate)
 
         # calculate the global threshold

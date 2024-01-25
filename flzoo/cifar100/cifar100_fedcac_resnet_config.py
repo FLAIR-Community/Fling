@@ -33,7 +33,6 @@ exp_args = dict(
     group=dict(
         name='fedcac_group',
         aggregation_method='avg',
-        # Only aggregate parameters whose name does not contain the keyword "fc".
         aggregation_parameters=dict(name='all', ),
     ),
     other=dict(test_freq=1, logging_path=f'./logging/cifar100_fedcac_resnet/{noniid}_{alpha}/{tau}_{beta}/{seed}')
