@@ -96,6 +96,8 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 **DLG:** [Deep Leakage from Gradients](https://arxiv.org/abs/1906.08935)
 
+**iDLG:** [Inverting Gradients -- How easy is it to break privacy in federated learning?](https://arxiv.org/abs/2003.14053)
+
 ## Feedback and Contribution
 
 - For any bugs, questions, feature requirements, feel free to propose them in [issues](https://github.com/kxzxvbk/Fling/issues)

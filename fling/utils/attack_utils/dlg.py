@@ -1,11 +1,11 @@
+import math
 import os
-from typing import Union, Dict
-
-import numpy as np
 from tqdm import tqdm
+from typing import Union, Dict, Tuple
 from easydict import EasyDict
 
 import torch
+import numpy as np
 from torch import nn
 from torch.utils.data import Dataset
 from torch.nn import functional as F
@@ -15,14 +15,39 @@ from fling.utils import TVLoss
 from fling.utils import get_weights
 
 
+def _l2_distance(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    # Calculate the l2 distance between two tensors.
+    return torch.sum((x - y) ** 2).sum()
+
+
+def _cos_distance(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    # Calculate the cos distance between two tensors.
+    assert x.shape == y.shape
+    x = torch.flatten(x)
+    y = torch.flatten(y)
+    return 1 - F.cosine_similarity(x, y, dim=0, eps=1e-10)
+
+
+def _reconstruction_loss(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    # Given a batch of real images and reconstructed images, calculate the reconstruction loss.
+    assert x.shape == y.shape
+    x = torch.flatten(x, start_dim=1)
+    y = torch.flatten(y, start_dim=1)
+    return torch.sqrt(torch.sum((x - y) ** 2, dim=1))
+
+
 class DLGAttacker:
     """
     Overview:
-        The attack method introduced in: Deep Leakage from Gradients. Given the gradients of input images, recover the
-    original input images.
+        A series of attack methods that recover input images using calculated gradients, i.e. leakage from gradients.
+    Reference paper: 1) Deep Leakage from Gradients <link https://arxiv.org/pdf/1906.08935.pdf link>, known as DLG. \
+    2) Inverting Gradients - How easy is it to break privacy in federated learning? \
+    <link https://arxiv.org/pdf/2003.14053.pdf link>, known as iDLG.
     """
 
-    def __init__(self, iteration: int, working_dir: str, iteration_per_save: int = 10):
+    def __init__(self, iteration: int, working_dir: str,
+                 iteration_per_save: int = 10, distance_measure: str = 'euclid',
+                 tv_weight: float = 0):
         """
         Overview:
             Initialize the attacker object.
@@ -30,12 +55,25 @@ class DLGAttacker:
             iteration: The number of iterations for recovering the input image.
             working_dir: The working dir of this attacker. The attack results will be saved to this path.
             iteration_per_save: The interation interval between saving two reconstructed images. Default to be 10.
+            distance_measure: The metric for measuring the distance between recovered gradient and ground truth \
+                gradient. If set to "euclid", the algorithm is equivalent to DLG, and if set to "cos", the algorithm \
+                is equivalent to iDLG.
+            tv_weight: The weight of total variance loss (TV-loss). A larger weight can result in more "smooth" \
+                recovered images.
         """
         self.iteration = iteration
         self.working_dir = working_dir
         self.logger = Logger(self.working_dir)
         self.base_index = 0
         self.iteration_per_save = iteration_per_save
+        self.tv_weight = tv_weight
+
+        if distance_measure == 'cos':
+            self.metric = _cos_distance
+        elif distance_measure == 'euclid':
+            self.metric = _l2_distance
+        else:
+            raise ValueError(f'Unrecognized distance measure: {distance_measure}')
 
     def attack(
             self,
@@ -48,8 +86,7 @@ class DLGAttacker:
             use_gt_labels: bool = True,
             save_img: bool = False,
             optim_backend: str = 'lbfgs',
-            tv_weight: float = 0,
-    ) -> float:
+    ) -> Tuple[float, float]:
         """
         Overview:
             The main attack function.
@@ -57,25 +94,26 @@ class DLGAttacker:
             model: The model to be attacked.
             dataset: The dataset tried to be recovered by the attacker.
             batch_size: Batch-size of the input images. A larger batch size will be harder to attack. Default to be 1.
-            parameter_args: Parameters whose gradients are visible to attackers. Typically equals to \
+            parameter_args: Parameters whose gradients are visible to attackers, which typically equals to \
                 ``aggregation_parameters`` in the config file.
             device: Device to run this attack algorithm, such as ``"cpu"`` and ``"cuda"``.
             class_number: The number of classes for the classification task.
             use_gt_labels: Whether the ground truth label is able to be acquired by the attacker. Default to be \
                 ``True``. If set to be ``False``, it will be harder to attack.
             save_img: Whether to save the reconstructed images into working dir. Default to be ``False``.
-            optim_backend: Backend for optimizing the recovred image. Supports "lbfgs" and "adam".
-            tv_weight: The weight of total variance loss (TV-loss). A larger weight can result in more "smooth" \
-                recovered images.
+            optim_backend: Backend for optimizing the recovered image. Supports "lbfgs" and "adam".
         Returns:
-            mean_loss: The mean reconstruction loss across all samples in the dataset. A smaller value indicates a \
-                better performance for the attacker.
+            final_loss: The reconstruction loss after the final iterations across all samples in the dataset. \
+                A smaller value indicates a better performance for the attacker.
+            min_loss: The min reconstruction loss of all iterations across all samples in the dataset. \
+                A smaller value indicates a better performance for the attacker.
         """
         start, end = 0, batch_size
         batch_idx = 0
         total_loss = []
+        total_min_loss = []
 
-        model = model.to(device=device)
+        model = model.to(device)
         model = model.eval()
         tv_criterion = TVLoss()
 
@@ -95,8 +133,8 @@ class DLGAttacker:
             batch_idx += 1
 
             # Prepare input data and labels.
-            batch_x = torch.stack([batch[i][0] for i in range(len(batch))]).to(device)
-            batch_y = torch.tensor([batch[i][1] for i in range(len(batch))]).to(device).unsqueeze(1)
+            batch_x = torch.stack([batch[i]['input'] for i in range(len(batch))]).to(device)
+            batch_y = torch.tensor([batch[i]['class_id'] for i in range(len(batch))]).to(device).unsqueeze(1)
             gt_label = torch.zeros(batch_y.size(0), class_number, device=device)
             gt_label.scatter_(1, batch_y, 1)
 
@@ -128,6 +166,11 @@ class DLGAttacker:
             # This is for saving reconstructed images.
             batch_img_history = {self.base_index + start + i: [] for i in range(dummy_data.shape[0])}
 
+            # Save the min reconstruction loss and the corresponding images.
+            best_losses = torch.zeros(dummy_data.shape[0], dtype=torch.float).to(device)
+            torch.fill_(best_losses, 1e6)
+            best_images = torch.zeros_like(batch_x).to('cpu')
+
             # Optimize the reconstructed images iteratively.
             for iters in tqdm(range(self.iteration)):
 
@@ -144,17 +187,25 @@ class DLGAttacker:
                     # Main loss function is the difference between gradients calculated by dummy data and real data.
                     grad_diff = 0
                     for gx, gy in zip(dummy_dy_dx, gt_dy_dx):
-                        grad_diff += ((gx - gy) ** 2).sum()
+                        grad_diff += self.metric(gx, gy)
                     # Calculate tv-loss.
                     tv_loss = tv_criterion(dummy_data)
 
                     # Final loss is the combination of tv-loss and grad-diff.
-                    total_loss = grad_diff + tv_weight * tv_loss
+                    total_loss = grad_diff + self.tv_weight * tv_loss
                     total_loss.backward(retain_graph=True)
 
                     return total_loss
 
                 optimizer.step(closure)
+                dummy_data.clamp(min=0, max=1)
+
+                # Calculate the reconstruction loss and save the best loss of all iterations.
+                # Save the corresponding images.
+                reconstruction_losses = _reconstruction_loss(dummy_data, batch_x)
+                best_losses = torch.minimum(best_losses, reconstruction_losses)
+                best_images[best_losses == reconstruction_losses] = \
+                    dummy_data[best_losses == reconstruction_losses].detach().cpu()
 
                 # Save the reconstructed data.
                 if iters % self.iteration_per_save == 0:
@@ -168,17 +219,27 @@ class DLGAttacker:
                         recovered_image = np.swapaxes(recovered_image, 1, 2)
                         batch_img_history[img_idx].append(recovered_image)
 
-            # Record reconstruction loss for this batch.
-            total_loss.append(torch.sqrt(torch.sum(dummy_data - batch_x) ** 2).item())
-            self.logger.logging(f'Batch reconstruction loss: {total_loss[-1]}.')
+            # Record final reconstruction loss for this batch.
+            total_loss.append(torch.mean(_reconstruction_loss(dummy_data, batch_x)).item())
+            total_min_loss.append(torch.mean(best_losses).item())
+            save_dict = {'last_loss': total_loss[-1], 'min_loss': total_min_loss[-1]}
+            self.logger.add_scalars_dict('reconstruction', save_dict, rnd=math.ceil(start//batch_size))
 
             # Save the images in .gif format.
             if save_img:
                 import imageio
-                for img_idx, images in batch_img_history.items():
+                for idx, (img_idx, images) in enumerate(batch_img_history.items()):
                     imageio.mimsave(os.path.join(self.working_dir, f'{img_idx}.gif'), images, duration=0.25)
+                    # Save the best image in .png format.
+                    recovered_image = (
+                            255 * np.concatenate([best_images[idx].numpy(), batch_x[idx].detach().cpu().numpy()], axis=2)
+                    ).astype('uint8')
+                    recovered_image = np.swapaxes(recovered_image, 0, 1)
+                    recovered_image = np.swapaxes(recovered_image, 1, 2)
+                    imageio.imwrite(os.path.join(self.working_dir, f'{img_idx}.png'), recovered_image)
 
         self.base_index += len(dataset)
-        mean_loss = sum(total_loss) / len(total_loss)
-        self.logger.logging(f'Mean reconstruction loss: {mean_loss}.')
-        return mean_loss
+        final_loss = sum(total_loss) / len(total_loss)
+        min_loss = sum(total_min_loss) / len(total_min_loss)
+        self.logger.logging(f'Final reconstruction loss: {final_loss}.\t Min reconstruction loss: {min_loss}.')
+        return final_loss, min_loss
