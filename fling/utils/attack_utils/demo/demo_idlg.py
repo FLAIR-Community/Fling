@@ -1,8 +1,6 @@
 from easydict import EasyDict
 
 from torch import nn
-from torchvision import transforms
-from torchvision.datasets import CIFAR10
 
 from fling import dataset
 from fling.utils.attack_utils import DLGAttacker

@@ -28,12 +28,13 @@ def _cos_distance(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return 1 - F.cosine_similarity(x, y, dim=0, eps=1e-10)
 
 
-def _reconstruction_loss(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+def _reconstruction_psnr(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     # Given a batch of real images and reconstructed images, calculate the reconstruction loss.
     assert x.shape == y.shape
     x = torch.flatten(x, start_dim=1)
     y = torch.flatten(y, start_dim=1)
-    return torch.sqrt(torch.sum((x - y) ** 2, dim=1))
+    psnr = - 10 * torch.log10(torch.mean((x - y) ** 2, dim=1))
+    return psnr
 
 
 class DLGAttacker:
@@ -168,7 +169,6 @@ class DLGAttacker:
 
             # Save the min reconstruction loss and the corresponding images.
             best_losses = torch.zeros(dummy_data.shape[0], dtype=torch.float).to(device)
-            torch.fill_(best_losses, 1e6)
             best_images = torch.zeros_like(batch_x).to('cpu')
 
             # Optimize the reconstructed images iteratively.
@@ -202,8 +202,8 @@ class DLGAttacker:
 
                 # Calculate the reconstruction loss and save the best loss of all iterations.
                 # Save the corresponding images.
-                reconstruction_losses = _reconstruction_loss(dummy_data, batch_x)
-                best_losses = torch.minimum(best_losses, reconstruction_losses)
+                reconstruction_losses = _reconstruction_psnr(dummy_data, batch_x)
+                best_losses = torch.maximum(best_losses, reconstruction_losses)
                 best_images[best_losses == reconstruction_losses] = \
                     dummy_data[best_losses == reconstruction_losses].detach().cpu()
 
@@ -220,9 +220,9 @@ class DLGAttacker:
                         batch_img_history[img_idx].append(recovered_image)
 
             # Record final reconstruction loss for this batch.
-            total_loss.append(torch.mean(_reconstruction_loss(dummy_data, batch_x)).item())
+            total_loss.append(torch.mean(_reconstruction_psnr(dummy_data, batch_x)).item())
             total_min_loss.append(torch.mean(best_losses).item())
-            save_dict = {'last_loss': total_loss[-1], 'min_loss': total_min_loss[-1]}
+            save_dict = {'last_psnr': total_loss[-1], 'max_psnr': total_min_loss[-1]}
             self.logger.add_scalars_dict('reconstruction', save_dict, rnd=math.ceil(start//batch_size))
 
             # Save the images in .gif format.
@@ -241,5 +241,5 @@ class DLGAttacker:
         self.base_index += len(dataset)
         final_loss = sum(total_loss) / len(total_loss)
         min_loss = sum(total_min_loss) / len(total_min_loss)
-        self.logger.logging(f'Final reconstruction loss: {final_loss}.\t Min reconstruction loss: {min_loss}.')
+        self.logger.logging(f'Final reconstruction PSNR: {final_loss}.\t Max reconstruction PSNR: {min_loss}.')
         return final_loss, min_loss

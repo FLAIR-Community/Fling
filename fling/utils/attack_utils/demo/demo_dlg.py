@@ -1,8 +1,6 @@
 from easydict import EasyDict
 
 from torch import nn
-from torchvision import transforms
-from torchvision.datasets import CIFAR10
 
 import fling.dataset
 from fling.utils.attack_utils import DLGAttacker
@@ -49,18 +47,18 @@ if __name__ == '__main__':
     model = ToyModel()
 
     # Step 3: initialize the attacker.
-    # attacker = DLGAttacker(iteration=3000, working_dir='./dlg_attacker',
-    #                        iteration_per_save=100, distance_measure='euclid')
+    attacker = DLGAttacker(iteration=3000, working_dir='./dlg_attacker',
+                           iteration_per_save=100, distance_measure='euclid')
 
     # Step 4: attack.
-    # attacker.attack(model, test_dataset, device='cuda', class_number=10, save_img=True, optim_backend='adam')
+    attacker.attack(model, test_dataset, device='cuda', class_number=10, save_img=True, optim_backend='adam')
 
     # If you want to use ``lbfgs`` as optim backend, you can start with this setting.
     # Note: The variance of performance of lbfgs may be quite large. Please repeat the experiments for more times.
     # Step 3: initialize the attacker.
-    attacker = DLGAttacker(iteration=300, working_dir='./dlg_attacker',
-                           iteration_per_save=10, distance_measure='euclid')
+    # attacker = DLGAttacker(iteration=300, working_dir='./dlg_attacker',
+    #                        iteration_per_save=10, distance_measure='euclid')
 
     # Step 4: attack.
-    attacker.attack(model, test_dataset, device='cuda', class_number=10, save_img=True,
-                    optim_backend='lbfgs')
+    # attacker.attack(model, test_dataset, device='cuda', class_number=10, save_img=True,
+    #                 optim_backend='lbfgs')
