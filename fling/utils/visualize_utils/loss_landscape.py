@@ -11,10 +11,8 @@ from torch.utils.data import DataLoader
 def _gen_rand_like(tensor: torch.Tensor) -> torch.Tensor:
     # Return a tensor whose shape is identical to the input tensor.
     # The returned tensor is a filled with Gaussian noise and the norm in each line is the same as the input.
-    tmp = torch.rand_like(tensor)
-    tmp = tmp / torch.norm(tmp, dim=1, keepdim=True)
-    tmp = tmp * torch.norm(tensor, dim=1, keepdim=True)
-    return tmp
+    tmp = torch.randn_like(tensor)
+    return tmp * torch.norm(tensor, dim=1, keepdim=True) / torch.norm(tmp, dim=1, keepdim=True)
 
 
 def _calc_loss_value(
@@ -24,8 +22,8 @@ def _calc_loss_value(
     model = model.to(device)
     model.eval()
     tot_loss = []
-    for _, (data_x, data_y) in enumerate(data_loader):
-        data_x, data_y = data_x.to(device), data_y.to(device)
+    for _, (data) in enumerate(data_loader):
+        data_x, data_y = data['input'].to(device), data['class_id'].to(device)
         pred_y = model(data_x)
         loss = criterion(pred_y, data_y)
         tot_loss.append(loss.item())
@@ -43,7 +41,8 @@ def plot_2d_loss_landscape(
         noise_range: Tuple[float, float] = (-1, 1),
         resolution: int = 20,
         visualize: bool = False,
-        log_scale: bool = False
+        log_scale: bool = False,
+        max_val: float = 5
 ) -> None:
     """
     Overview:
@@ -63,6 +62,7 @@ def plot_2d_loss_landscape(
             but a lower resolution may result in unclear contours. Default to be ``20``.
         visualize: Whether to directly show the picture in GUI. Default to be ``False``.
         log_scale: Whether to use a log function to normalize the loss. Default to be ``False``.
+        max_val: The max value of permitted loss. This is for better visualization.
     """
     # Copy the original model.
     orig_model = model
@@ -71,6 +71,7 @@ def plot_2d_loss_landscape(
     # Generate two random directions.
     rand_x, rand_y = {}, {}
     for k, layer in model.named_modules():
+        # Decide which parameters should be included.
         if parameter_args['name'] == 'all':
             incl = True
         elif parameter_args['name'] == 'contain':
@@ -84,13 +85,12 @@ def plot_2d_loss_landscape(
         if not incl:
             continue
 
+        # Generate random noises.
         if isinstance(layer, nn.Linear):
-            orig_weight = copy.deepcopy(layer.weight)
-            rand_x0 = _gen_rand_like(orig_weight)
-            rand_y0 = _gen_rand_like(orig_weight)
+            rand_x0 = _gen_rand_like(layer.weight)
+            rand_y0 = _gen_rand_like(layer.weight)
         elif isinstance(layer, nn.Conv2d):
-            orig_weight = copy.deepcopy(layer.weight)
-            orig_weight = orig_weight.reshape(orig_weight.shape[0], -1)
+            orig_weight = layer.weight.reshape(layer.weight.shape[0], -1)
             rand_x0 = _gen_rand_like(orig_weight)
             rand_y0 = _gen_rand_like(orig_weight)
         else:
@@ -111,16 +111,18 @@ def plot_2d_loss_landscape(
                     if k not in rand_x.keys():
                         continue
                     elif isinstance(layer, nn.Linear):
-                        orig_weight = copy.deepcopy(orig_layers[k].weight)
-                        orig_weight += rand_x[k] * x_coord + rand_y[k] * y_coord
-                        layer.weight = orig_weight
+                        orig_weight = orig_layers[k].weight.clone()
+                        delta_w = rand_x[k] * x_coord + rand_y[k] * y_coord
+                        orig_weight += delta_w
+                        layer.weight.data = orig_weight
                     elif isinstance(layer, nn.Conv2d):
-                        orig_weight = copy.deepcopy(orig_layers[k].weight)
+                        orig_weight = orig_layers[k].weight.clone()
                         orig_shape = orig_weight.shape
                         orig_weight = orig_weight.reshape(orig_weight.shape[0], -1)
-                        orig_weight += rand_x[k] * x_coord + rand_y[k] * y_coord
+                        delta_w = rand_x[k] * x_coord + rand_y[k] * y_coord
+                        orig_weight += delta_w
                         layer.weight.data = orig_weight.reshape(orig_shape)
-                loss_values[i][j] = _calc_loss_value(model=model, data_loader=dataloader, device=device)
+                loss_values[i][j] = min(_calc_loss_value(model=model, data_loader=dataloader, device=device), max_val)
     if log_scale:
         loss_values = torch.log(loss_values)
 
