@@ -169,6 +169,7 @@ class DLGAttacker:
 
             # Save the min reconstruction loss and the corresponding images.
             best_losses = torch.zeros(dummy_data.shape[0], dtype=torch.float).to(device)
+            torch.fill_(best_losses, -1e6)
             best_images = torch.zeros_like(batch_x).to('cpu')
 
             # Optimize the reconstructed images iteratively.
