@@ -10,6 +10,7 @@ It mainly supports:
 
 - Generic Federated Learning methods, such as FedAvg.
 - Personalized Federated Learning methods, such as FedPer.
+- Attacking methods, such as DLG.
 
 ## Installation
 
@@ -49,7 +50,9 @@ This config is a simplified version for conducting FedAvg on the dataset MNIST a
 
 For other algorithms and datasets, users can refer to `argzoo/` or customize your own configuration files.
 
-**Other tutorials:**
+For attacking methods, please refer to our examples in: [demo for attack](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/attack_utils/demo)
+
+**Tutorials:**
 
 [Overall Framework of Fling](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_en.md) | [Fling 整体框架](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_zh.md)
 
@@ -89,6 +92,12 @@ For other algorithms and datasets, users can refer to `argzoo/` or customize you
 **pFedSD:** [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434)
 
 **FedCAC:** [Bold but Cautious: Unlocking the Potential of Personalized Federated Learning through Cautiously Aggressive Collaboration]()
+
+### Attacking Methods
+
+**DLG:** [Deep Leakage from Gradients](https://arxiv.org/abs/1906.08935)
+
+**iDLG:** [Inverting Gradients -- How easy is it to break privacy in federated learning?](https://arxiv.org/abs/2003.14053)
 
 ## Feedback and Contribution
 
