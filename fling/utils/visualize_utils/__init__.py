@@ -1,2 +1,3 @@
 from .loss_landscape import plot_2d_loss_landscape
 from .conv_kernel_visualizer import plot_conv_kernels
+from .hessian_eigen_value import calculate_hessian_dominant_eigen_values

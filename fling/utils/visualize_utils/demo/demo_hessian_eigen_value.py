@@ -5,7 +5,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from fling import dataset
-from fling.utils.visualize_utils import plot_2d_loss_landscape
+from fling.utils.visualize_utils import calculate_hessian_dominant_eigen_values
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     criterion = torch.nn.CrossEntropyLoss()
-    for _ in range(10):
+    for _ in range(0):
         for _, (data) in enumerate(dataloader):
             data_x, data_y = data['input'], data['class_id']
             data_x, data_y = data_x.to(device), data_y.to(device)
@@ -71,14 +71,5 @@ if __name__ == '__main__':
 
     # Step 4: plot the loss landscape after training the model.
     # Only one line of code for visualization!
-    plot_2d_loss_landscape(
-        model=model,
-        dataloader=test_dataloader,
-        device='cuda',
-        caption='Loss Landscape Trained',
-        save_path='./landscape.pdf',
-        noise_range=(-1, 1),
-        resolution=30,
-        log_scale=True,
-        max_val=20,
-    )
+    res = calculate_hessian_dominant_eigen_values(model, iter_num=20, dataloader=test_dataloader, device='cuda')
+    print(res)
