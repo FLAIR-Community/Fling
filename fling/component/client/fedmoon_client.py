@@ -37,7 +37,6 @@ class FedMOONClient(BaseClient):
             self.prev_models.pop(0)
         self.prev_models.append(copy.deepcopy(model))
 
-
     def _store_global_model(self, model: nn.Module) -> None:
         r"""
         Overview:
