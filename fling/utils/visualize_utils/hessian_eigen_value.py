@@ -61,7 +61,9 @@ def calculate_hessian_dominant_eigen_values(
 ) -> Dict:
     """
     Overview:
-        Calculate each dominant eigen value of each layer in the model.
+        Using power iteration to calculate each dominant eigen value of each layer in the model.
+        Reference paper: HAWQ: Hessian AWare Quantization of Neural Networks with Mixed-Precision
+        <link https://arxiv.org/pdf/1905.03696.pdf link>
     Arguments:
         model: The neural network that calculates ``loss``.
         iter_num: Number of iterations using power iteration.
@@ -93,8 +95,6 @@ def calculate_hessian_dominant_eigen_values(
     # Power iteration.
     for i in range(iter_num):
         hv = _get_hv(g, ws, vs)
-        print(f'Iteration: {i}')
-        print(_rayleigh_quotient(hv, vs))
         vs = [hv[i].detach() for i in range(len(hv))]
         _normalize(vs)
 
