@@ -1,3 +1,4 @@
+import copy
 import math
 import pickle
 import random
@@ -244,3 +245,24 @@ class TVLoss(nn.Module):
 
     def _tensor_size(self, t):
         return t.size()[1] * t.size()[2] * t.size()[3]
+
+
+def model_add(model1: nn.Module, model2: nn.Module) -> nn.Module:
+    ret = copy.deepcopy(model1)
+    sd1, sd2 = model1.state_dict(), model2.state_dict()
+    ret.load_state_dict({k: sd1[k] + sd2[k] for k in sd1.keys()})
+    return ret
+
+
+def model_sub(model1: nn.Module, model2: nn.Module) -> nn.Module:
+    ret = copy.deepcopy(model1)
+    sd1, sd2 = model1.state_dict(), model2.state_dict()
+    ret.load_state_dict({k: sd1[k] - sd2[k] for k in sd1.keys()})
+    return ret
+
+
+def model_mul(scalar: float, model: nn.Module) -> nn.Module:
+    ret = copy.deepcopy(model)
+    sd = model.state_dict()
+    ret.load_state_dict({k: scalar * sd[k] for k in sd.keys()})
+    return ret

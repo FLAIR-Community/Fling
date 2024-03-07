@@ -1,7 +1,9 @@
 import copy
-from typing import Tuple, Dict
+import math
+from typing import Tuple, Dict, Optional
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from fling.utils.torch_utils import model_add, model_sub, model_mul
 
 import torch
 from torch import nn
@@ -16,7 +18,7 @@ def _gen_rand_like(tensor: torch.Tensor) -> torch.Tensor:
 
 
 def _calc_loss_value(
-    model: nn.Module, data_loader: DataLoader, device: str, criterion: nn.Module = nn.CrossEntropyLoss()
+        model: nn.Module, data_loader: DataLoader, device: str, criterion: nn.Module = nn.CrossEntropyLoss()
 ):
     # Given a model and corresponding dataset, calculate the mean loss value.
     model = model.to(device)
@@ -37,12 +39,14 @@ def plot_2d_loss_landscape(
         device: str,
         caption: str,
         save_path: str,
+        target_model1: Optional[nn.Module] = None,
+        target_model2: Optional[nn.Module] = None,
         parameter_args: Dict = {"name": "all"},
         noise_range: Tuple[float, float] = (-1, 1),
         resolution: int = 20,
         visualize: bool = False,
         log_scale: bool = False,
-        max_val: float = 5
+        max_val: float = 5,
 ) -> None:
     """
     Overview:
@@ -53,6 +57,9 @@ def plot_2d_loss_landscape(
         dataloader: The dataloader used to check the landscape.
         caption: The caption of generated graph.
         save_path: The save path of the generated loss landscape picture.
+        target_model1: If specified, the first direction of visualization will be not randomly chosen, but will be set \
+            as ``target_model1 - model``.
+        target_model2: Similar to ``target_model1``, determine the second direction of visualization.
         parameter_args: Specify what parameters should add noises. Default to be ``{"name": "all"}``. For other \
             usages, please refer to the usage of ``aggregation_parameters`` in our configuration. A tutorial can \
             be found in: https://github.com/kxzxvbk/Fling/docs/meaning_for_configurations_en.md.
@@ -67,6 +74,7 @@ def plot_2d_loss_landscape(
     # Copy the original model.
     orig_model = model
     model = copy.deepcopy(model)
+    model.eval()
 
     # Generate two random directions.
     rand_x, rand_y = {}, {}
@@ -86,10 +94,19 @@ def plot_2d_loss_landscape(
             continue
 
         # Generate random noises.
-        if isinstance(layer, nn.Linear):
+        if (isinstance(layer, nn.Linear) or isinstance(layer, nn.Conv2d) or isinstance(layer, nn.BatchNorm2d)) \
+                and target_model1 is not None and target_model2 is not None:
+            # Detail: If the target models are specified, all parameters together with statistics (e.g. BN statistics)
+            # will be permuted. If the target models are not specified, only weight tensors in linear layers and
+            # convolution layers will be permuted.
+            rand_x0 = model_sub(dict(target_model1.named_modules())[k], layer)
+            rand_y0 = model_sub(dict(target_model2.named_modules())[k], layer)
+        elif isinstance(layer, nn.Linear):
+            # Generate random linear weight tensors.
             rand_x0 = _gen_rand_like(layer.weight)
             rand_y0 = _gen_rand_like(layer.weight)
         elif isinstance(layer, nn.Conv2d):
+            # Generate random convolution weight tensors.
             orig_weight = layer.weight.reshape(layer.weight.shape[0], -1)
             rand_x0 = _gen_rand_like(orig_weight)
             rand_y0 = _gen_rand_like(orig_weight)
@@ -110,12 +127,20 @@ def plot_2d_loss_landscape(
                 for k, layer in model.named_modules():
                     if k not in rand_x.keys():
                         continue
+                    elif target_model1 is not None and target_model2 is not None:
+                        # If the target models are specified, manipulate the total model.
+                        new_layer = model_add(model_mul(x_coord, rand_x[k]), model_mul(y_coord, rand_y[k]))
+                        new_layer = model_add(new_layer, orig_layers[k])
+                        # Copy the new generated layers to the original object.
+                        layer.load_state_dict(new_layer.state_dict())
                     elif isinstance(layer, nn.Linear):
+                        # Target models are not specified, only operate the weight tensors.
                         orig_weight = orig_layers[k].weight.clone()
                         delta_w = rand_x[k] * x_coord + rand_y[k] * y_coord
                         orig_weight += delta_w
                         layer.weight.data = orig_weight
                     elif isinstance(layer, nn.Conv2d):
+                        # Operate on the convolution weight tensors.
                         orig_weight = orig_layers[k].weight.clone()
                         orig_shape = orig_weight.shape
                         orig_weight = orig_weight.reshape(orig_weight.shape[0], -1)
@@ -129,9 +154,31 @@ def plot_2d_loss_landscape(
     # Plot the result.
     x_mesh, y_mesh = torch.meshgrid(x_coords, y_coords)
     ax = plt.axes(projection='3d')
-    ax.plot_surface(x_mesh, y_mesh, loss_values, rstride=1, cstride=1, cmap='viridis', edgecolor='none')
+
+    # Add special dots.
+    non_nan_tensor = loss_values[~torch.isnan(loss_values)]
+    max_loss = torch.max(non_nan_tensor)
+
+    loss1 = _calc_loss_value(model=orig_model, data_loader=dataloader, device=device)
+    if log_scale:
+        loss1 = math.log(loss1)
+    ax.text(0, 0, max_loss, "GM ({:.2f})".format(loss1), color='black', zorder=2)
+
+    # Add client model dots.
+    if target_model1 is not None and target_model2 is not None:
+        loss1 = _calc_loss_value(model=target_model1, data_loader=dataloader, device=device)
+        if log_scale:
+            loss1 = math.log(loss1)
+        ax.text(1, 1, max_loss, "LM1 ({:.2f})".format(loss1), color='black', zorder=2)
+
+        loss2 = _calc_loss_value(model=target_model2, data_loader=dataloader, device=device)
+        if log_scale:
+            loss2 = math.log(loss2)
+        ax.text(0, 1, max_loss, "LM2 ({:.2f})".format(loss2), color='black', zorder=2)
+
+    ax.plot_surface(x_mesh, y_mesh, loss_values, rstride=1, cstride=1, cmap='viridis', edgecolor='none', zorder=1)
     ax.set_title(caption)
     plt.savefig(save_path)
     if visualize:
         plt.show()
-    plt.cla()
+    plt.close()
