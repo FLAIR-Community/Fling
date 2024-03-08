@@ -81,7 +81,7 @@ def generic_model_visualization_pipeline(args: dict, seed: int = 0) -> None:
             # Logging test variables.
             logger.add_scalars_dict(prefix='before_aggregation_test', dic=test_result, rnd=i)
 
-        if last_global_model is not None:
+        if last_global_model is not None and i > 45:
             plot_2d_loss_landscape(model=last_global_model, dataloader=part_test,
                                    device=args.learn.device, caption='Global-test Loss Landscape',
                                    save_path=os.path.join(args.other.logging_path, f"losslandscape_gt_{i}.pdf"),

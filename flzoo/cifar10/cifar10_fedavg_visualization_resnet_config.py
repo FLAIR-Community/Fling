@@ -5,7 +5,7 @@ exp_args = dict(
         dataset='cifar10', data_path='./data/CIFAR10', sample_method=dict(name='iid', train_num=500, test_num=100)
     ),
     learn=dict(
-        device='cuda:0', local_eps=5, global_eps=10, batch_size=100, optimizer=dict(name='sgd', lr=0.1, momentum=0.9)
+        device='cuda:0', local_eps=5, global_eps=50, batch_size=100, optimizer=dict(name='sgd', lr=0.1, momentum=0.9)
     ),
     model=dict(
         name='resnet8',
