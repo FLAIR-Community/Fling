@@ -75,8 +75,8 @@ class FedCACClient(BaseClient):
                     thresh = new_metric.sort()[0][0]
 
             # Get the local mask and global mask
-            mask = (c >= thresh).int()
-            global_mask.append((c < thresh).int())
+            mask = (c >= thresh).int().to('cpu')
+            global_mask.append((c < thresh).int().to('cpu'))
             local_mask.append(mask)
             critical_parameter.append(mask.view(-1))
         model.zero_grad()

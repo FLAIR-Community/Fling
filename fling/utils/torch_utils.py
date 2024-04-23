@@ -64,7 +64,21 @@ def calculate_mean_std(train_dataset: Dataset, test_dataset: Dataset) -> tuple:
         return reduce(lambda x, y: x + y, res) / len(res), reduce(lambda x, y: x + y, res_std) / len(res)
 
 
-def get_parameters(model: nn.Module, parameter_args: dict, return_dict: bool = False) -> Union[List, Dict]:
+def get_weights(model: nn.Module,
+                parameter_args: dict,
+                return_dict: bool = False,
+                include_non_param: bool = False) -> Union[List, Dict]:
+    """
+    Overview:
+        Get model parameters, using the given ``parameter_args``.
+    Arguments:
+        - model: The model to extract parameters from.
+        - parameter_args: The parameter argument that specify what parameters to extract.
+        - return_dict: If ``True``, the returned type is diction; otherwise, the returned type is list.
+        - include_non_param: If ``True``, all weights in ``model.state_dict()`` will be considered, including
+            non-parameter weights (e.g. running_mean, running_var). Otherwise, only parameters of the model will
+            be considered.
+    """
     if parameter_args.name == 'all':
         use_keys = model.state_dict().keys()
     elif parameter_args.name == 'contain':
@@ -86,16 +100,29 @@ def get_parameters(model: nn.Module, parameter_args: dict, return_dict: bool = F
     else:
         raise ValueError(f'Unrecognized finetune parameter name: {parameter_args.name}')
 
-    if not return_dict:
-        res = []
-        for key, param in model.named_parameters():
-            if key in use_keys:
-                res.append(param)
+    if include_non_param:
+        if not return_dict:
+            res = []
+            for key in model.state_dict().keys():
+                if key in use_keys:
+                    res.append(model.state_dict()[key])
+        else:
+            res = {}
+            for key in model.state_dict().keys():
+                if key in use_keys:
+                    res[key] = model.state_dict()[key]
     else:
-        res = {}
-        for key, param in model.named_parameters():
-            if key in use_keys:
-                res[key] = param
+        if not return_dict:
+            res = []
+            for key, param in model.named_parameters():
+                if key in use_keys:
+                    res.append(param)
+        else:
+            res = {}
+            for key, param in model.named_parameters():
+                if key in use_keys:
+                    res[key] = param
+
     return res
 
 
@@ -198,3 +225,22 @@ def get_model_difference(
             f' Model A: {type(model_a_param)}, model B: {type(model_b_param)}'
         )
     return res
+
+
+class TVLoss(nn.Module):
+
+    def __init__(self):
+        super(TVLoss, self).__init__()
+
+    def forward(self, x):
+        batch_size = x.size()[0]
+        h_x = x.size()[2]
+        w_x = x.size()[3]
+        count_h = self._tensor_size(x[:, :, 1:, :])
+        count_w = self._tensor_size(x[:, :, :, 1:])
+        h_tv = torch.pow((x[:, :, 1:, :] - x[:, :, :h_x - 1, :]), 2).sum()
+        w_tv = torch.pow((x[:, :, :, 1:] - x[:, :, :, :w_x - 1]), 2).sum()
+        return 2 * (h_tv / count_h + w_tv / count_w) / batch_size
+
+    def _tensor_size(self, t):
+        return t.size()[1] * t.size()[2] * t.size()[3]
