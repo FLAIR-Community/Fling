@@ -5,6 +5,19 @@ from typing import Type, Any, Callable, Union, List, Optional
 from fling.utils.registry_utils import MODEL_REGISTRY
 
 
+class FedRodHead(nn.Module):
+
+    def __init__(self, input_dim, class_number):
+        super(FedRodHead, self).__init__()
+        self.fedrod_g_head = nn.Linear(input_dim, class_number)
+        self.fedrod_p_head = nn.Linear(input_dim, class_number)
+
+    def forward(self, x):
+        g = self.fedrod_g_head(x)
+        p = self.fedrod_p_head(x) + g.detach()
+        return g, p
+
+
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
     return nn.Conv2d(
@@ -136,6 +149,7 @@ class ResNet(nn.Module):
             self,
             block: Type[Union[BasicBlock, Bottleneck]],
             layers: List[int],
+            fedrod_head: bool = False,
             features: List[int] = [64, 128, 256, 512],
             linear_hidden_dims: List[int] = [],
             input_channel: int = 3,
@@ -178,18 +192,10 @@ class ResNet(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        if len(linear_hidden_dims):
-            self.mlp = []
-            self.mlp.append(nn.Flatten())
-            self.mlp.append(nn.Linear(features[len(layers) - 1] * block.expansion, linear_hidden_dims[0]))
-            for i in range(len(linear_hidden_dims) - 1):
-                self.mlp.append(nn.ReLU(inplace=True))
-                self.mlp.append(nn.Linear(linear_hidden_dims[i], linear_hidden_dims[i + 1]))
-            self.mlp = nn.Sequential(*self.mlp)
-            self.fc = nn.Linear(linear_hidden_dims[-1], class_number)
+        if not fedrod_head:
+            self.fc = nn.Linear(features[len(layers) - 1] * block.expansion, class_number)
         else:
-            self.mlp = nn.Identity()
-            self.fc = nn.Sequential(nn.Flatten(), nn.Linear(features[len(layers) - 1] * block.expansion, class_number))
+            self.fc = FedRodHead(input_dim=features[len(layers) - 1] * block.expansion, class_number=class_number)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
