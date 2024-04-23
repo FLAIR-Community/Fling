@@ -1,15 +1,21 @@
+import csv
+
 import torch
+from torch.utils.data import Dataset
 from torchtext.datasets import SogouNews
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
-from torch.utils.data import Dataset
-import csv
 
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
 @DATASET_REGISTRY.register('sogou_news')
 class SogouNewsDataset(Dataset):
+    """
+    Implementation of Sogou news dataset. The Sogou News dataset is a mixture of 2,909,551 news articles from the \
+    SogouCA and SogouCS news corpora, in 5 categories. For more information, please refer to the link: \
+    http://www.di.unipi.it/~gulli/AG_corpus_of_news_articles.html .
+    """
     vocab = None
 
     def __init__(self, cfg: dict, train: bool):
@@ -63,5 +69,4 @@ class SogouNewsDataset(Dataset):
             text += [self.vocab['<pad>']] * (self.max_length - len(text))
 
         assert len(text) == self.max_length
-
         return {'input': torch.LongTensor(text), 'class_id': label}

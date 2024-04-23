@@ -1,5 +1,5 @@
 """
-This file is based on the implementation of transformer of PyTorch
+This file is based on the implementation of transformer of PyTorch.
 """
 import math
 from typing import Optional, Union, Callable, Tuple

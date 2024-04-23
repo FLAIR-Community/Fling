@@ -1,14 +1,18 @@
+import torch
+from torch.utils.data import Dataset
 from torchtext.datasets import AG_NEWS
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
-from torch.utils.data import Dataset
-import torch
 
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
 @DATASET_REGISTRY.register('ag_news')
 class AGNewsDataset(Dataset):
+    """
+    Implementation of AG news dataset. This dataset contains over 1 million of news articles with 4 categories.
+    For more information, please refer to the link: http://www.di.unipi.it/~gulli/AG_corpus_of_news_articles.html .
+    """
     vocab = None
 
     def __init__(self, cfg: dict, train: bool):
@@ -61,5 +65,4 @@ class AGNewsDataset(Dataset):
             text += [self.vocab['<pad>']] * (self.max_length - len(text))
 
         assert len(text) == self.max_length
-
         return {'input': torch.LongTensor(text), 'class_id': label}
