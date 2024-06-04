@@ -664,7 +664,7 @@ class TransformerClassifier(nn.Module):
         vocab_size: int,
         hidden_dim: int = 200,
         n_head: int = 2,
-        ffn_dim: int = 2,
+        ffn_dim: int = 200,
         n_layers: int = 4,
         class_number: int = 5,
         dropout: float = 0.1,
