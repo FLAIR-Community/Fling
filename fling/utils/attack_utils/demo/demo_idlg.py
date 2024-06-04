@@ -48,8 +48,9 @@ if __name__ == '__main__':
 
     # Step 3: initialize the attacker.
     # Use distance measure to be "cos"!
-    attacker = DLGAttacker(iteration=3000, working_dir='./idlg_attacker',
-                           iteration_per_save=100, distance_measure='cos', tv_weight=1e-3)
+    attacker = DLGAttacker(
+        iteration=3000, working_dir='./idlg_attacker', iteration_per_save=100, distance_measure='cos', tv_weight=1e-3
+    )
 
     # Step 4: attack.
     attacker.attack(model, test_dataset, device='cuda', class_number=10, save_img=True, optim_backend='adam')
