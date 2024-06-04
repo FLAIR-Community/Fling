@@ -1,8 +1,12 @@
 import torch
 from torch.utils.data import Dataset
-from torchtext.datasets import AG_NEWS
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
+
+try:
+    from torchtext.datasets import AG_NEWS
+    from torchtext.data.utils import get_tokenizer
+    from torchtext.vocab import build_vocab_from_iterator
+except ImportError:
+    raise ImportError('torchtext is not successfully installed. Please install it manually.')
 
 from fling.utils.registry_utils import DATASET_REGISTRY
 

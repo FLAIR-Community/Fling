@@ -61,7 +61,10 @@ class FedCACServerGroup(ParameterServerGroup):
                 if i == j:
                     continue
                 overlap_rate = 1 - torch.sum(
-                    torch.abs(self.clients[i].critical_parameter.to(self.args.learn.device) - self.clients[j].critical_parameter.to(self.args.learn.device))
+                    torch.abs(
+                        self.clients[i].critical_parameter.to(self.args.learn.device) -
+                        self.clients[j].critical_parameter.to(self.args.learn.device)
+                    )
                 ) / float(torch.sum(self.clients[i].critical_parameter.to(self.args.learn.device)).cpu() * 2)
                 overlap_buffer[i].append(overlap_rate)
 

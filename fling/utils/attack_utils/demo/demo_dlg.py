@@ -47,8 +47,9 @@ if __name__ == '__main__':
     model = ToyModel()
 
     # Step 3: initialize the attacker.
-    attacker = DLGAttacker(iteration=3000, working_dir='./dlg_attacker',
-                           iteration_per_save=100, distance_measure='euclid')
+    attacker = DLGAttacker(
+        iteration=3000, working_dir='./dlg_attacker', iteration_per_save=100, distance_measure='euclid'
+    )
 
     # Step 4: attack.
     attacker.attack(model, test_dataset, device='cuda', class_number=10, save_img=True, optim_backend='adam')
