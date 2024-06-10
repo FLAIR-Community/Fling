@@ -1,13 +1,5 @@
 import torch
 from torch.utils.data import Dataset
-
-try:
-    from torchtext.datasets import AG_NEWS
-    from torchtext.data.utils import get_tokenizer
-    from torchtext.vocab import build_vocab_from_iterator
-except ImportError:
-    raise ImportError('torchtext is not successfully installed. Please install it manually.')
-
 from fling.utils.registry_utils import DATASET_REGISTRY
 
 
@@ -20,6 +12,13 @@ class AGNewsDataset(Dataset):
     vocab = None
 
     def __init__(self, cfg: dict, train: bool):
+        try:
+            from torchtext.datasets import AG_NEWS
+            from torchtext.data.utils import get_tokenizer
+            from torchtext.vocab import build_vocab_from_iterator
+        except ImportError:
+            raise ImportError('torchtext is not successfully installed. Please install it manually.')
+
         super(AGNewsDataset, self).__init__()
         self.train = train
         self.cfg = cfg

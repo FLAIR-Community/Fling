@@ -9,7 +9,6 @@ from torch import nn, Tensor
 from torch.nn import TransformerEncoder
 from torch.nn import functional as F
 from torch.nn.init import xavier_uniform_, constant_, xavier_normal_
-from torch.nn.modules.linear import NonDynamicallyQuantizableLinear
 from torch.nn.modules.transformer import _get_activation_fn
 
 from fling.utils.registry_utils import MODEL_REGISTRY
@@ -122,7 +121,8 @@ class MultiheadAttention(nn.Module):
             self.in_proj_bias = nn.Parameter(torch.empty(3 * embed_dim, **factory_kwargs))
         else:
             self.register_parameter('in_proj_bias', None)
-        self.out_proj = NonDynamicallyQuantizableLinear(embed_dim, embed_dim, bias=bias, **factory_kwargs)
+        self.out_proj = torch.nn.modules.linear.\
+            NonDynamicallyQuantizableLinear(embed_dim, embed_dim, bias=bias, **factory_kwargs)
 
         if add_bias_kv:
             self.bias_k = nn.Parameter(torch.empty((1, 1, embed_dim), **factory_kwargs))
