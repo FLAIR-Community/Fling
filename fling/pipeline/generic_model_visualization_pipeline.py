@@ -82,24 +82,45 @@ def generic_model_visualization_pipeline(args: dict, seed: int = 0) -> None:
             logger.add_scalars_dict(prefix='before_aggregation_test', dic=test_result, rnd=i)
 
         if last_global_model is not None and i > 45:
-            plot_2d_loss_landscape(model=last_global_model, dataloader=part_test,
-                                   device=args.learn.device, caption='Global-test Loss Landscape',
-                                   save_path=os.path.join(args.other.logging_path, f"losslandscape_gt_{i}.pdf"),
-                                   target_model1=group.clients[0].model, target_model2=group.clients[1].model,
-                                   resolution=20, noise_range=(-0.1, 1.0),
-                                   log_scale=True, max_val=20)
-            plot_2d_loss_landscape(model=last_global_model, dataloader=group.clients[0].train_dataloader,
-                                   device=args.learn.device, caption='Client-1-train Loss Landscape',
-                                   save_path=os.path.join(args.other.logging_path, f"losslandscape_ct1_{i}.pdf"),
-                                   target_model1=group.clients[0].model, target_model2=group.clients[1].model,
-                                   resolution=20, noise_range=(-0.1, 1.1),
-                                   log_scale=True, max_val=20)
-            plot_2d_loss_landscape(model=last_global_model, dataloader=group.clients[1].train_dataloader,
-                                   device=args.learn.device, caption='Client-2-train Loss Landscape',
-                                   save_path=os.path.join(args.other.logging_path, f"losslandscape_ct2_{i}.pdf"),
-                                   target_model1=group.clients[0].model, target_model2=group.clients[1].model,
-                                   resolution=20, noise_range=(-0.1, 1.1),
-                                   log_scale=True, max_val=20)
+            plot_2d_loss_landscape(
+                model=last_global_model,
+                dataloader=part_test,
+                device=args.learn.device,
+                caption='Global-test Loss Landscape',
+                save_path=os.path.join(args.other.logging_path, f"losslandscape_gt_{i}.pdf"),
+                target_model1=group.clients[0].model,
+                target_model2=group.clients[1].model,
+                resolution=20,
+                noise_range=(-0.1, 1.0),
+                log_scale=True,
+                max_val=20
+            )
+            plot_2d_loss_landscape(
+                model=last_global_model,
+                dataloader=group.clients[0].train_dataloader,
+                device=args.learn.device,
+                caption='Client-1-train Loss Landscape',
+                save_path=os.path.join(args.other.logging_path, f"losslandscape_ct1_{i}.pdf"),
+                target_model1=group.clients[0].model,
+                target_model2=group.clients[1].model,
+                resolution=20,
+                noise_range=(-0.1, 1.1),
+                log_scale=True,
+                max_val=20
+            )
+            plot_2d_loss_landscape(
+                model=last_global_model,
+                dataloader=group.clients[1].train_dataloader,
+                device=args.learn.device,
+                caption='Client-2-train Loss Landscape',
+                save_path=os.path.join(args.other.logging_path, f"losslandscape_ct2_{i}.pdf"),
+                target_model1=group.clients[0].model,
+                target_model2=group.clients[1].model,
+                resolution=20,
+                noise_range=(-0.1, 1.1),
+                log_scale=True,
+                max_val=20
+            )
 
         # Aggregate parameters in each client.
         trans_cost = group.aggregate(i)

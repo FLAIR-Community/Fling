@@ -49,15 +49,14 @@ def _rayleigh_quotient(hv: Sequence, v: Sequence) -> List:
     """
     Calculate: \\lambda = \\frac{v^THv}{v^Tv}
     """
-    return [((torch.flatten(v[i].T) @ torch.flatten(hv[i])) /
-             (torch.flatten(v[i].T) @ torch.flatten(v[i]))).item() for i in range(len(hv))]
+    return [
+        ((torch.flatten(v[i].T) @ torch.flatten(hv[i])) / (torch.flatten(v[i].T) @ torch.flatten(v[i]))).item()
+        for i in range(len(hv))
+    ]
 
 
 def calculate_hessian_dominant_eigen_values(
-        model: nn.Module,
-        iter_num: int,
-        dataloader: DataLoader,
-        device: str
+        model: nn.Module, iter_num: int, dataloader: DataLoader, device: str
 ) -> Dict:
     """
     Overview:

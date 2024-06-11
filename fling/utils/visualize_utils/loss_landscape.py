@@ -18,7 +18,7 @@ def _gen_rand_like(tensor: torch.Tensor) -> torch.Tensor:
 
 
 def _calc_loss_value(
-        model: nn.Module, data_loader: DataLoader, device: str, criterion: nn.Module = nn.CrossEntropyLoss()
+    model: nn.Module, data_loader: DataLoader, device: str, criterion: nn.Module = nn.CrossEntropyLoss()
 ):
     # Given a model and corresponding dataset, calculate the mean loss value.
     model = model.to(device)
@@ -34,19 +34,19 @@ def _calc_loss_value(
 
 
 def plot_2d_loss_landscape(
-        model: nn.Module,
-        dataloader: DataLoader,
-        device: str,
-        caption: str,
-        save_path: str,
-        target_model1: Optional[nn.Module] = None,
-        target_model2: Optional[nn.Module] = None,
-        parameter_args: Dict = {"name": "all"},
-        noise_range: Tuple[float, float] = (-1, 1),
-        resolution: int = 20,
-        visualize: bool = False,
-        log_scale: bool = False,
-        max_val: float = 5,
+    model: nn.Module,
+    dataloader: DataLoader,
+    device: str,
+    caption: str,
+    save_path: str,
+    target_model1: Optional[nn.Module] = None,
+    target_model2: Optional[nn.Module] = None,
+    parameter_args: Dict = {"name": "all"},
+    noise_range: Tuple[float, float] = (-1, 1),
+    resolution: int = 20,
+    visualize: bool = False,
+    log_scale: bool = False,
+    max_val: float = 5,
 ) -> None:
     """
     Overview:
