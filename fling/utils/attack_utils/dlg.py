@@ -33,7 +33,7 @@ def _reconstruction_psnr(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     assert x.shape == y.shape
     x = torch.flatten(x, start_dim=1)
     y = torch.flatten(y, start_dim=1)
-    psnr = - 10 * torch.log10(torch.mean((x - y) ** 2, dim=1))
+    psnr = -10 * torch.log10(torch.mean((x - y) ** 2, dim=1))
     return psnr
 
 
@@ -46,9 +46,14 @@ class DLGAttacker:
     <link https://arxiv.org/pdf/2003.14053.pdf link>, known as iDLG.
     """
 
-    def __init__(self, iteration: int, working_dir: str,
-                 iteration_per_save: int = 10, distance_measure: str = 'euclid',
-                 tv_weight: float = 0):
+    def __init__(
+        self,
+        iteration: int,
+        working_dir: str,
+        iteration_per_save: int = 10,
+        distance_measure: str = 'euclid',
+        tv_weight: float = 0
+    ):
         """
         Overview:
             Initialize the attacker object.
@@ -224,7 +229,7 @@ class DLGAttacker:
             total_loss.append(torch.mean(_reconstruction_psnr(dummy_data, batch_x)).item())
             total_min_loss.append(torch.mean(best_losses).item())
             save_dict = {'last_psnr': total_loss[-1], 'max_psnr': total_min_loss[-1]}
-            self.logger.add_scalars_dict('reconstruction', save_dict, rnd=math.ceil(start//batch_size))
+            self.logger.add_scalars_dict('reconstruction', save_dict, rnd=math.ceil(start // batch_size))
 
             # Save the images in .gif format.
             if save_img:
@@ -233,7 +238,7 @@ class DLGAttacker:
                     imageio.mimsave(os.path.join(self.working_dir, f'{img_idx}.gif'), images, duration=0.25)
                     # Save the best image in .png format.
                     recovered_image = (
-                            255 * np.concatenate([best_images[idx].numpy(), batch_x[idx].detach().cpu().numpy()], axis=2)
+                        255 * np.concatenate([best_images[idx].numpy(), batch_x[idx].detach().cpu().numpy()], axis=2)
                     ).astype('uint8')
                     recovered_image = np.swapaxes(recovered_image, 0, 1)
                     recovered_image = np.swapaxes(recovered_image, 1, 2)

@@ -37,8 +37,6 @@ default_exp_args = dict(
             name='sgd',
             # Learning rate of the optimizer.
             lr=0.02,
-            # Momentum of the SGD optimizer.
-            momentum=0.9
         ),
         # Learning rate scheduler. For each global epoch, use a dynamic learning rate.
         scheduler=dict(
@@ -55,11 +53,6 @@ default_exp_args = dict(
     model=dict(
         # Name for model used. Must be registered in `MODEL_REGISTRY`.
         name='resnet8',
-        # Arguments used in initializing corresponding model.
-        # Channel of input image.
-        input_channel=3,
-        # Number of classes, i.e. the dimension for output logits.
-        class_number=10,
     ),
     # Configurations about client.
     client=dict(

@@ -47,7 +47,8 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         'setuptools<=66.1.1', 'yapf==0.29.0', 'torch>=1.7.0', 'torchvision', 'numpy>=1.18.0', 'easydict==1.9',
-        'tensorboard>=2.10.1', 'tqdm', 'timm', 'click', 'prettytable', 'einops', 'scipy', 'six', 'lmdb', 'imageio[pyav]'
+        'tensorboard>=2.10.1', 'tqdm', 'timm', 'click', 'prettytable', 'einops', 'scipy', 'portalocker', 'six', 'lmdb',
+        'imageio[pyav]'
     ],
     extras_require={
         'test': [
