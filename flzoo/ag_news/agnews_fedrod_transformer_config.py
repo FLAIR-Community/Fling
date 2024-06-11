@@ -2,37 +2,32 @@ from easydict import EasyDict
 
 exp_args = dict(
     data=dict(
-        dataset='tiny_imagenet',
-        data_path='./data/tiny-imagenet-200',
-        sample_method=dict(name='dirichlet', alpha=0.2, train_num=500, test_num=100)
+        dataset='ag_news',
+        data_path='./data/ag_news',
+        sample_method=dict(name='dirichlet', alpha=1, train_num=0, test_num=0),
+        max_length=512
     ),
     learn=dict(
         device='cuda:0',
         local_eps=8,
         global_eps=40,
-        batch_size=32,
+        batch_size=256,
         optimizer=dict(name='sgd', lr=0.02, momentum=0.9),
-        # Only fine-tune parameters whose name contain the keyword "fedrod_p_head".
         finetune_parameters=dict(name='contain', keywords=['fedrod_p_head']),
     ),
-    model=dict(
-        name='resnet8',
-        input_channel=3,
-        class_number=200,
-        fedrod_head=True,
-    ),
+    model=dict(name='transformer_classifier', class_number=5, vocab_size=30333, fedrod_head=True),
     client=dict(name='fedrod_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(
         name='base_group',
         aggregation_method='avg',
-        # Only aggregate parameters whose name does not contain the keyword "fedrod_p_head".
         aggregation_parameters=dict(
             name='except',
             keywords=['fedrod_p_head'],
         ),
     ),
-    other=dict(test_freq=3, logging_path='./logging/tiny_imagenet_fedrod_resnet_dirichlet_02')
+    launcher=dict(name='serial'),
+    other=dict(test_freq=3, logging_path='./logging/agnews_fedrod_transformer')
 )
 
 exp_args = EasyDict(exp_args)
