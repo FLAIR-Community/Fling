@@ -260,7 +260,6 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.mlp(x)
         y = self.fc(x)
         if mode == 'compute-logit':
             return y
