@@ -52,6 +52,7 @@ def _get_layer_hook(act_dict: Dict, layer_id: str, channel_id: int) -> Callable:
     Return a proper hook function, using the given layer name and channel id. The activation captured by this \
     hook function will be saved into ``act_dict``.
     """
+
     def hook(module: nn.Module, input: torch.Tensor, output: torch.Tensor) -> torch.Tensor:
         if len(output.shape) == 2:
             channel_out = output[:, channel_id]
@@ -60,6 +61,7 @@ def _get_layer_hook(act_dict: Dict, layer_id: str, channel_id: int) -> Callable:
         else:
             raise ValueError(f'Can not process feature with shape: {output.shape}.')
         act_dict[layer_id] = torch.mean(channel_out)
+
     return hook
 
 
@@ -70,9 +72,17 @@ class ActivationMaximizer:
         a Deep Network" (https://docplayer.net/17848924-Visualizing-higher-layer-features-of-a-deep-network.html). \
         The concrete implementation is based on: https://github.com/Nguyen-Hoa/Activation-Maximization.
     """
-    def __init__(self, iteration: int, working_dir: str,
-                 iteration_per_save: int = 10, tv_weight: float = 0, enable_gaussian_blur_normalizer: bool = False,
-                 enable_contrib_crop_normalizer: bool = False, enable_norm_crop_normalizer: bool = False):
+
+    def __init__(
+        self,
+        iteration: int,
+        working_dir: str,
+        iteration_per_save: int = 10,
+        tv_weight: float = 0,
+        enable_gaussian_blur_normalizer: bool = False,
+        enable_contrib_crop_normalizer: bool = False,
+        enable_norm_crop_normalizer: bool = False
+    ):
         """
         Overview:
             Initialize the class using given arguments.
@@ -140,7 +150,7 @@ class ActivationMaximizer:
         for iters in tqdm(range(self.iteration)):
             _ = model(dummy_image)
             # Calculate loss function.
-            activation_loss = - activation_dict[layer_id]
+            activation_loss = -activation_dict[layer_id]
             tv_loss = tv_criterion(dummy_image)
             loss = activation_loss + self.tv_weight * tv_loss
 
