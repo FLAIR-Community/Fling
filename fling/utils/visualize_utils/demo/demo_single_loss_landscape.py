@@ -7,6 +7,8 @@ from torch.utils.data import DataLoader
 from fling import dataset
 from fling.utils.visualize_utils import plot_2d_loss_landscape
 from fling.utils.registry_utils import DATASET_REGISTRY
+from easydict import EasyDict
+from fling.utils.registry_utils import MODEL_REGISTRY
 
 
 class ToyModel(nn.Module):
@@ -49,7 +51,16 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(test_dataset, batch_size=100)
 
     # Step 2: prepare the model.
-    model = ToyModel()
+    model_arg = EasyDict(dict(
+        name='resnet8',
+        input_channel=3,
+        class_number=10,
+    ))
+    model_name = model_arg.pop('name')
+    model = MODEL_REGISTRY.build(model_name, **model_arg)
+
+    # You can also initialize the model without using configurations.
+    # e.g. model = ToyModel()
 
     # Step 3: train the randomly initialized model.
     dataloader = DataLoader(dataset, batch_size=100)
