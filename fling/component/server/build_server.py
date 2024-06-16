@@ -5,4 +5,4 @@ from fling.component.server import ServerTemplate
 
 
 def get_server(args: dict, test_dataset: Dataset, **kwargs) -> ServerTemplate:
-    return SERVER_REGISTRY.build(args.server.name, args, test_dataset, **kwargs)
+    return SERVER_REGISTRY.build(args.server.name, args=args, test_dataset=test_dataset, **kwargs)
