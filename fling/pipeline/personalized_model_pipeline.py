@@ -40,7 +40,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     group.initialize()
 
     # Setup lr_scheduler.
-    lr_scheduler = LRScheduler(args)
+    lr_scheduler = LRScheduler(base_lr=args.learn.optimizer.lr, args=args.learn.scheduler)
 
     # Setup launcher.
     launcher = get_launcher(args)
