@@ -153,9 +153,9 @@ def balanced_softmax_loss(
 
 class LRScheduler:
 
-    def __init__(self, args: dict):
-        self.args = args.learn.scheduler
-        self.lr = args.learn.optimizer.lr
+    def __init__(self, base_lr: float, args: dict):
+        self.args = args
+        self.lr = base_lr
 
     def get_lr(self, train_round: int) -> float:
         if self.args.name == 'fix':
