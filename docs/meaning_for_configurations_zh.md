@@ -6,7 +6,7 @@
 
 请注意，以下配置文件即为默认配置文件。换句话说，如果用户定义的配置中某些键不存在，将默认使用以下文件中的值。
 
-以下是默认配置文件，您也可以在[这里](https://github.com/kxzxvbk/Fling/blob/main/argzoo/default_config.py)查看：
+以下是默认配置文件，您也可以在[这里](https://github.com/FLAIR-Community/Fling/blob/main/argzoo/default_config.py)查看：
 
 ```python
 import platform
@@ -173,7 +173,7 @@ finetune_parameters=dict(
 
 `group.aggregation_parameters` 控制在联邦学习框架下应该聚合哪些参数，对于它的设置和上面所述的 `learn.finetune_parameters` 是类似的。
 
-为直观表示参数 `learn.finetune_parameters` 和 `group.aggregation_parameters` 两者之间含义和用法的区别，这里以 **FedPer** 算法的配置文件 [`cifar10_fedper_resnet_config.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py) 为例，其中对上述两种参数的定义部分如下：
+为直观表示参数 `learn.finetune_parameters` 和 `group.aggregation_parameters` 两者之间含义和用法的区别，这里以 **FedPer** 算法的配置文件 [`cifar10_fedper_resnet_config.py`](https://github.com/FLAIR-Community/Fling/blob/main/fling/dataset/cifar100.py) 为例，其中对上述两种参数的定义部分如下：
 
 ```python
 exp_args = dict(
@@ -220,7 +220,7 @@ launcher=dict(
 
 ### data.transforms
 
-- `include_default` 键用于指定是否包括默认的数据增强方法。例如，CIFAR100 数据集的默认数据增强方法定义在 [`fling/dataset/cifar100.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py) ，具体内容为：
+- `include_default` 键用于指定是否包括默认的数据增强方法。例如，CIFAR100 数据集的默认数据增强方法定义在 [`fling/dataset/cifar100.py`](https://github.com/FLAIR-Community/Fling/blob/main/fling/dataset/cifar100.py) ，具体内容为：
 
 ```python
 default_augmentation = dict(
@@ -275,4 +275,4 @@ transforms=dict(
 )
 ```
 
-- 关于详细的数据增强方法，请参考[此处](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/data_utils/data_transform.py)。
+- 关于详细的数据增强方法，请参考[此处](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/data_utils/data_transform.py)。

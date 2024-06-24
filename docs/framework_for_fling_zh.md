@@ -395,4 +395,4 @@ pipeline 是特定算法的主要入口。目前，我们已经实现了两个�
 - `generic_model_serial_pipeline`：这是用于通用联邦学习的 pipeline。
 - `personalized_model_serial_pipeline`：这是用于个性化联邦学习的 pipeline。
 
-具体的实现可以点击[此处](https://github.com/kxzxvbk/Fling/tree/main/fling/pipeline)查看。
+具体的实现可以点击[此处](https://github.com/FLAIR-Community/Fling/tree/main/fling/pipeline)查看。

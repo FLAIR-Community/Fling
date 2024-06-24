@@ -46,7 +46,7 @@ class CIFAR100Dataset(Dataset):
 
 - 您应该使用此注册器为数据集命名：`@DATASET_REGISTRY.register('cifar100')`
 - 您定义的数据集应为 `torch.utils.data.Dataset` 的子类。
-- `default_augmentation` 指的是该数据集默认的数据增强方法。如果您没有显式定义这个属性，默认情况下不会使用任何增强。关于如何在用户定义的配置中覆盖此默认配置的更多信息，请参阅[此链接](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_en.md)。
+- `default_augmentation` 指的是该数据集默认的数据增强方法。如果您没有显式定义这个属性，默认情况下不会使用任何增强。关于如何在用户定义的配置中覆盖此默认配置的更多信息，请参阅[此链接](https://github.com/FLAIR-Community/Fling/blob/main/docs/meaning_for_configurations_en.md)。
 - 对于分类任务，返回的数据项应该具有以下字典格式：`{'input': x, 'class_id': y}`。如果您进行的不是分类任务，请自行定义格式，并根据 **步骤 5** 修改数据预处理和学习操作。
 
 ### 步骤 2：导入数据集文件
