@@ -1,4 +1,4 @@
-<img src="./README.assets/fling.png" style="zoom: 35%;" />
+<img src="./README.assets/fling.png" style="zoom: 25%;" />
 
 ## Fling
 
