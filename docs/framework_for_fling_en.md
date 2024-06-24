@@ -395,4 +395,4 @@ A pipeline is the main entry of a specific algorithm. Currently, we have impleme
 - `generic_model_serial_pipeline` : This is the pipeline for generic federated learning.
 - `personalized_model_serial_pipeline` : This is the pipeline for personalized federated learning.
 
-Detailed implementation can be viewed at [here](https://github.com/kxzxvbk/Fling/tree/main/fling/pipeline).
+Detailed implementation can be viewed at [here](https://github.com/FLAIR-Community/Fling/tree/main/fling/pipeline).

@@ -6,7 +6,7 @@ In this document, we provide a complete configuration file and explain the meani
 
 Note that the following configuration file is exactly the default configuration file. In other words, if some keys do not exist in user-defined config, the value in the following file will be used by default.
 
-Here is the default configuration file, you can also view it at [here](https://github.com/kxzxvbk/Fling/blob/main/argzoo/default_config.py) :
+Here is the default configuration file, you can also view it at [here](https://github.com/FLAIR-Community/Fling/blob/main/argzoo/default_config.py) :
 
 ```python
 import platform
@@ -173,7 +173,7 @@ finetune_parameters=dict(
 
 The setting for `group.aggregation_parameters` , which controls what parameters should be aggregated under the framework of Federated Learning, is similar.
 
-To show the differences in meaning and usage between the parameters `learn.finetune_parameters` and `group.aggregation_parameters`, let's take the configuration file of the **FedPer** algorithm, [`cifar10_fedper_resnet_config.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py), as an example. The definitions of these two parameters in the configuration file are as follows:
+To show the differences in meaning and usage between the parameters `learn.finetune_parameters` and `group.aggregation_parameters`, let's take the configuration file of the **FedPer** algorithm, [`cifar10_fedper_resnet_config.py`](https://github.com/FLAIR-Community/Fling/blob/main/fling/dataset/cifar100.py), as an example. The definitions of these two parameters in the configuration file are as follows:
 
 ```python
 exp_args = dict(
@@ -231,7 +231,7 @@ transforms=dict(
 )
 ```
 
-, which is defined in the default augmentation [`fling/dataset/cifar100.py`](https://github.com/kxzxvbk/Fling/blob/main/fling/dataset/cifar100.py). Note that for different datasets, the default augmentations can be different and can be even None.
+, which is defined in the default augmentation [`fling/dataset/cifar100.py`](https://github.com/FLAIR-Community/Fling/blob/main/fling/dataset/cifar100.py). Note that for different datasets, the default augmentations can be different and can be even None.
 
 - If users want to disable the default transforms, just use `include_default=False` and define your own methods:
 
@@ -264,5 +264,5 @@ transforms=dict(
 )
 ```
 
-- For detailed data augmentation methods, please refer to [here](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/data_utils/data_transform.py) .
+- For detailed data augmentation methods, please refer to [here](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/data_utils/data_transform.py) .
 

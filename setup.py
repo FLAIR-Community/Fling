@@ -33,7 +33,7 @@ setup(
     long_description_content_type='text/markdown',
     author=meta['__AUTHOR__'],
     author_email=meta['__AUTHOR_EMAIL__'],
-    url='https://github.com/kxzxvbk/Fling',
+    url='https://github.com/FLAIR-Community/Fling',
     license='Apache License, Version 2.0',
     keywords='Federated Learning Framework',
     packages=[

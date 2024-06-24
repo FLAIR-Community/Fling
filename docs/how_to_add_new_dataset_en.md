@@ -46,7 +46,7 @@ Notice that:
 
 - You should give a name to the dataset by using this decorator: `@DATASET_REGISTRY.register('cifar100')`
 - The dataset defined should be a subclass of `torch.utils.data.Dataset`
-- The `default_augmentation` refers to the default data augmentation method of this dataset. If you do not explicitly define this attribute, no augmentation will be applied by default. More information about how to override this default setting in user-defined config, please refer to this [link](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_en.md).
+- The `default_augmentation` refers to the default data augmentation method of this dataset. If you do not explicitly define this attribute, no augmentation will be applied by default. More information about how to override this default setting in user-defined config, please refer to this [link](https://github.com/FLAIR-Community/Fling/blob/main/docs/meaning_for_configurations_en.md).
 - For classification tasks, the return data item should in this diction format: `{'input': x, 'class_id': y} `. If you are not conducting a classification task, please define the format yourself and modify the data-preprocessing and learning operations  according step 5.
 
 ### Step 2: Import the dataset file
