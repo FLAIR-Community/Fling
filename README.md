@@ -1,8 +1,8 @@
-<img src="https://github.com/kxzxvbk/Fling/blob/main/README.assets/fling.png" style="zoom: 35%;" />
+<img src="./README.assets/fling.png" style="zoom: 35%;" />
 
 ## Fling
 
-**Fling** is a research platform for Federated Learning using PyTorch as backend. 
+FL-Launching (**Fling**) is a research platform for Federated Learning using PyTorch as backend. 
 
 Its goal is to **simulate the distributed learning process of Federated Learning on single or multiple machines**, providing a **fair testing platform** for the performance of various federated learning algorithms on different datasets. It is mainly based on the Python language and uses the PyTorch framework as the backend module for deep learning, supporting a variety of federated learning algorithms and commonly used federated learning datasets.
 
@@ -19,7 +19,7 @@ Firstly, it is recommended to install PyTorch manually with a suitable version (
 After the first step, you can simply install the latest version of Fling with the following command by using Git:
 
 ```bash
-git clone https://github.com/kxzxvbk/Fling
+git clone https://github.com/FLAIR-Community/Fling
 cd Fling
 pip install -e .
 ```
@@ -50,26 +50,26 @@ This config is a simplified version for conducting FedAvg on the dataset MNIST a
 
 For other algorithms and datasets, users can refer to `argzoo/` or customize your own configuration files.
 
-For attacking methods, please refer to our examples in: [demo for attack](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/attack_utils/demo)
+For attacking methods, please refer to our examples in: [demo for attack](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/attack_utils/demo)
 
 **Tutorials:**
 
-[Overall Framework of Fling](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_en.md) | [Fling 整体框架](https://github.com/kxzxvbk/Fling/blob/main/docs/framework_for_fling_zh.md)
+[Overall Framework of Fling](https://github.com/FLAIR-Community/Fling/blob/main/docs/framework_for_fling_en.md) | [Fling 整体框架](https://github.com/FLAIR-Community/Fling/blob/main/docs/framework_for_fling_zh.md)
 
-[Meaning for Each Configuration Key](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_en.md) | [配置文件各字段含义](https://github.com/kxzxvbk/Fling/blob/main/docs/meaning_for_configurations_zh.md)
+[Meaning for Each Configuration Key](https://github.com/FLAIR-Community/Fling/blob/main/docs/meaning_for_configurations_en.md) | [配置文件各字段含义](https://github.com/FLAIR-Community/Fling/blob/main/docs/meaning_for_configurations_zh.md)
 
-[How to Add a New FL Algorithm](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_en.md) | [如何自定义联邦学习算法](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_algorithm_zh.md)
+[How to Add a New FL Algorithm](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_algorithm_en.md) | [如何自定义联邦学习算法](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_algorithm_zh.md)
 
-[How to Add a New Dataset](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_en.md) | [如何添加新数据集](https://github.com/kxzxvbk/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)
+[How to Add a New Dataset](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_dataset_en.md) | [如何添加新数据集](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)
 
-[Cli Usage in Fling](https://github.com/kxzxvbk/Fling/blob/main/docs/cli_en.md) | [Fling 的 CLI 使用](https://github.com/kxzxvbk/Fling/blob/main/docs/cli_zh.md)
+[Cli Usage in Fling](https://github.com/FLAIR-Community/Fling/blob/main/docs/cli_en.md) | [Fling 的 CLI 使用](https://github.com/FLAIR-Community/Fling/blob/main/docs/cli_zh.md)
 
 ## Feature
 
 - Support for a variety of algorithms and datasets.
 - Support multiprocessing training on each client for better efficiency.
 - Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
-- Strong visualization utilities. See [demo](https://github.com/kxzxvbk/Fling/blob/main/fling/utils/visualize_utils/demo) for detailed information.
+- Strong visualization utilities. See [demo](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/visualize_utils/demo) for detailed information.
 
 ## Supported Algorithms
 
@@ -101,12 +101,12 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 ## Feedback and Contribution
 
-- For any bugs, questions, feature requirements, feel free to propose them in [issues](https://github.com/kxzxvbk/Fling/issues)
-- For any contributions that can improve Fling (more algorithms or better system design), we warmly welcome you to propose them in a [pull request](https://github.com/kxzxvbk/Fling/pulls).
+- For any bugs, questions, feature requirements, feel free to propose them in [issues](https://github.com/FLAIR-Community/Fling/issues)
+- For any contributions that can improve Fling (more algorithms or better system design), we warmly welcome you to propose them in a [pull request](https://github.com/FLAIR-Community/Fling/pulls).
 
 ## Acknowledgments
 
-Special thanks to [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu), 
+Special thanks to [@kxzxvbk](https://github.com/kxzxvbk), [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu), 
 
 
 ## Citation
@@ -115,7 +115,7 @@ Special thanks to [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](h
     title={Fling: Framework for Federated Learning},
     author={Fling Contributors},
     publisher = {GitHub},
-    howpublished = {\url{https://github.com/kxzxvbk/Fling}},
+    howpublished = {\url{https://github.com/FLAIR-Community/Fling}},
     year={2023},
 }
 ```
