@@ -34,3 +34,41 @@ def fed_avg(clients: list, server: ServerTemplate) -> int:
         trans_cost += len(clients) * state_dict[k].numel()
     # 1B = 32bit
     return 4 * trans_cost
+
+
+def cross_domain_fed_avg(clients: dict, args: dict,  server: ServerTemplate) -> int:
+    r"""
+    Overview:
+        Use the average method to aggregate parameters in different client models.
+        Note that only the keys in ``server.glob_dict`` will be aggregated.
+        Parameters besides these keys will be retained in each client.
+    Arguments:
+        clients: a dict of clients that is needed to be aggregated in this round.
+        server: The parameter server of these clients.
+        args: to get domain and client index
+    Returns:
+        trans_cost: the total uplink cost in this communication round.
+    """
+
+    # The ``sample_num`` refers to the number of data in each client.
+    # FedAvg will use a weighted-averaging algorithm to average client models according to their ``sample_num``
+    domains = args.data.domains.split(',') # domains
+    first_domain = domains[0] # get first domain for initialize
+    num_user = args.client.client_num
+
+    total_samples = sum(clients[domain][client].sample_num for domain in domains for client in range(num_user))
+    # Weighted-averaging.
+    server.glob_dict = {
+        k: reduce(
+            lambda x, y: x + y,
+            [clients[domain][client].sample_num / total_samples * clients[domain][client].model.state_dict()[k] for domain in domains for client in range(num_user)]
+        )
+        for k in clients[first_domain][0].fed_keys
+    }
+    # Calculate the ``trans_cost``.
+    trans_cost = 0
+    state_dict = clients[first_domain][0].model.state_dict()
+    for k in clients[first_domain][0].fed_keys:
+        trans_cost += len(domains) * num_user * state_dict[k].numel()
+    # 1B = 32bit
+    return 4 * trans_cost

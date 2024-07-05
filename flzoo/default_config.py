@@ -9,7 +9,7 @@ default_exp_args = dict(
         data_path='./data',
 
         # domains for cross-domain datasets
-        domains=['clipart', 'infograph', 'painting', 'quickdraw', 'real', 'sketch'],
+        domains='clipart,infograph,painting,quickdraw,real,sketch',
         #base_dir for loading datasets
         base_dir='D:/VScode/FL/Data/DomainNet/',
 
@@ -73,10 +73,6 @@ default_exp_args = dict(
         name='base_client',
         # Number of clients.
         client_num=30,
-
-        # number of users per domain
-        num_users=5,
-
         # The ratio of clients participated in each global epoch. For instance, if `sample_rate=0.5`,
         # only half of all clients will join federated learning in each global epoch.
         sample_rate=1,

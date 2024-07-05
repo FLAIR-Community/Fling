@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 
 from torch.utils.data.dataset import Dataset
+from torch.utils.data import DataLoader
 from torch.utils import data
 
 
@@ -19,7 +20,63 @@ class NaiveDataset(data.Dataset):
         return len(self.indexes)
 
 
-def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int) -> List:
+class DatasetSplit(data.Dataset):
+    def __init__(self, dataset, idxs):
+        self.dataset = dataset
+        self.idxs = list(idxs)
+
+    def __len__(self):
+        return len(self.idxs)
+
+    def __getitem__(self, item):
+        image, label = self.dataset[self.idxs[item]]
+        return image, label
+
+
+def cross_domain_iid_sampling(datasets, num_users: int, train: bool, seed: int):
+    r"""
+    Overview:
+        Independent and identical (i.i.d) sampling method for cross-domain datasets.
+    Arguments:
+        dataset: the total dataset to be sampled (with all domains included)
+        client_number: the number of clients per domain
+        seed: dynamic seed(no need).
+    Returns:
+        A dict of datasets for each client per domain.
+    """
+    def _sampling_iid(dataset, num_users: int, seed: int):
+        """
+        Sample I.I.D. client data from dataset
+        :param dataset:dataset to be sampled
+        :param num_users:the number of clients per domain
+        :return: dict of image index: dict[user] = each user's image index dict
+        """
+        num_items = int(len(dataset)/num_users)
+        dict_users, all_idxs = {}, [i for i in range(len(dataset))]
+        random_state = np.random.RandomState(seed)
+        for i in range(num_users):
+            dict_users[i] = set(random_state.choice(all_idxs, num_items, replace=False))
+            all_idxs = list(set(all_idxs) - dict_users[i])
+        return dict_users
+    # if test dataset: clients in the same domain share an identical dataset
+    if train == False: num_users = 1
+    else: num_users = num_users
+
+    dataset_loader = {domain:[] for domain in datasets}
+    dataset_len = {domain:[] for domain in datasets}
+    if train == False: num_users = 1
+    for domain in datasets:
+        #iid_sampling
+        dict_users = _sampling_iid(datasets[domain], num_users, seed)
+        # generate dataset loader
+        for idx in range(num_users):
+            dataset_len[domain].append(len(dict_users[idx])) # numbers of each domains datas
+            dataset_loader[domain].append(DatasetSplit(datasets[domain], dict_users[idx]))# get img & labels by indexs
+            
+    return dataset_loader, dataset_len
+
+
+def iid_sampling(dataset, client_number: int, sample_num: int, seed: int) -> List:
     r"""
     Overview:
         Independent and identical (i.i.d) sampling method.
@@ -43,22 +100,6 @@ def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: in
     dict_users, all_index = {}, [i for i in range(len(dataset))]
     for i in range(client_number):
         dict_users[i] = random_state.choice(all_index, sample_num, replace=False)
-
-    return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
-
-
-def cross_domain_iid_sampling(dataset: Dataset, num_users: int) -> List:
-    """
-    Sample I.I.D. client data from dataset
-    :param dataset:
-    :param num_users:number of users per domain
-    :return: dict of image index
-    """
-    num_items = int(len(dataset) / num_users)
-    dict_users, all_idxs = {}, [i for i in range(len(dataset))]
-    for i in range(num_users):
-        dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
-        all_idxs = list(set(all_idxs) - dict_users[i])
 
     return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
 
@@ -199,6 +240,6 @@ def data_sampling(dataset: Dataset, args: dict, seed: int, train: bool = True) -
         raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
 
     if sampling_name == 'cross_domain_iid':
-        return sampling_func(dataset, args.client.num_users, seed, **sampling_config)
+        return sampling_func(dataset, args.client.client_num, train, seed, **sampling_config)
     else:
         return sampling_func(dataset, args.client.client_num, sample_num, seed, **sampling_config)

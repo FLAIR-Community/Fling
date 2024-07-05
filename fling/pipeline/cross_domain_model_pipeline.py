@@ -1,12 +1,12 @@
 import os
 import torch
 
-from fling.component.client import get_client
+from fling.component.client import get_cross_domain_client
 from fling.component.server import get_server
-from fling.component.group import get_group
+from fling.component.group import get_cross_domain_group
 from fling.dataset import get_cross_domain_dataset
 from fling.utils.data_utils import data_sampling
-from fling.utils import Logger, compile_config, client_sampling, VariableMonitor, LRScheduler, get_launcher
+from fling.utils import Logger, compile_config, VariableMonitor, LRScheduler, get_cross_domain_launcher
 
 
 def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
@@ -25,48 +25,48 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
     # Construct logger.
     logger = Logger(args.other.logging_path)
 
-    # edition: train_sets[domain]
-    # Load dataset.
+    
+    # Load dataset with domains.
+    # edition: train_set[domain]
+    domains = args.data.domains.split(',')
     train_set = {}
     test_set = {}
-    for domain in args.data.domains:
-        train_set[domain] = get_cross_domain_dataset(args, domain=domain, train=True)
-        test_set[domain] = get_cross_domain_dataset(args, domain=domain, train=False)
+    
+    for domain in domains:
+        train_set[domain] = get_cross_domain_dataset(args, domain, train=True)
+        test_set[domain] = get_cross_domain_dataset(args, domain, train=False)
+    
+
     # Split dataset into clients.
+    # edition: train_sets_loader[domain][user id]
+    train_sets, train_sets_len = data_sampling(train_set, args, seed, train=True)
+    test_sets, test_sets_len = data_sampling(train_set, args, seed, train=False)
 
-
-# edition: train_sets[domain][user id]
-    train_sets = {}
-    test_sets = {}
-    for domain in args.data.domains:
-        train_sets[domain] = data_sampling(train_set[domain], args, seed, train=True)
-        test_sets[domain] = data_sampling(test_set[domain], args, seed, train=False)
 
     # Initialize group, clients and server.
-    group = get_group(args, logger)
-    group.server = get_server(args, test_dataset=test_set)
-
+    # edition: new pipeline client, server for cross-domain
+    group = get_cross_domain_group(args, logger)
+    group.server = get_server(args, test_dataset=test_sets)
     # edition:according to num_user per domain to create client
-    # to make sure every client have an unique id
-    client_id = 0
-    for domain in args.data.domains:
-        for i in range(args.num_users):
-            group.append(
-                get_client(
+    for domain in domains:
+        for i in range(args.client.client_num):
+            group.append(domain,
+                get_cross_domain_client(
                     args=args,
-                    client_id=client_id,
+                    domain=domain,
+                    client_id=i,
                     train_dataset=train_sets[domain][i],
-                    test_dataset=test_sets[domain][i]
+                    test_dataset=test_sets[domain][0]
                 )
             )
-            client_id += 1
     group.initialize()
+    # ********************** to be edited *************************
 
     # Setup lr_scheduler.
     lr_scheduler = LRScheduler(args)
 
     # Setup launcher.
-    launcher = get_launcher(args)
+    launcher = get_cross_domain_launcher(args)
 
     # Training loop
     for i in range(args.learn.global_eps):
@@ -74,19 +74,16 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
         # Initialize variable monitor.
         train_monitor = VariableMonitor()
 
-        # edition: calculate total client_num = domains * num_users
-        client_num = len(args.data.domains) * args.num_users
-        # Random sample participated clients in each communication round.
-        participated_clients = client_sampling(range(client_num), args.client.sample_rate)
-
         # Adjust learning rate.
         cur_lr = lr_scheduler.get_lr(train_round=i)
 
         # Local training for each participated client and add results to the monitor.
         # Use multiprocessing for acceleration.
+        # edition: all clients from all domains will be participated in each communication round.
         train_results = launcher.launch(
-            clients=[group.clients[j] for j in participated_clients], lr=cur_lr, task_name='train'
-        )
+            clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)]
+                                        , lr=cur_lr, task_name='train')
+        
         for item in train_results:
             train_monitor.append(item)
 
@@ -96,7 +93,9 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
 
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
-            test_results = launcher.launch(clients=[group.clients[j] for j in range(client_num)], task_name='test')
+            test_results = launcher.launch(
+                clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)]
+                                           , task_name='test')
             for item in test_results:
                 test_monitor.append(item)
 
@@ -120,7 +119,9 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
 
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
-            test_results = launcher.launch(clients=[group.clients[j] for j in range(client_num)], task_name='test')
+            test_results = launcher.launch(
+                clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)]
+                                           , task_name='test')
             for item in test_results:
                 test_monitor.append(item)
 
@@ -133,18 +134,18 @@ def cross_domain_model_pipeline(args: dict, seed: int = 0) -> None:
             # Saving model checkpoints.
             torch.save(group.server.glob_dict, os.path.join(args.other.logging_path, 'model.ckpt'))
 
-    # Fine-tuning
-    # Fine-tune model on each client and collect all the results.
-    finetune_results = launcher.launch(
-        clients=[group.clients[j] for j in range(client_num)],
-        lr=cur_lr,
-        finetune_args=args.learn.finetune_parameters,
-        task_name='finetune'
-    )
+    # # Fine-tuning
+    # # Fine-tune model on each client and collect all the results.
+    # finetune_results = launcher.launch(
+    #     clients=[group.clients[j] for j in range(client_num)],
+    #     lr=cur_lr,
+    #     finetune_args=args.learn.finetune_parameters,
+    #     task_name='finetune'
+    # )
 
-    # Logging fine-tune results
-    for key in finetune_results[0][0].keys():
-        for eid in range(len(finetune_results[0])):
-            tmp_mean = sum([finetune_results[cid][eid][key]
-                            for cid in range(len(finetune_results))]) / len(finetune_results)
-            logger.add_scalar(f'finetune/{key}', tmp_mean, eid)
+    # # Logging fine-tune results
+    # for key in finetune_results[0][0].keys():
+    #     for eid in range(len(finetune_results[0])):
+    #         tmp_mean = sum([finetune_results[cid][eid][key]
+    #                         for cid in range(len(finetune_results))]) / len(finetune_results)
+    #         logger.add_scalar(f'finetune/{key}', tmp_mean, eid)
