@@ -33,7 +33,7 @@ class DatasetSplit(data.Dataset):
         return image, label
 
 
-def cross_domain_iid_sampling(datasets, num_users: int, train: bool, seed: int):
+def cross_domain_iid_sampling(datasets: Dataset, num_users: int, train: bool, seed: int):
     r"""
     Overview:
         Independent and identical (i.i.d) sampling method for cross-domain datasets.
@@ -44,7 +44,7 @@ def cross_domain_iid_sampling(datasets, num_users: int, train: bool, seed: int):
     Returns:
         A dict of datasets for each client per domain.
     """
-    def _sampling_iid(dataset, num_users: int, seed: int):
+    def _sampling_iid(dataset: Dataset, num_users: int, seed: int):
         """
         Sample I.I.D. client data from dataset
         :param dataset:dataset to be sampled
@@ -76,7 +76,7 @@ def cross_domain_iid_sampling(datasets, num_users: int, train: bool, seed: int):
     return dataset_loader, dataset_len
 
 
-def iid_sampling(dataset, client_number: int, sample_num: int, seed: int) -> List:
+def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int) -> List:
     r"""
     Overview:
         Independent and identical (i.i.d) sampling method.
