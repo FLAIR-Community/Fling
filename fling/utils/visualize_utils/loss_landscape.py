@@ -62,7 +62,7 @@ def plot_2d_loss_landscape(
         target_model2: Similar to ``target_model1``, determine the second direction of visualization.
         parameter_args: Specify what parameters should add noises. Default to be ``{"name": "all"}``. For other \
             usages, please refer to the usage of ``aggregation_parameters`` in our configuration. A tutorial can \
-            be found in: https://github.com/FLAIR-Community/Fling/docs/meaning_for_configurations_en.md.
+            be found in: https://github.com/kxzxvbk/Fling/docs/meaning_for_configurations_en.md.
         device: The device to run on, such as ``"cuda"`` or ``"cpu"``.
         noise_range: The coordinate range of the loss-landscape, default to be ``(-1, 1)``.
         resolution: The resolution of generated landscape. A larger resolution will cost longer time for computation, \

@@ -18,7 +18,7 @@ class CIFAR10Dataset(Dataset):
         transform = get_data_transform(cfg.data.transforms, train=train)
         self.dataset = CIFAR10(cfg.data.data_path, train=train, transform=transform, download=True)
 
-    def __len__(self) -> None:
+    def __len__(self) -> int:
         return len(self.dataset)
 
     def __getitem__(self, item: int) -> dict:

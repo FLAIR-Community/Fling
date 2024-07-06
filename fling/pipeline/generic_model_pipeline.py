@@ -63,15 +63,15 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
         )
         for item in train_results:
             train_monitor.append(item)
-
+        
         # Testing
         if i % args.other.test_freq == 0 and "before_aggregation" in args.learn.test_place:
             test_result = group.server.test(model=group.clients[0].model)
             # Logging test variables.
             logger.add_scalars_dict(prefix='before_aggregation_test', dic=test_result, rnd=i)
 
-        # Aggregate parameters in each client.
-        trans_cost = group.aggregate(i)
+        # Aggregate parameters in participate clients.
+        trans_cost = group.aggregate(i, participated_clients)
 
         # Logging train variables.
         mean_train_variables = train_monitor.variable_mean()
