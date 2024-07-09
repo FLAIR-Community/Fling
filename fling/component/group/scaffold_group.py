@@ -80,8 +80,9 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             client.update_model(state_dict)
             client.update_c(c)
 
-    def aggregate(self, train_round: int, participate_clients_ids: list = None,
-                  aggr_parameter_args: dict = None) -> int:
+    def aggregate(
+            self, train_round: int, participate_clients_ids: list = None, aggr_parameter_args: dict = None
+    ) -> int:
         r"""
         Overview:
             Aggregate all participating client models.
@@ -111,22 +112,15 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             keys = self.clients[0].fed_keys
             # Aggregate c and y
             avg_delta_y = {
-                k: reduce(
-                    lambda x, y: x + y,
-                    [client.delta_y[k] / K for client in self.participate_clients]
-                )
+                k: reduce(lambda x, y: x + y, [client.delta_y[k] / K for client in self.participate_clients])
                 for k in keys
             }
             avg_delta_c = {
-                k: reduce(
-                    lambda x, y: x + y,
-                    [client.delta_c[k] / K for client in self.participate_clients]
-                )
+                k: reduce(lambda x, y: x + y, [client.delta_c[k] / K for client in self.participate_clients])
                 for k in keys
             }
             trans_cost = 4 * sum(
-                N * (self.clients[0].delta_y[k].numel() + self.clients[0].delta_c[k].numel())
-                for k in keys
+                N * (self.clients[0].delta_y[k].numel() + self.clients[0].delta_c[k].numel()) for k in keys
             )
 
             for k in keys:

@@ -85,7 +85,9 @@ class ParameterServerGroup:
         """
         self.clients.append(client)
 
-    def aggregate(self, train_round: int, participate_clients_ids: list = None, aggr_parameter_args: dict = None) -> int:
+    def aggregate(
+            self, train_round: int, participate_clients_ids: list = None, aggr_parameter_args: dict = None
+    ) -> int:
         r"""
         Overview:
             Aggregate all participating client models.

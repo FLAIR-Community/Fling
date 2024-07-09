@@ -63,7 +63,7 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
         )
         for item in train_results:
             train_monitor.append(item)
-        
+
         # Testing
         if i % args.other.test_freq == 0 and "before_aggregation" in args.learn.test_place:
             test_result = group.server.test(model=group.clients[0].model)
