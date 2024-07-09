@@ -110,7 +110,7 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             K = len(self.participate_clients)
             N = len(self.clients)
             keys = self.clients[0].fed_keys
-            # aggregate c and y
+            # Aggregate c and y
             avg_delta_y = {
                 k: reduce(
                     lambda x, y: x + y,

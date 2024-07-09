@@ -45,7 +45,6 @@ class SCAFFOLDClient(BaseClient):
 
         # Set optimizer, loss function.
         weights = self.model.parameters()
-        # op = SCAFFOLDOptimizer(weights, self.server_c, self.c, lr, self.args.learn.decay)
         op = SCAFFOLDOptimizer(params=weights, server_c=self.server_c, client_c=self.c, lr=lr)
 
         # Set the loss function.
