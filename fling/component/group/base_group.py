@@ -85,7 +85,7 @@ class ParameterServerGroup:
         """
         self.clients.append(client)
 
-    def aggregate(self, train_round: int, participate_clients_ids: list, aggr_parameter_args: dict = None) -> int:
+    def aggregate(self, train_round: int, participate_clients_ids: list = None, aggr_parameter_args: dict = None) -> int:
         r"""
         Overview:
             Aggregate all participating client models.
@@ -97,6 +97,8 @@ class ParameterServerGroup:
         Returns:
             - trans_cost: uplink communication cost.
         """
+        if participate_clients_ids is None:
+            participate_clients_ids = list(range(self.args.client.client_num))
         self.participate_clients = [self.clients[i] for i in participate_clients_ids]
         # Pick out the parameters for aggregation if needed.
         if aggr_parameter_args is not None:
