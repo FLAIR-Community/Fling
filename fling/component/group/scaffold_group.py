@@ -37,10 +37,10 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         fed_keys = get_weights(
             self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True, include_non_param=True
         ).keys()
-    
+
         # Step 2.
         self.logger.logging(f'Weights for federated training: {fed_keys}')
-        
+
         glob_dict = {k: self.clients[0].model.state_dict()[k] for k in fed_keys}
         c = {k: torch.zeros_like(self.clients[0].model.state_dict()[k]) for k in fed_keys}
 
@@ -50,7 +50,7 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             for k, v in sd.items():
                 if k in glob_dict.keys():
                     glob_dict[k] = v
-        
+
         self.server.glob_dict = glob_dict
         self.server.c = c
         self.participate_clients = self.clients.copy()
@@ -67,7 +67,6 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             'Parameter number in each model: {:.2f}M'.format(get_params_number(self.clients[0].model) / 1e6)
         )
 
-
     def sync(self) -> None:
         r"""
         Overview:
@@ -77,12 +76,12 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         """
         state_dict = self.server.glob_dict
         c = self.server.c
-        for client in self.participate_clients:
+        for client in self.clients:
             client.update_model(state_dict)
             client.update_c(c)
 
-
-    def aggregate(self, train_round: int, participate_clients_ids: list = None, aggr_parameter_args: dict = None) -> int:
+    def aggregate(self, train_round: int, participate_clients_ids: list = None,
+                  aggr_parameter_args: dict = None) -> int:
         r"""
         Overview:
             Aggregate all participating client models.
@@ -130,7 +129,6 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
                 for k in keys
             )
 
-
             for k in keys:
                 self.server.glob_dict[k] += self.args.learn.server_lr * avg_delta_y[k]
                 self.server.c[k] += K / N * avg_delta_c[k]
@@ -150,4 +148,3 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
                 client.set_fed_keys(fed_keys_bak)
 
         return trans_cost
-
