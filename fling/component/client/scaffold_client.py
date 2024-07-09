@@ -65,8 +65,10 @@ class SCAFFOLDClient(BaseClient):
                 # Update total sample number.
                 self.train_step(batch_data=preprocessed_data, criterion=criterion, monitor=monitor, optimizer=op)
 
+        iter_num_per_epoch = (self.sample_num + self.args.learn.batch_size - 1) // self.args.learn.batch_size
+        K = self.args.learn.local_eps * iter_num_per_epoch
         for k, v in self.model.state_dict().items():
-            new_c = self.c[k] - self.server_c[k] + (server_weights[k] - v) / (self.args.learn.local_eps * lr)
+            new_c = self.c[k] - self.server_c[k] + (server_weights[k] - v) / (K * lr)
             self.delta_y[k] = v - server_weights[k]
             self.delta_c[k] = new_c - self.c[k]
             self.c[k] = new_c
@@ -109,7 +111,4 @@ class SCAFFOLDOptimizer(Optimizer):
                 if p.grad is None:
                     continue
                 grad = p.grad.data + c.data - ci.data
-                # print(f"server c data: {c.data}")
-                # print(f"client c data: {ci.data}")
-                # print(f"ci: {torch.equal(ci, torch.zeros_like(ci))}")
                 p.data = p.data - group['lr'] * grad.data
