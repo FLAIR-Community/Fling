@@ -19,16 +19,56 @@ class NaiveDataset(data.Dataset):
         return len(self.indexes)
 
 
+def uniform_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int) -> List:
+    r"""
+    Overview:
+        Uniform sampling method. For each client, the dataset is sampled randomly from the total dataset. \
+    The datasets used for different clients will not overlap under this setting. This may be slightly from standard \
+    "iid scenario". For concrete differences, please refer to ``iid_sampling``.
+    Arguments:
+        dataset: The total dataset to be sampled from
+        client_number: The number of clients
+        sample_num: The number of samples in each client. If the value is zero, the number will be
+            ``len(dataset) // client_number``.
+        seed: Dynamic seed.
+    Returns:
+        A list of datasets for each client.
+    """
+    num_indices = len(dataset)
+
+    # If sample_num is not specified, then the dataset is divided equally among each client
+    if sample_num == 0:
+        sample_num = num_indices // client_number
+
+    assert sample_num * client_number <= num_indices, "Total data required is larger than original dataset. " \
+                                                      "It is not permitted in ``uniform_sampling``. " \
+                                                      "Please try ``iid_sampling`` instead."
+
+    random_state = np.random.RandomState(seed)
+
+    dict_users, all_index = {}, [i for i in range(len(dataset))]
+
+    random_state.shuffle(all_index)
+    length_per_client = num_indices // client_number
+    for i in range(client_number):
+        start_idx = i * length_per_client
+        dict_users[i] = all_index[start_idx:start_idx + sample_num]
+
+    return [NaiveDataset(tot_data=dataset, indexes=dict_users[i]) for i in range(len(dict_users))]
+
+
 def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int) -> List:
     r"""
     Overview:
-        Independent and identical (i.i.d) sampling method.
+        Independent and identical (i.i.d) sampling method. For each client, the dataset is sampled randomly from the \
+    total dataset independently. It should be noted that, datasets for different clients may have same data samples, \
+    which is different from ``uniform_sampling``.
     Arguments:
-        dataset: the total dataset to be sampled from
-        client_number: the number of clients
-        sample_num: the number of samples in each client. If the value is zero, the number will be
+        dataset: The total dataset to be sampled from
+        client_number: The number of clients
+        sample_num: The number of samples in each client. If the value is zero, the number will be
             ``len(dataset) // client_number``.
-        seed: dynamic seed.
+        seed: Dynamic seed.
     Returns:
         A list of datasets for each client.
     """
@@ -50,14 +90,17 @@ def iid_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: in
 def pathological_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int, alpha: int) -> List:
     r"""
     Overview:
-        Pathological sampling method.
+        Pathological sampling method. The overall steps are as follows:
+        1) Randomly generate the data distribution for each client, i.e. decide which data classes do each client have.
+        2) Sample the total dataset to satisfy the distribution required by each client.
+        Note: The data samples for each client may overlap.
     Arguments:
-        dataset: the total dataset to be sampled from
-        client_number: the number of clients
+        dataset: The total dataset to be sampled from
+        client_number: The number of clients
         sample_num: the number of samples in each client. If the value is zero, the number will be
          ``len(dataset) // client_number``.
-        seed: dynamic seed.
-        alpha: how many classes in each client.
+        seed: Dynamic seed.
+        alpha: How many classes in each client.
     Returns:
         A list of datasets for each client.
     """
@@ -98,14 +141,18 @@ def pathological_sampling(dataset: Dataset, client_number: int, sample_num: int,
 def dirichlet_sampling(dataset: Dataset, client_number: int, sample_num: int, seed: int, alpha: float) -> List:
     r"""
     Overview:
-        Dirichlet sampling method.
+        Dirichlet sampling method. The overall steps are as follows:
+        1) Randomly generate the data distribution for each client, i.e. decide the number of samples for each class \
+         in each client. The generation of such distributions obeys dirichlet distribution.
+        2) Sample the total dataset to satisfy the distribution required by each client.
+        Note: The data samples for each client may overlap.
     Arguments:
-        dataset: the total dataset to be sampled from
-        client_number: the number of clients
-        sample_num: the number of samples in each client. If the value is zero, the number will be
+        dataset: The total dataset to be sampled from
+        client_number: The number of clients
+        sample_num: The number of samples in each client. If the value is zero, the number will be
          ``len(dataset) // client_number``.
-        seed: dynamic seed.
-        alpha: the argument alpha in dirichlet sampling with range (0, +inf).
+        seed: Dynamic seed.
+        alpha: The argument alpha in dirichlet sampling with range (0, +inf).
          A smaller alpha means the distributions sampled are more imbalanced.
     Returns:
         A list of datasets for each client.
@@ -149,6 +196,7 @@ def dirichlet_sampling(dataset: Dataset, client_number: int, sample_num: int, se
 
 # Supported sampling methods.
 sampling_methods = {
+    'uniform': uniform_sampling,
     'iid': iid_sampling,
     'dirichlet': dirichlet_sampling,
     'pathological': pathological_sampling,
@@ -158,12 +206,12 @@ sampling_methods = {
 def data_sampling(dataset: Dataset, args: dict, seed: int, train: bool = True) -> List:
     r"""
     Overview:
-        Dirichlet sampling method.
+        Sample the data set using the given configurations.
     Arguments:
-        dataset: the total dataset to be sampled from.
-        args: arguments.
-        seed: dynamic seed.
-        train: whether this sampling is for training dataset or testing dataset.
+        dataset: The total dataset to be sampled from.
+        args: Arguments of the current experiment.
+        seed: Dynamic seed for better reproducibility.
+        train: Whether this sampling is for training dataset or testing dataset.
     Returns:
         A list of datasets for each client.
     """

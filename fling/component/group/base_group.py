@@ -60,7 +60,7 @@ class ParameterServerGroup:
                 if k in glob_dict.keys():
                     glob_dict[k] = v
         self.server.glob_dict = glob_dict
-        self.participate_clients = self.clients.copy()
+        self.participate_clients = self.clients
 
         self.set_fed_keys()
 
