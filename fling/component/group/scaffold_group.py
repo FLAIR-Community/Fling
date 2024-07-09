@@ -109,7 +109,6 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         if self.args.group.aggregation_method == 'avg':
             K = len(self.participate_clients)
             N = len(self.clients)
-            print(f"K, N: {K} {N}")
             keys = self.clients[0].fed_keys
             # aggregate c and y
             avg_delta_y = {

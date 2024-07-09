@@ -102,7 +102,6 @@ class SCAFFOLDOptimizer(Optimizer):
         super(SCAFFOLDOptimizer, self).__init__(params, defaults)
         self.server_c = server_c
         self.client_c = client_c
-        pass
 
     def step(self):
         for group in self.param_groups:
