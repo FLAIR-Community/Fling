@@ -147,7 +147,7 @@ class ParameterServerGroup:
             - None
         """
         state_dict = self.server.glob_dict
-        for client in self.participate_clients:
+        for client in self.clients:
             client.update_model(state_dict)
 
     def set_fed_keys(self) -> None:
