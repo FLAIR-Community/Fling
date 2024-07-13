@@ -53,7 +53,6 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
 
         self.server.glob_dict = glob_dict
         self.server.c = c
-        self.participate_clients = self.clients.copy()
 
         self.set_fed_keys()
 
@@ -96,27 +95,27 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         """
         if participate_clients_ids is None:
             participate_clients_ids = list(range(self.args.client.client_num))
-        self.participate_clients = [self.clients[i] for i in participate_clients_ids]
+        participate_clients = [self.clients[i] for i in participate_clients_ids]
         # Pick out the parameters for aggregation if needed.
         if aggr_parameter_args is not None:
             fed_keys_bak = self.clients[0].fed_keys
             new_fed_keys = get_weights(
                 self.clients[0].model, aggr_parameter_args, return_dict=True, include_non_param=True
             ).keys()
-            for client in self.participate_clients:
+            for client in participate_clients:
                 client.set_fed_keys(new_fed_keys)
 
         if self.args.group.aggregation_method == 'avg':
-            K = len(self.participate_clients)
+            K = len(participate_clients)
             N = len(self.clients)
             keys = self.clients[0].fed_keys
             # Aggregate c and y
             avg_delta_y = {
-                k: reduce(lambda x, y: x + y, [client.delta_y[k] / K for client in self.participate_clients])
+                k: reduce(lambda x, y: x + y, [client.delta_y[k] / K for client in participate_clients])
                 for k in keys
             }
             avg_delta_c = {
-                k: reduce(lambda x, y: x + y, [client.delta_c[k] / K for client in self.participate_clients])
+                k: reduce(lambda x, y: x + y, [client.delta_c[k] / K for client in participate_clients])
                 for k in keys
             }
             trans_cost = 4 * sum(
@@ -138,7 +137,7 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         self.logger.add_scalar('time/time_per_round', time_per_round, train_round)
 
         if aggr_parameter_args is not None:
-            for client in self.participate_clients:
+            for client in participate_clients:
                 client.set_fed_keys(fed_keys_bak)
 
         return trans_cost
