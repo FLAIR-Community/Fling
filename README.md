@@ -50,6 +50,8 @@ This config is a simplified version for conducting FedAvg on the dataset MNIST a
 
 For other algorithms and datasets, users can refer to `argzoo/` or customize your own configuration files.
 
+For visualization utilities, please refer to [README for visualization](https://github.com/FLAIR-Community/Fling/tree/main/fling/utils/visualize_utils/README.md).
+
 For attacking methods, please refer to our examples in: [demo for attack](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/attack_utils/demo)
 
 **Tutorials:**
@@ -69,7 +71,7 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 - Support for a variety of algorithms and datasets.
 - Support multiprocessing training on each client for better efficiency.
 - Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
-- Strong visualization utilities. See [demo](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/visualize_utils/demo) for detailed information.
+- Strong visualization utilities. See [README](https://github.com/FLAIR-Community/Fling/tree/main/fling/utils/visualize_utils/README.md) for detailed information. There are also [demos](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/visualize_utils/demo) for reference.
 
 ## Supported Algorithms
 
