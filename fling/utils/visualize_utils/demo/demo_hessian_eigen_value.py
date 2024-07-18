@@ -83,4 +83,5 @@ if __name__ == '__main__':
     # Step 4: plot the loss landscape after training the model.
     # Only one line of code for visualization.
     res = calculate_hessian_dominant_eigen_values(model, iter_num=20, dataloader=test_dataloader, device='cuda')
-    print(res)
+    for key, values in res.items():
+        print(f'{key} : {values}')

@@ -14,10 +14,11 @@ def am_demo(path_head, model, layer, channel_id):
 
 
 if __name__ == '__main__':
-    # Step 1: prepare the model.
+    # path to store the result
     name = 'demo'
     out_dir = os.path.join('./visualize/', name)
 
+    # Step 1: prepare the model.
     model_arg = EasyDict(dict(
         name='resnet8',
         input_channel=3,
