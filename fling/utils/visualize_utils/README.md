@@ -1,5 +1,3 @@
-- visualize 文件夹写一个 readme，包括：1）每种 visualization 分别是什么，原理的参考文献链接；2）在 Fling 中怎么跑，给出/非常详细的教程；3）贴一些可视化的截图结果；4）在主 README 里面添加对这个的引用，最终提交一个 pr
-
 # Visualizations
 
 This section contains some visualization utilities to visualize some characteristics of the model.
