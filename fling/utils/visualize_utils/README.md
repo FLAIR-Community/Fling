@@ -149,7 +149,7 @@ In the "prepare the model" phase, you can choose to initialize the new model or 
 
 Here is an example of the results of a calculation on a ResNet-8 model:
 
-<img src="./README.assets/hessian_eigenvalues.png" alt="hessian_eigenvalues" style="zoom:80%;" />
+<img src="./README.assets/hessian_eigenvalues.png" alt="hessian_eigenvalues" style="zoom:60%;" />
 
 ### Loss Landscape
 
@@ -220,8 +220,8 @@ The results of a loss landscape visualization of a ResNet-8 model trained to con
 
 - `landscape_1.jpg`:
 
-  <img src="./README.assets/landscape_1.jpg" alt="landscape_0.1" style="zoom: 33%;" />
+  <img src="./README.assets/landscape_1.jpg" alt="landscape_0.1" style="zoom: 30%;" />
 
 - `landscape_0.1.jpg`:
 
-  <img src="./README.assets/landscape_0.1.jpg" alt="landscape_0.1" style="zoom: 33%;" />
+  <img src="./README.assets/landscape_0.1.jpg" alt="landscape_0.1" style="zoom: 30%;" />
