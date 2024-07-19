@@ -1,5 +1,4 @@
-from functools import reduce
-
+from .utils import tensor_reduce
 from fling.component.server import ServerTemplate
 
 
@@ -21,9 +20,10 @@ def fed_avg(clients: list, server: ServerTemplate) -> int:
     total_samples = sum([client.sample_num for client in clients])
     # Weighted-averaging.
     server.glob_dict = {
-        k: reduce(
+        k: tensor_reduce(
             lambda x, y: x + y,
-            [client.sample_num / total_samples * client.model.state_dict()[k] for client in clients]
+            [client.sample_num / total_samples * client.model.state_dict()[k] for client in clients],
+            device=clients[0].args.learn.device
         )
         for k in clients[0].fed_keys
     }
