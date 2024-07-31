@@ -31,7 +31,10 @@ def get_model(args: dict) -> torch.nn.Module:
             # Compile
             if platform.system().lower() == 'linux':
                 warnings.warn('Using PyTorch >= 2.0, compiling the model ...')
-                model = torch.compile(model)
+                try:
+                    model = torch.compile(model)
+                except Exception as e:
+                    warnings.warn(f'Compile error, skip compiling...')
             # Non-compile
             else:
                 warnings.warn(

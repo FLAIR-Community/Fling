@@ -70,8 +70,8 @@ def generic_model_pipeline(args: dict, seed: int = 0) -> None:
             # Logging test variables.
             logger.add_scalars_dict(prefix='before_aggregation_test', dic=test_result, rnd=i)
 
-        # Aggregate parameters in each client.
-        trans_cost = group.aggregate(i)
+        # Aggregate parameters in participate clients.
+        trans_cost = group.aggregate(i, participated_clients)
 
         # Logging train variables.
         mean_train_variables = train_monitor.variable_mean()
