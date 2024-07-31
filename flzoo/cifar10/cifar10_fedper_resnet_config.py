@@ -4,7 +4,7 @@ exp_args = dict(
     data=dict(
         dataset='cifar10',
         data_path='./data/CIFAR10',
-        sample_method=dict(name='dirichlet', alpha=0.2, train_num=500, test_num=100)
+        sample_method=dict(name='dirichlet', alpha=1, train_num=500, test_num=100)
     ),
     learn=dict(
         device='cuda:0',
@@ -31,7 +31,10 @@ exp_args = dict(
             keywords=['fc'],
         ),
     ),
-    other=dict(test_freq=3, logging_path='./logging/cifar10_fedper_resnet_dirichlet_02')
+    other=dict(
+        test_freq=3,
+        logging_path='./logging/cifar10_fedper_resnet_dirichlet_02'
+    )
 )
 
 exp_args = EasyDict(exp_args)

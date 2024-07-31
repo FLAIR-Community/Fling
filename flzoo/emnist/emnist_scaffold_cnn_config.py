@@ -1,7 +1,11 @@
 from easydict import EasyDict
 
 exp_args = dict(
-    data=dict(dataset='mnist', data_path='./data/mnist', sample_method=dict(name='iid', train_num=500, test_num=100)),
+    data=dict(
+        dataset='mnist',
+        data_path='./data/mnist',
+        sample_method=dict(name='dirichlet', alpha=0.2, train_num=500, test_num=100)
+    ),
     learn=dict(
         device='cuda:0',
         local_eps=8,
@@ -17,7 +21,7 @@ exp_args = dict(
         input_channel=1,
         class_number=10,
     ),
-    launcher=dict(name='serial'),
+    laucher=dict(name='serial'),
     client=dict(name='scaffold_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(name='scaffold_group', aggregation_method='avg'),

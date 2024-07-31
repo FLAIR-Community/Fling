@@ -54,6 +54,7 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         self.server.glob_dict = glob_dict
         self.server.c = c
 
+
         self.set_fed_keys()
 
         # Step 3.
@@ -108,7 +109,9 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         if self.args.group.aggregation_method == 'avg':
             K = len(participate_clients)
             N = len(self.clients)
-            keys = self.clients[0].fed_keys
+            keys = []
+            for k, v in self.clients[0].model.named_parameters():
+                keys.append(k)
             # Aggregate c and y
             avg_delta_y = {
                 k: reduce(lambda x, y: x + y, [client.delta_y[k] / K for client in participate_clients])

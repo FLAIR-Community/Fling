@@ -21,11 +21,10 @@ class SCAFFOLDClient(BaseClient):
 
     def __init__(self, *args, **kwargs):
         super(SCAFFOLDClient, self).__init__(*args, **kwargs)
-        state_dict = self.model.state_dict()
-        self.c = {k: torch.zeros_like(v) for k, v in state_dict.items()}
-        self.delta_c = {k: torch.zeros_like(v) for k, v in state_dict.items()}
-        self.delta_y = {k: torch.zeros_like(v) for k, v in state_dict.items()}
-        self.server_c = {k: torch.zeros_like(v) for k, v in state_dict.items()}
+        self.c = {k: torch.zeros_like(v.data) for k, v in self.model.named_parameters()}
+        self.delta_c = {k: torch.zeros_like(v.data) for k, v in self.model.named_parameters()}
+        self.delta_y = {k: torch.zeros_like(v.data) for k, v in self.model.named_parameters()}
+        self.server_c = {k: torch.zeros_like(v.data) for k, v in self.model.named_parameters()}
         self.model.to(kwargs['args']['learn']['device'])
 
     def train(self, lr, device=None, train_args=None):
@@ -37,7 +36,7 @@ class SCAFFOLDClient(BaseClient):
             self.device = device
         self.model.train()
         self.model.to(self.device)
-        for k in self.model.state_dict():
+        for k, v in self.model.named_parameters():
             self.c[k] = self.c[k].to(self.device)
             self.delta_c[k] = self.delta_c[k].to(self.device)
             self.delta_y[k] = self.delta_y[k].to(self.device)
@@ -54,8 +53,8 @@ class SCAFFOLDClient(BaseClient):
 
         # server_weights records the parameters before the optimizer update
         server_weights = {}
-        for k, v in self.model.state_dict().items():
-            server_weights[k] = copy.deepcopy(v).to(self.device)
+        for k, v in self.model.named_parameters():
+            server_weights[k] = copy.deepcopy(v.data).to(self.device)
 
         # Main training loop.
         for epoch in range(self.args.learn.local_eps):
@@ -66,9 +65,9 @@ class SCAFFOLDClient(BaseClient):
 
         iter_num_per_epoch = (self.sample_num + self.args.learn.batch_size - 1) // self.args.learn.batch_size
         K = self.args.learn.local_eps * iter_num_per_epoch
-        for k, v in self.model.state_dict().items():
-            new_c = self.c[k] - self.server_c[k] + (server_weights[k] - v) / (K * lr)
-            self.delta_y[k] = v - server_weights[k]
+        for k, v in self.model.named_parameters():
+            new_c = self.c[k] - self.server_c[k] + (server_weights[k] - v.data) / (K * lr)
+            self.delta_y[k] = v.data - server_weights[k]
             self.delta_c[k] = new_c - self.c[k]
             self.c[k] = new_c
 
