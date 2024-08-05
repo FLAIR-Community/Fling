@@ -22,4 +22,4 @@ if __name__ == '__main__':
     logger = Logger('resnet18_conv_kernels')
 
     # Step 3: save the kernels.
-    plot_conv_kernels(logger, model.conv1, name='pre-conv')
+    plot_conv_kernels(logger, layer=model.conv1, name='pre-conv')

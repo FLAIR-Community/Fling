@@ -80,7 +80,8 @@ if __name__ == '__main__':
             optimizer.step()
     model.to('cpu')
 
-    # Step 4: plot the loss landscape after training the model.
+    # Step 4: calculate the hessian eigen values of the model.
     # Only one line of code for visualization.
     res = calculate_hessian_dominant_eigen_values(model, iter_num=20, dataloader=test_dataloader, device='cuda')
-    print(res)
+    for key, values in res.items():
+        print(f'{key} : {values}')
