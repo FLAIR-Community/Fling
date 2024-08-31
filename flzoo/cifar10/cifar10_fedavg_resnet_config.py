@@ -2,7 +2,8 @@ from easydict import EasyDict
 
 exp_args = dict(
     data=dict(
-        dataset='cifar10', data_path='./data/CIFAR10',
+        dataset='cifar10',
+        data_path='./data/CIFAR10',
         sample_method=dict(name='dirichlet', alpha=1, train_num=500, test_num=100)
     ),
     learn=dict(

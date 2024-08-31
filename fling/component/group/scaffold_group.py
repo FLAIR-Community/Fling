@@ -54,7 +54,6 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
         self.server.glob_dict = glob_dict
         self.server.c = c
 
-
         self.set_fed_keys()
 
         # Step 3.
@@ -110,8 +109,14 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             K = len(participate_clients)
             N = len(self.clients)
             keys = []
+            bn_keys = []
+
             for k, v in self.clients[0].model.named_parameters():
                 keys.append(k)
+            for k in self.clients[0].model.state_dict():
+                if k not in keys:
+                    bn_keys.append(k)
+
             # Aggregate c and y
             avg_delta_y = {
                 k: reduce(lambda x, y: x + y, [client.delta_y[k] / K for client in participate_clients])
@@ -121,6 +126,10 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
                 k: reduce(lambda x, y: x + y, [client.delta_c[k] / K for client in participate_clients])
                 for k in keys
             }
+            avg_bn_val = {
+                k: reduce(lambda x, y: x + y, [client.model.state_dict()[k] / K for client in participate_clients])
+                for k in bn_keys
+            }
             trans_cost = 4 * sum(
                 N * (self.clients[0].delta_y[k].numel() + self.clients[0].delta_c[k].numel()) for k in keys
             )
@@ -128,6 +137,8 @@ class SCAFFOLDServerGroup(ParameterServerGroup):
             for k in keys:
                 self.server.glob_dict[k] += self.args.learn.server_lr * avg_delta_y[k]
                 self.server.c[k] += K / N * avg_delta_c[k]
+            for k in bn_keys:
+                self.server.glob_dict[k] = avg_bn_val[k]
 
             self.sync()
         else:

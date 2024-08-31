@@ -12,7 +12,7 @@ exp_args = dict(
         global_eps=40,
         batch_size=32,
         # learning rate for client
-        lr=0.08,
+        lr=0.1,
         decay=1e-4,
         # learning rate for server
         server_lr=1,
@@ -23,19 +23,14 @@ exp_args = dict(
         input_channel=3,
         class_number=10,
     ),
-    client=dict(
-        name='scaffold_client',
-        client_num=40
-    ),
+    launcher=dict(name='serial', ),
+    client=dict(name='scaffold_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(
         name='scaffold_group',
         aggregation_method='avg',
     ),
-    other=dict(
-        test_freq=3,
-        logging_path='./logging/cifar10_scaffold_cnn_iid_demo'
-    )
+    other=dict(test_freq=3, logging_path='./logging/cifar10_scaffold_cnn_dirichlet_1')
 )
 
 exp_args = EasyDict(exp_args)

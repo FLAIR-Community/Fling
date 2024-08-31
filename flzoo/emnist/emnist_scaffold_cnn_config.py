@@ -4,7 +4,7 @@ exp_args = dict(
     data=dict(
         dataset='mnist',
         data_path='./data/mnist',
-        sample_method=dict(name='dirichlet', alpha=0.2, train_num=500, test_num=100)
+        sample_method=dict(name='dirichlet', alpha=1.0, train_num=500, test_num=100)
     ),
     learn=dict(
         device='cuda:0',
@@ -21,7 +21,7 @@ exp_args = dict(
         input_channel=1,
         class_number=10,
     ),
-    laucher=dict(name='serial'),
+    launcher=dict(name='serial'),
     client=dict(name='scaffold_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(name='scaffold_group', aggregation_method='avg'),

@@ -31,10 +31,7 @@ exp_args = dict(
             keywords=['fc'],
         ),
     ),
-    other=dict(
-        test_freq=3,
-        logging_path='./logging/cifar10_fedper_resnet_dirichlet_02'
-    )
+    other=dict(test_freq=3, logging_path='./logging/cifar10_fedper_resnet_dirichlet_02')
 )
 
 exp_args = EasyDict(exp_args)

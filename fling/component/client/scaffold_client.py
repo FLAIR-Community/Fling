@@ -85,7 +85,7 @@ class SCAFFOLDClient(BaseClient):
     def update_c(self, dic: dict) -> None:
         r"""
         Overview:
-            Update the state_dict of the local model of this client.
+            Update the c_vector of the local model of this client.
             For keys not existed in the argument `dic`, the value will be retained.
         Arguments:
             - dic: dict type parameters for updating local model.
