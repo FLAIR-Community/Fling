@@ -1,37 +1,26 @@
 import time
+import copy
 import torch
 
-from fling.utils import get_params_number
-from fling.utils.compress_utils import fed_avg
+from fling.utils.compress_utils import *
 from fling.utils.registry_utils import GROUP_REGISTRY
-from fling.utils import Logger, get_weights
-from fling.component.client import ClientTemplate
+from fling.utils import Logger, get_weights, get_params_number
+from fling.component.group import ParameterServerGroup
+from fling.component.server import ServerTemplate
+from functools import reduce
 
 
-@GROUP_REGISTRY.register('base_group')
-class ParameterServerGroup:
+@GROUP_REGISTRY.register('scaffold_group')
+class SCAFFOLDServerGroup(ParameterServerGroup):
     r"""
     Overview:
-        Base implementation of the group in federated learning.
+        Implementation of the group in SCAFFOLD.
     """
 
     def __init__(self, args: dict, logger: Logger):
-        r"""
-        Overview:
-            Lazy initialization of group.
-            To complete the initialization process, please call `self.initialization()` after server and all clients
-        are initialized.
-        Arguments:
-            - args: arguments in dict type.
-            - logger: logger for this group
-        Returns:
-            - None
-        """
-        self.clients = []
-        self.server = None
-        self.args = args
-        self.logger = logger
-        self._time = time.time()
+        super(SCAFFOLDServerGroup, self).__init__(args, logger)
+        # To be consistent with the existing pipeline interface. group maintains an epoch counter itself.
+        self.epoch = -1
 
     def initialize(self) -> None:
         r"""
@@ -51,7 +40,9 @@ class ParameterServerGroup:
 
         # Step 2.
         self.logger.logging(f'Weights for federated training: {fed_keys}')
+
         glob_dict = {k: self.clients[0].model.state_dict()[k] for k in fed_keys}
+        c = {k: torch.zeros_like(self.clients[0].model.state_dict()[k]) for k in fed_keys}
 
         # Resume from the checkpoint if needed.
         if self.args.other.resume_path is not None:
@@ -59,7 +50,9 @@ class ParameterServerGroup:
             for k, v in sd.items():
                 if k in glob_dict.keys():
                     glob_dict[k] = v
+
         self.server.glob_dict = glob_dict
+        self.server.c = c
 
         self.set_fed_keys()
 
@@ -73,16 +66,18 @@ class ParameterServerGroup:
             'Parameter number in each model: {:.2f}M'.format(get_params_number(self.clients[0].model) / 1e6)
         )
 
-    def append(self, client: ClientTemplate) -> None:
+    def sync(self) -> None:
         r"""
         Overview:
-            Append a client into the group.
-        Arguments:
-            - client: client to be added.
+            Synchronize all local models, making their parameters same as global model.
         Returns:
             - None
         """
-        self.clients.append(client)
+        state_dict = self.server.glob_dict
+        c = self.server.c
+        for client in self.clients:
+            client.update_model(state_dict)
+            client.update_c(c)
 
     def aggregate(
             self, train_round: int, participate_clients_ids: list = None, aggr_parameter_args: dict = None
@@ -111,7 +106,40 @@ class ParameterServerGroup:
                 client.set_fed_keys(new_fed_keys)
 
         if self.args.group.aggregation_method == 'avg':
-            trans_cost = fed_avg(participate_clients, self.server)
+            K = len(participate_clients)
+            N = len(self.clients)
+            keys = []
+            bn_keys = []
+
+            for k, v in self.clients[0].model.named_parameters():
+                keys.append(k)
+            for k in self.clients[0].model.state_dict():
+                if k not in keys:
+                    bn_keys.append(k)
+
+            # Aggregate c and y
+            avg_delta_y = {
+                k: reduce(lambda x, y: x + y, [client.delta_y[k] / K for client in participate_clients])
+                for k in keys
+            }
+            avg_delta_c = {
+                k: reduce(lambda x, y: x + y, [client.delta_c[k] / K for client in participate_clients])
+                for k in keys
+            }
+            avg_bn_val = {
+                k: reduce(lambda x, y: x + y, [client.model.state_dict()[k] / K for client in participate_clients])
+                for k in bn_keys
+            }
+            trans_cost = 4 * sum(
+                N * (self.clients[0].delta_y[k].numel() + self.clients[0].delta_c[k].numel()) for k in keys
+            )
+
+            for k in keys:
+                self.server.glob_dict[k] += self.args.learn.server_lr * avg_delta_y[k]
+                self.server.c[k] += K / N * avg_delta_c[k]
+            for k in bn_keys:
+                self.server.glob_dict[k] = avg_bn_val[k]
+
             self.sync()
         else:
             raise KeyError('Unrecognized compression method: ' + self.args.group.aggregation_method)
@@ -127,34 +155,3 @@ class ParameterServerGroup:
                 client.set_fed_keys(fed_keys_bak)
 
         return trans_cost
-
-    def flush(self) -> None:
-        r"""
-        Overview:
-            Reset this group and clear all server and clients.
-        Returns:
-            - None
-        """
-        self.clients = []
-        self.server = None
-
-    def sync(self) -> None:
-        r"""
-        Overview:
-            Synchronize all local models, making their parameters same as global model.
-        Returns:
-            - None
-        """
-        state_dict = self.server.glob_dict
-        for client in self.clients:
-            client.update_model(state_dict)
-
-    def set_fed_keys(self) -> None:
-        r"""
-        Overview:
-            Set `fed_keys` of each client, determine which parameters should be included for federated learning
-        Returns:
-            - None
-        """
-        for client in self.clients:
-            client.set_fed_keys(self.server.glob_dict.keys())

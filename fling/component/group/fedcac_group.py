@@ -103,7 +103,7 @@ class FedCACServerGroup(ParameterServerGroup):
             trans_cost += self.args.client.client_num * state_dict[k].numel()
         return trans_cost
 
-    def aggregate(self, train_round: int) -> int:
+    def aggregate(self, train_round: int, participate_clients_ids: list = None) -> int:
         r"""
         Overview:
             Aggregate all client models.
@@ -113,6 +113,8 @@ class FedCACServerGroup(ParameterServerGroup):
         Returns:
             - trans_cost: uplink communication cost.
         """
+        if participate_clients_ids is None:
+            participate_clients_ids = list(range(self.args.client.client_num))
         if self.args.group.aggregation_method == 'avg':
             trans_cost = fed_avg(self.clients, self.server)
             trans_cost += self.get_customized_global_models()

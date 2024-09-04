@@ -80,6 +80,7 @@ def get_weights(model: nn.Module,
             non-parameter weights (e.g. running_mean, running_var). Otherwise, only parameters of the model will
             be considered.
     """
+    print(parameter_args.name)
     if parameter_args.name == 'all':
         use_keys = model.state_dict().keys()
     elif parameter_args.name == 'contain':
