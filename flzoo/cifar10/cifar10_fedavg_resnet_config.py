@@ -2,7 +2,9 @@ from easydict import EasyDict
 
 exp_args = dict(
     data=dict(
-        dataset='cifar10', data_path='./data/CIFAR10', sample_method=dict(name='iid', train_num=500, test_num=100)
+        dataset='cifar10',
+        data_path='./data/CIFAR10',
+        sample_method=dict(name='dirichlet', alpha=1, train_num=500, test_num=100)
     ),
     learn=dict(
         device='cuda:0', local_eps=8, global_eps=40, batch_size=32, optimizer=dict(name='sgd', lr=0.02, momentum=0.9)

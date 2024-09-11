@@ -83,6 +83,8 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 **FedMOON:** [Model-Contrastive Federated Learning](https://openaccess.thecvf.com/content/CVPR2021/papers/Li_Model-Contrastive_Federated_Learning_CVPR_2021_paper.pdf)
 
+**SCAFFOLD:** [SCAFFOLD: Stochastic Controlled Averaging for Federated Learning ](https://arxiv.org/abs/1910.06378)
+
 ### Personalized Federated Learning
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
