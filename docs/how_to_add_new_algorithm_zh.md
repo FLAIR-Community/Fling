@@ -8,7 +8,7 @@
 
 ### 配置初始化
 
-这里以个性化联邦学习的 `fling/pipeline/personalized_model_pipeline.py ` 为例，如下所示：
+接下来我们将分段对 pipeline 的主体进行详细解释。这里以个性化联邦学习的 `fling/pipeline/personalized_model_pipeline.py ` 为例，如下所示：
 
 ```python
 def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
@@ -48,20 +48,21 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     launcher = get_launcher(args)
 ```
 
-在配置初始化部分中，主要涉及**数据集的划分**、**主要组件**（客户端、服务器、群组）**的初始化**、**学习率调度器的设置**。
+在配置初始化部分中，主要涉及**数据集的划分**、**主要组件**（客户端、服务器、群组）**的初始化**、**学习率调度器的设置**、**启动器`launcher`的设置**。
 
 **请注意：**我们建议如非必要，尽量不自定义新的 pipeline，而是选择对相应的组件部分进行修改/添加。
 
 - 如果要添加数据集，可参考[此教程](https://github.com/KyeGuo/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)。
 - 如果要自定义学习率调度器，可参考[此文档](https://github.com/KyeGuo/Fling/blob/main/docs/meaning_for_configurations_zh.md)中的对应部分。
 - 如果要对客户端、服务器、群组的初始化进行自定义，可参考[此介绍](https://github.com/KyeGuo/Fling/blob/main/docs/framework_for_fling_zh.md)，具体方法我们也会在后文介绍。
+- 启动器 `launcher` 是一个负责组织各个客户端进行训练、测试、微调的组件，具体实现可参考[此处](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)。
 
 ### 训练主体
 
 这里以个性化联邦学习的 `fling/pipeline/personalized_model_pipeline.py` 为例，如下所示：
 
 ```python
-# Training loop
+	# Training loop
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
         # Initialize variable monitor.
@@ -130,10 +131,11 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
             logger.add_scalar(f'finetune/{key}', tmp_mean, eid)
 ```
 
-在训练主体部分中，每个通信轮次内，主要涉及**客户端采样**、使用 `launcher` 对各个客户端进行**本地训练**、**聚合前/聚合后测试**，以及使用 `group.aggregate()` 实现服务器组织客户端的**聚合**。由于是个性化联邦学习，在最后还使用 `launcher` 对各个客户端进行本地微调。
+在训练主体部分中，每个通信轮次内，主要涉及**客户端采样**（选取部分客户端参与本轮训练）、使用 `launcher` 对各个客户端进行**本地训练**、**聚合前/聚合后测试**，以及使用 `group.aggregate()` 实现服务器组织客户端的**聚合**。由于是个性化联邦学习，在最后还使用 `launcher` 对各个客户端进行本地微调。
 
-**请注意：**此处我们同样建议如非必要，尽量不自定义新的 pipeline，而是选择对相应的组件部分进行修改/添加
+**请注意：**此处我们同样建议并介绍如何对相应的组件部分进行修改/添加。
 
+- 使用 `launcher.launch()` 来组织各个客户端串行/并行地执行 `task_name` 对应的操作。具体地，在[代码](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)中已经定义了对组件 `client` 中的三种内置函数 `train` 、`test` 、`finetune` 的调用。
 - 如果涉及到自定义 `logger` 中结果的呈现，可以针对 `train_monitor`、`test_monitor` 以及 `logger.add_scalars_dict()` 部分的操作进行修改。
 - 对于**客户端的训练、微调、测试**，**服务器的全局测试**，**群组组织的聚合**和**分发**，可参考[此介绍](https://github.com/KyeGuo/Fling/blob/main/docs/framework_for_fling_zh.md)。具体的自定义方法我们将在下文介绍。
 
@@ -141,7 +143,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
 
 在详细了解了 pipeline 之后，我们知道要自定义联邦学习算法，可以对客户端（Client）、服务器（Server）和群组（Group）进行自定义，即覆写原组件的方法、添加新属性甚至新方法等。如果需要，甚至可以对流水线（Pipeline）进行自定义。
 
-如果您想向 Fling 添加新的联邦学习算法，可以参考以下步骤：
+如果您想向 Fling 添加新的联邦学习算法，可以参考以下步骤，这里结合 **MOON 算法为例**进行说明：
 
 ### 步骤 1：分析需要新定义的组件
 
