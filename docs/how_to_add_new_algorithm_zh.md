@@ -59,10 +59,10 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
 
 ### 训练主体
 
-这里以个性化联邦学习的 `fling/pipeline/personalized_model_pipeline.py` 为例，如下所示：
+承接上文，在这小节中我们对个性化联邦学习的 `pipeline` 的**训练主体**部分进行介绍：
 
 ```python
-	# Training loop
+# Training loop
     for i in range(args.learn.global_eps):
         logger.logging('Starting round: ' + str(i))
         # Initialize variable monitor.
@@ -133,9 +133,13 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
 
 在训练主体部分中，每个通信轮次内，主要涉及**客户端采样**（选取部分客户端参与本轮训练）、使用 `launcher` 对各个客户端进行**本地训练**、**聚合前/聚合后测试**，以及使用 `group.aggregate()` 实现服务器组织客户端的**聚合**。由于是个性化联邦学习，在最后还使用 `launcher` 对各个客户端进行本地微调。
 
-**请注意：**此处我们同样建议并介绍如何对相应的组件部分进行修改/添加。
+接下来，我们介绍如何对相应的组件部分进行修改/添加：
 
-- 使用 `launcher.launch()` 来组织各个客户端串行/并行地执行 `task_name` 对应的操作。具体地，在[代码](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)中已经定义了对组件 `client` 中的三种内置函数 `train` 、`test` 、`finetune` 的调用。
+- 关于启动器组件 `launcher` ，我们使用 `launcher.launch()` 来组织各个客户端串行/并行地执行 `task_name` 对应的操作：
+  1. 我们目前共有三种可调用的模式，对应参数 `task_name` 的 `'train'` 、`'test'` 、`'finetune'` 值，分别表示执行客户端的本地训练、测试、微调操作；
+  2. 具体地，在[代码](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)中定义了对组件 `client` 中的三种内置函数 `train` 、`test` 、`finetune` 的调用。因此实际执行的代码函数在组件 [`client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) 类文件中；
+  3. 我们引入 `launcher` 的目的是实现对各个客户端执行相应操作的并行化。相关配置参数的定义可参照 [Fling/flzoo/default_config.py](https://github.com/FLAIR-Community/Fling/blob/main/flzoo/default_config.py) 中的 `launcher.name` 字段。
+
 - 如果涉及到自定义 `logger` 中结果的呈现，可以针对 `train_monitor`、`test_monitor` 以及 `logger.add_scalars_dict()` 部分的操作进行修改。
 - 对于**客户端的训练、微调、测试**，**服务器的全局测试**，**群组组织的聚合**和**分发**，可参考[此介绍](https://github.com/KyeGuo/Fling/blob/main/docs/framework_for_fling_zh.md)。具体的自定义方法我们将在下文介绍。
 
