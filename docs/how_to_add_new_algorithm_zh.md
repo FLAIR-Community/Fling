@@ -137,7 +137,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
 
 - 关于启动器组件 `launcher` ，我们使用 `launcher.launch()` 来组织各个客户端串行/并行地执行 `task_name` 对应的操作：
   1. 我们目前共有三种可调用的模式，对应参数 `task_name` 的 `'train'` 、`'test'` 、`'finetune'` 值，分别表示执行客户端的本地训练、测试、微调操作；
-  2. 具体地，在[代码](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)中定义了对组件 `client` 中的三种内置函数 `train` 、`test` 、`finetune` 的调用。因此实际执行的代码函数在组件 [`client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) 类文件中；
+  2. 具体地，在[代码](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)中定义了对组件 `client` 中的三种内置函数 `train` 、`test` 、`finetune` 的调用。例如，如果使用 `base_client` 作为客户端组件，那么实际调用的 `train` 、`test` 、`finetune` 函数定义在组件 [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) 类文件中；
   3. 我们引入 `launcher` 的目的是实现对各个客户端执行相应操作的并行化。相关配置参数的定义可参照 [Fling/flzoo/default_config.py](https://github.com/FLAIR-Community/Fling/blob/main/flzoo/default_config.py) 中的 `launcher.name` 字段。
 
 - 如果涉及到自定义 `logger` 中结果的呈现，可以针对 `train_monitor`、`test_monitor` 以及 `logger.add_scalars_dict()` 部分的操作进行修改。
