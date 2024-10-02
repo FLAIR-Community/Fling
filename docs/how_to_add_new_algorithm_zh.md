@@ -48,7 +48,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     launcher = get_launcher(args)
 ```
 
-在配置初始化部分中，主要涉及**数据集的划分**、**主要组件**（客户端、服务器、群组）**的初始化**、**学习率调度器的设置**、**启动器`launcher`的设置**。接下来是对各个组件的简单介绍：
+在初始化部分中，主要涉及**数据集的划分**、**主要组件**（客户端、服务器、群组）**的初始化**、**学习率调度器的设置**、**启动器`launcher`的设置**。接下来是对各个组件的简单介绍：
 
 - 数据集：上述代码块包含了构造数据集、划分数据集（采用 non-IID 方式）等操作。如果需要新定义数据集，可以参考[此教程](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_dataset_zh.md)。
 - 学习率调度器 ``lr_scheduler``：这一组件的作用是在每个训练轮次开始时，为每个客户端决定学习率。具体的使用和修改方式，可参考[此文档](https://github.com/FLAIR-Community/Fling/blob/main/docs/meaning_for_configurations_zh.md)中的对应部分。
@@ -136,8 +136,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
 接下来，我们介绍如何对相应的组件部分进行修改/添加：
 
 - 关于启动器组件 `launcher` ，我们使用 `launcher.launch()` 来组织各个客户端串行/并行地执行 `task_name` 对应的操作：
-  1. 我们目前共有三种可调用的模式，对应参数 `task_name` 的 `'train'` 、`'test'` 、`'finetune'` 值，分别表示执行客户端的本地训练、测试、微调操作；
-  2. 具体地，在[代码](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py)中定义了对组件 `client` 中的三种内置函数 `train` 、`test` 、`finetune` 的调用。例如，如果使用 `base_client` 作为客户端组件，那么实际调用的 `train` 、`test` 、`finetune` 函数定义在组件 [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) 类文件中；
+  1. 我们目前共有三种可调用的模式，对应参数 `task_name` 的 `'train'` 、`'test'` 、`'finetune'` 值，分别表示执行客户端的本地训练、测试、微调操作。例如，如果使用  [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) 作为客户端组件，那么上述三种模式则分别实际调用了相应类的 `train` 、`test` 、`finetune` 函数。
   3. 我们引入 `launcher` 的目的是实现对各个客户端执行相应操作的并行化。相关配置参数的定义可参照 [Fling/flzoo/default_config.py](https://github.com/FLAIR-Community/Fling/blob/main/flzoo/default_config.py) 中的 `launcher.name` 字段。
 - 如果涉及到自定义 `logger` 中结果的呈现，可以针对 `train_monitor`、`test_monitor` 以及 `logger.add_scalars_dict()` 部分的操作进行修改。
 
@@ -145,7 +144,7 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
 
 在详细了解了 pipeline 之后，我们知道要自定义联邦学习算法，可以对客户端（Client）、服务器（Server）和群组（Group）进行自定义，即覆写原组件的方法、添加新属性甚至新方法等。如果需要，甚至可以对流水线（Pipeline）进行自定义。
 
-如果您想向 Fling 添加新的联邦学习算法，可以参考以下步骤，这里结合 **MOON 算法为例**进行说明：
+这里结合 **MOON 算法为例**进行说明：
 
 ### 步骤 1：分析需要新定义的组件
 
