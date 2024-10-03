@@ -15,9 +15,9 @@ exp_args = dict(
         input_channel=3,
         class_number=100,
     ),
-    client=dict(name='fedpart_client', client_num=40),
+    client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
-    group=dict(name='fedpart_group', aggregation_method='avg'),
+    group=dict(name='base_group', aggregation_method='avg', include_non_param=False,),
     other=dict(test_freq=1, logging_path='./logging/cifar100_fedpart_resnet18_iid')
 )
 

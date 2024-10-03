@@ -20,11 +20,12 @@ exp_args = dict(
         vocab_size=75242,
         n_layers=3
     ),
-    client=dict(name='fedpart_client', client_num=40),
+    client=dict(name='base_client', client_num=40),
     server=dict(name='base_server'),
     group=dict(
-        name='fedpart_group',
-        aggregation_method='avg'
+        name='base_group',
+        aggregation_method='avg',
+        include_non_param=False,
     ),
     launcher=dict(name='serial'),
     other=dict(test_freq=1, logging_path='./logging/sogou_news_fedpart_transformer')

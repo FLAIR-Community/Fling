@@ -46,7 +46,7 @@ class ParameterServerGroup:
         """
         # Step 1.
         fed_keys = get_weights(
-            self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True, include_non_param=True
+            self.clients[0].model, self.args.group.aggregation_parameters, return_dict=True, include_non_param=self.args.group.include_non_param
         ).keys()
 
         # Step 2.
@@ -105,7 +105,7 @@ class ParameterServerGroup:
         if aggr_parameter_args is not None:
             fed_keys_bak = self.clients[0].fed_keys
             new_fed_keys = get_weights(
-                self.clients[0].model, aggr_parameter_args, return_dict=True, include_non_param=True
+                self.clients[0].model, aggr_parameter_args, return_dict=True, include_non_param=self.args.group.include_non_param
             ).keys()
             for client in participate_clients:
                 client.set_fed_keys(new_fed_keys)

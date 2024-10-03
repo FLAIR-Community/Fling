@@ -94,7 +94,7 @@ def get_train_args_resnet18_v1(rnd: int) -> Dict:
     """
     # Total 197M (11227812)
     rnd2str = {
-        0: ['conv1', 'bn1'],  # 9536
+        0: ['pre_conv', 'pre_bn'],  # 9536
         1: ['layers.0.0.conv1', 'layers.0.0.bn1'],  # 36992
         2: ['layers.0.0.conv2', 'layers.0.0.bn2'],  # 36992
         3: ['layers.0.1.conv1', 'layers.0.1.bn1'],  # 36992
@@ -148,7 +148,7 @@ def get_train_args_resnet8_v1(rnd: int) -> Dict:
     """
     # Total 197M
     rnd2str = {
-        0: ['conv1', 'bn1'],  # 1.5
+        0: ['pre_conv', 'pre_bn'],  # 1.5
         1: ['layers.0.0.conv1', 'layers.0.0.bn1'],  # 5.898
         2: ['layers.0.0.conv2', 'layers.0.0.bn2'],  # 5.898
         3: ['layers.1.0.conv1', 'layers.1.0.bn1'],  # 11.8

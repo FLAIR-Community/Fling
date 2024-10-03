@@ -68,8 +68,7 @@ def calculate_mean_std(train_dataset: Dataset, test_dataset: Dataset) -> tuple:
 def get_weights(model: nn.Module,
                 parameter_args: dict,
                 return_dict: bool = False,
-                include_non_param: bool = False,
-                prefix_mode: bool = False) -> Union[List, Dict]:
+                include_non_param: bool = False) -> Union[List, Dict]:
     """
     Overview:
         Get model parameters, using the given ``parameter_args``.
@@ -80,10 +79,7 @@ def get_weights(model: nn.Module,
         - include_non_param: If ``True``, all weights in ``model.state_dict()`` will be considered, including
             non-parameter weights (e.g. running_mean, running_var). Otherwise, only parameters of the model will
             be considered.
-        - prefix_model: If ``True``, prefix matching is followed when matching keys of weights. Otherwise,
-            matching is the default.
     """
-    # print(parameter_args.name)
     if parameter_args.name == 'all':
         use_keys = model.state_dict().keys()
     elif parameter_args.name == 'contain':
@@ -91,24 +87,16 @@ def get_weights(model: nn.Module,
         use_keys = []
         for kw in keywords:
             for k in model.state_dict():
-                if prefix_mode:
-                    if len(kw) <= len(k) and k[:len(kw)] == kw:
-                        use_keys.append(k)
-                else:
-                    if kw in k:
-                        use_keys.append(k)
+                if kw in k:
+                    use_keys.append(k)
         use_keys = list(set(use_keys))
     elif parameter_args.name == 'except':
         keywords = parameter_args.keywords
         use_keys = []
         for kw in keywords:
             for k in model.state_dict():
-                if prefix_mode:
-                    if len(kw) <= len(k) and k[:len(kw)] == kw:
-                        use_keys.append(k)
-                else:
-                    if kw in k:
-                        use_keys.append(k)
+                if kw in k:
+                    use_keys.append(k)
         use_keys = list(set(model.state_dict().keys()) - set(use_keys))
     else:
         raise ValueError(f'Unrecognized finetune parameter name: {parameter_args.name}')
@@ -129,7 +117,6 @@ def get_weights(model: nn.Module,
             res = []
             for key, param in model.named_parameters():
                 if key in use_keys:
-                    # print(key)
                     res.append(param)
         else:
             res = {}
