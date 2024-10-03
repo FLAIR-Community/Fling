@@ -137,9 +137,8 @@ Next, we introduce how to modify or add to the relevant components:
 
 - For the launcher component `launcher`, we use `launcher.launch()` to organize the execution of the operation corresponding to `task_name` by each client either serially or in parallel:
   1. Currently, there are three callable modes corresponding to the values of the parameter `task_name`: `'train'`, `'test'`, and `'finetune'`, which represent the local training, testing, and fine-tuning operations of the clients, respectively. For example, if [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) is used as the client component, the actual function that executes are the `train`, `test`, and `finetune` functions defined in  corresponding  class file.
-  3. The purpose of introducing the `launcher` is to parallelize the execution of the corresponding operations across clients. You can refer to the `launcher.name` field in [Fling/flzoo/default_config.py](https://github.com/FLAIR-Community/Fling/blob/main/flzoo/default_config.py) for the definition of related configuration parameters.
-- If you need to customize the presentation of results in the `logger`, you can modify the `train_monitor`, `test_monitor`, and `logger.add_scalars_dict()` operations.
-
+  1. Currently, there are three callable modes corresponding to the values of the parameter `task_name`: `'train'`, `'test'`, and `'finetune'`, which represent the local training, testing, and fine-tuning operations of the clients, respectively.
+  2. Specifically, in the [code](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py), the calls to the three built-in functions `train`, `test`, and `finetune` within the `client` component are defined. For example, if `base_client` is used as the client component, the actual definitions of the `train`, `test`, and `finetune` functions are found in the [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) class file.
 
 ## Customizing and Using Algorithm Components
 
