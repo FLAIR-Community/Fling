@@ -24,15 +24,16 @@ exp_args = dict(
     server=dict(name='base_server'),
     group=dict(
         name='base_group',
-        aggregation_method='avg'
+        aggregation_method='avg',
+        include_non_param=False,
     ),
     launcher=dict(name='serial'),
-    other=dict(test_freq=1, logging_path='./logging/sogou_news_fedavg_transformer')
+    other=dict(test_freq=1, logging_path='./logging/sogou_news_fedpart_transformer')
 )
 
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
-    from fling.pipeline import generic_model_pipeline
+    from fling.pipeline import partial_model_pipeline
     
-    generic_model_pipeline(exp_args, seed=0)
+    partial_model_pipeline(exp_args, seed=0)

@@ -83,6 +83,9 @@ default_exp_args = dict(
             # For default case, every parameter should be aggregated.
             name='all'
         ),
+        # Whether non-parameter weights will be globally aggregated. Default to be ``True``, which means
+        # all weights in ``model.state_dict()`` will be globally aggregated.
+        include_non_param=True,
     ),
     # Launcher configurations.
     launcher=dict(
