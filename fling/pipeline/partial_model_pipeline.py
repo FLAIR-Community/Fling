@@ -17,36 +17,19 @@ def get_kwds(rnd: int, rnd2str: Dict) -> list:
     Overview:
         Given the current index ``idx``, choose the function to decide the layers to train
     """
-    func = 'roll'
-    kwds = None
-
     rounds_per_key = 2
     total_len = len(list(rnd2str.keys()))
 
-    if func[:4] == 'roll':
-        idx = (rnd // rounds_per_key) % total_len
-        print('index: ' + str(idx))
+    idx = (rnd // rounds_per_key) % total_len
+    kwds = rnd2str[idx]
 
-        if func == 'roll':
-            kwds = rnd2str[idx]
-        elif func == 'roll+back':
-            idx = total_len - 1 - idx
-            kwds = rnd2str[idx]
-        else:
-            kwds = rnd2str[idx]
-    elif func == 'V':
-        idx = (rnd // rounds_per_key) % (2 * (total_len - 1))
-        print('index: ' + str(idx))
-        if idx >= total_len:
-            idx = (2 * (total_len - 1)) - idx
-        kwds = rnd2str[idx]
     return kwds, idx
 
 
-def get_train_args_transformer_v1(rnd: int) -> Dict:
+def get_train_args_transformer(rnd: int) -> Dict:
     """
     Overview:
-        Given the current training round ``rnd``, decide the trainable parameters.
+        Given the current training round ``rnd``, decide the trainable parameters of a transformer model (3 encoder layers).
     """
     rnd2str = {
         0: ['_orig_mod.embedding.weight'], # 6066600
@@ -79,18 +62,13 @@ def get_train_args_transformer_v1(rnd: int) -> Dict:
         return EasyDict({"name": "all"}), -1
     elif rnd >= 89 and rnd < 105:
         kwds, idx = get_kwds(rnd - 89, rnd2str)
-    # FedPart(Base)
-    # if rnd < 5:
-    #     return EasyDict({"name": "all"}), -1
-    # else:
-    #     kwds, idx = get_kwds(rnd - 5, rnd2str)
     return EasyDict({"name": "contain", "keywords": kwds}), idx
 
 
-def get_train_args_resnet18_v1(rnd: int) -> Dict:
+def get_train_args_resnet18(rnd: int) -> Dict:
     """
     Overview:
-        Given the current training round ``rnd``, decide the trainable parameters.
+        Given the current training round ``rnd``, decide the trainable parameters of a ResNet-18 model.
     """
     # Total 197M (11227812)
     rnd2str = {
@@ -133,18 +111,13 @@ def get_train_args_resnet18_v1(rnd: int) -> Dict:
         return EasyDict({"name": "all"}), -1
     elif rnd >= 99 and rnd < 141:
         kwds, idx = get_kwds(rnd - 99, rnd2str)
-    # FedPart(Base)
-    # if rnd < 5:
-    #     return EasyDict({"name": "all"}), -1
-    # else:
-    #     kwds, idx = get_kwds(rnd - 5, rnd2str)
     return EasyDict({"name": "contain", "keywords": kwds}), idx
 
 
-def get_train_args_resnet8_v1(rnd: int) -> Dict:
+def get_train_args_resnet8(rnd: int) -> Dict:
     """
     Overview:
-        Given the current training round ``rnd``, decide the trainable parameters.
+        Given the current training round ``rnd``, decide the trainable parameters of a ResNet-8 model.
     """
     # Total 197M
     rnd2str = {
@@ -180,39 +153,37 @@ def get_train_args_resnet8_v1(rnd: int) -> Dict:
         return EasyDict({"name": "all"}), -1
     elif rnd >= 105 and rnd < 125:
         kwds, idx = get_kwds(rnd - 105, rnd2str)
-    # FedPart(Base)
-    # if rnd < 5:
-    #     return EasyDict({"name": "all"}), -1
-    # else:
-    #     kwds, idx = get_kwds(rnd - 5, rnd2str)
     return EasyDict({"name": "contain", "keywords": kwds}), idx
 
 
 def get_train_args(rnd: int, model_name: str) -> Dict:
     if model_name == 'resnet8':
-        return get_train_args_resnet8_v1(rnd)
+        return get_train_args_resnet8(rnd)
     elif model_name == 'resnet18':
-        return get_train_args_resnet18_v1(rnd)
+        return get_train_args_resnet18(rnd)
     elif model_name == 'transformer_classifier':
-        return get_train_args_transformer_v1(rnd)
+        return get_train_args_transformer(rnd)
 
 
 def get_aggr_args(rnd: int, model_name: str) -> Dict:
     if model_name == 'resnet8':
-        tmp = get_train_args_resnet8_v1(rnd)
+        tmp = get_train_args_resnet8(rnd)
     elif model_name == 'resnet18':
-        tmp = get_train_args_resnet18_v1(rnd)
+        tmp = get_train_args_resnet18(rnd)
     elif model_name == 'transformer_classifier':
-        tmp = get_train_args_transformer_v1(rnd)
+        tmp = get_train_args_transformer(rnd)
     return tmp
 
 
 def partial_model_pipeline(args: dict, seed: int = 0) -> None:
     r"""
     Overview:
-       Pipeline for partial federated learning. In each training round, a part of the model will be trained and \
-       aggregated. The final performance of is calculated by averaging the local model in each client. Typically, \
-       each local model is tested using local test dataset.
+       Pipeline for partial federated learning. In each training round, a part of the model can be selected in order \
+       from shallow to deep to be trained and aggregated. The final performance of is calculated by averaging the \
+       local model in each client. Typically, each local model is tested using local test dataset.
+       This pipeline is the base implementation of FedPart introduced in: 
+       Why Go Full? Elevating Federated Learning Through Partial Network Updates
+       <link https://[TO_BE_DONE] link>.
     Arguments:
         - args: dict type arguments.
         - seed: random seed.
