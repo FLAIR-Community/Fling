@@ -13,8 +13,6 @@ exp_args = dict(
         batch_size=32,
         optimizer=dict(name='adam', lr=1e-3),
         test_place=['before_aggregation', 'after_aggregation'],
-        # Only fine-tune parameters whose name contain the keyword "fc".
-        finetune_parameters=dict(name='contain', keywords=['fc']),
     ),
     model=dict(
         name='resnet8',
@@ -28,12 +26,15 @@ exp_args = dict(
         aggregation_method='avg',
         include_non_param=False,
     ),
-    other=dict(test_freq=1, logging_path='./logging/cifar10_fedpart_resnet8_iid_new')
+    other=dict(test_freq=1, logging_path='./logging/cifar10_fedpart_resnet8_iid')
 )
 
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
+    # Here, `partial_model_pipeline` can be replaced with `generic_model_pipeline`
+    # to run the full-parameter training (FedAvg) with the corresponding configuration.
+    # Please note that the `other.logging_path` above should be modified accordingly.
     from fling.pipeline import partial_model_pipeline
 
     partial_model_pipeline(exp_args, seed=0)

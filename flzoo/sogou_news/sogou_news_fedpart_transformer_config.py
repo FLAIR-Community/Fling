@@ -34,6 +34,9 @@ exp_args = dict(
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
+    # Here, `partial_model_pipeline` can be replaced with `generic_model_pipeline`
+    # to run the full-parameter training (FedAvg) with the corresponding configuration.
+    # Please note that the `other.logging_path` above should be modified accordingly.
     from fling.pipeline import partial_model_pipeline
     
     partial_model_pipeline(exp_args, seed=0)
