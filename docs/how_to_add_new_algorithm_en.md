@@ -1,14 +1,14 @@
 # The Pipeline of Federated Learning Algorithms
 
-In Fling, we have already supported some common federated learning algorithms (including general federated learning and personalized federated learning). For most scenarios, users can start federated learning experiments in different settings simply by modifying the configuration file. Of course, we also fully support users in implementing more complex, customized algorithms. We will walk through the federated learning pipeline in the Fling framework step by step to help users gain a clearer understanding of the process.
+In Fling, we have already supported some common federated learning algorithms (including generic federated learning and personalized federated learning). For most scenarios, users can start federated learning experiments in different settings simply by modifying the configuration file. Of course, we also fully support users in implementing more complex, customized algorithms. We will walk through the federated learning pipeline in the Fling framework step by step to help users gain a clearer understanding of the process.
 
 ## The Algorithm Workflow: Pipeline
 
-Whether it's a general federated learning algorithm or a personalized federated learning algorithm, the main process follows the corresponding pipeline. The pipeline is responsible for organizing the algorithm's workflow around three main components in the Fling framework: Client, Server, and Group. The main workflow can be divided into **Component Initialization** and **Training Process**.
+Whether it's a generic federated learning algorithm or a personalized federated learning algorithm, the main process follows the corresponding pipeline files. A pipeline is responsible for organizing the algorithm's workflow around three main components in the Fling framework: Client, Server, and Group. The main workflow can be divided into **Component Initialization** and **Training Process**.
 
 ### Component Initialization
 
-Next, we will explain the main steps of the pipeline in detail. Here we take the personalized federated learning pipeline `fling/pipeline/personalized_model_pipeline.py` as an example, as shown below:
+We explain the main steps of the pipeline in detail. Here we take the personalized federated learning pipeline `fling/pipeline/personalized_model_pipeline.py` as an example, as shown below:
 
 ```python
 def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
@@ -48,9 +48,9 @@ def personalized_model_pipeline(args: dict, seed: int = 0) -> None:
     launcher = get_launcher(args)
 ```
 
-In the configuration initialization phase, the main tasks involve **dataset partitioning**, **initialization of major components** (Client, Server, Group), **learning rate scheduler setup**, and **launcher setup**. Below is a brief introduction to each component:
+In the initialization phase, the main tasks involve **dataset partitioning**, **initialization of major components** (Client, Server, Group), **learning rate scheduler setup**, and **launcher setup**. Below is a brief introduction to each component:
 
-- **Dataset**: The code block above includes operations for constructing and partitioning datasets (using a non-IID method). If you need to define a new dataset, you can refer to [this tutorial](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_dataset_en.md).
+- **Dataset**: The code above includes operations for constructing and partitioning datasets (using a non-IID method). If you need to define a new dataset, you can refer to [this tutorial](https://github.com/FLAIR-Community/Fling/blob/main/docs/how_to_add_new_dataset_en.md).
 - **Learning Rate Scheduler `lr_scheduler`**: This component is responsible for deciding the learning rate for each client at the beginning of each training round. For specific usage and modifications, you can refer to the corresponding section in [this documentation](https://github.com/FLAIR-Community/Fling/blob/main/docs/meaning_for_configurations_en.md).
 - **Launcher `launcher`**: This component helps to parallelize the training, testing, and fine-tuning of all clients, improving execution efficiency. You can find more details about its usage and implementation [here](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py).
 - **Client**: The client contains all the operations required for edge devices in federated learning, including local training, testing, fine-tuning, and uploading parameters. Common client definitions can be found in `fling/component/client`.
@@ -136,17 +136,15 @@ In the training process section, for each communication round, the main tasks in
 Next, we introduce how to modify or add to the relevant components:
 
 - For the launcher component `launcher`, we use `launcher.launch()` to organize the execution of the operation corresponding to `task_name` by each client either serially or in parallel:
+  1. Currently, there are three callable modes corresponding to the values of the parameter `task_name`: `'train'`, `'test'`, and `'finetune'`, which represent the local training, testing, and fine-tuning operations of the clients, respectively. For example, if [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) is used as the client component, the actual function that executes are the `train`, `test`, and `finetune` functions defined in  corresponding  class file.
   1. Currently, there are three callable modes corresponding to the values of the parameter `task_name`: `'train'`, `'test'`, and `'finetune'`, which represent the local training, testing, and fine-tuning operations of the clients, respectively.
   2. Specifically, in the [code](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/launcher_utils.py), the calls to the three built-in functions `train`, `test`, and `finetune` within the `client` component are defined. For example, if `base_client` is used as the client component, the actual definitions of the `train`, `test`, and `finetune` functions are found in the [`base_client`](https://github.com/FLAIR-Community/Fling/blob/main/fling/component/client/base_client.py) class file.
-  3. The purpose of introducing the `launcher` is to parallelize the execution of the corresponding operations across clients. You can refer to the `launcher.name` field in [Fling/flzoo/default_config.py](https://github.com/FLAIR-Community/Fling/blob/main/flzoo/default_config.py) for the definition of related configuration parameters.
-- If you need to customize the presentation of results in the `logger`, you can modify the `train_monitor`, `test_monitor`, and `logger.add_scalars_dict()` operations.
-
 
 ## Customizing and Using Algorithm Components
 
 After gaining a detailed understanding of the pipeline, we know that to customize a federated learning algorithm, you can customize the Client, Server, and Group components, which may involve overriding original component methods, adding new attributes, or even introducing new methods. If needed, you can even customize the pipeline itself.
 
-If you want to add a new federated learning algorithm to Fling, you can follow the steps below. Here, we will explain this process using the **MOON algorithm as an example**:
+Here, we will explain this process using the **MOON algorithm as an example**:
 
 ### Step 1: Analyze the Components to be Defined
 
