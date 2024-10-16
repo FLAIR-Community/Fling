@@ -183,7 +183,7 @@ def partial_model_pipeline(args: dict, seed: int = 0) -> None:
        local model in each client. Typically, each local model is tested using local test dataset.
        This pipeline is the base implementation of FedPart introduced in: 
        Why Go Full? Elevating Federated Learning Through Partial Network Updates
-       <link https://[TO_BE_DONE] link>.
+       <link https://arxiv.org/abs/2410.11559 link>.
     Arguments:
         - args: dict type arguments.
         - seed: random seed.
