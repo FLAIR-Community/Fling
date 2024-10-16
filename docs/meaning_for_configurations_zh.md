@@ -102,6 +102,8 @@ default_exp_args = dict(
             # 对于默认情况，应聚合所有参数。
             name='all'
         ),
+        # 是否对模型的统计量参数进行全局聚合。默认为"是"，表示模型的所有参数包括统计量在内都进行全局聚合。
+        include_non_param=True,
     ),
     # 启动程序的相关配置
     launcher=dict(

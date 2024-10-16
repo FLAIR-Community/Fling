@@ -85,6 +85,8 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 **SCAFFOLD:** [SCAFFOLD: Stochastic Controlled Averaging for Federated Learning ](https://arxiv.org/abs/1910.06378)
 
+**FedPart:** [Why Go Full? Elevating Federated Learning Through Partial Network Updates](https://arxiv.org/abs/2410.11559)
+
 ### Personalized Federated Learning
 
 **FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
