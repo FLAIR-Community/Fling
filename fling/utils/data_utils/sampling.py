@@ -228,7 +228,7 @@ def data_sampling(dataset: Dataset, args: dict, seed: int, train: bool = True) -
         sampling_func = sampling_methods[sampling_name]
     except KeyError:
         raise ValueError(f'Unrecognized sampling method: {args.data.sample_method.name}')
- 
+
     # For Cross-Domain Scenario: clients in the same domain share an identical test dataset.
     if 'domains' in args['data'] and train is not True:
         return sampling_func(dataset, 1, len(dataset), seed, **sampling_config)

@@ -14,18 +14,17 @@ class DomainNetDataset(Dataset):
     r"""
     Implementation for DomainNet dataset. 
     """
-    def __init__(self, cfg: dict, domain: str,  train: bool): 
+
+    def __init__(self, cfg: dict, domain: str, train: bool):
         super(DomainNetDataset, self).__init__()
         self.train = train
         self.cfg = cfg
         self.transform = get_data_transform(cfg.data.transforms, train=train)
-        self.imgs, self.labels = load_domainnet(base_dir=self.cfg.data.data_path, 
-                                                domain=domain, 
-                                                train=train)
+        self.imgs, self.labels = load_domainnet(base_dir=self.cfg.data.data_path, domain=domain, train=train)
 
     def __len__(self) -> int:
         return len(self.imgs)
-        
+
     def __getitem__(self, index: int) -> dict:
         img, label = self.imgs[index], self.labels[index]
         if len(img.split()) != 3:
@@ -45,7 +44,18 @@ def load_domainnet(base_dir: str, domain: str, train: bool) -> Tuple[List, List]
         Returns:
             - Two lists containing image data and labels.
     """
-    label_dict = {'bird':0, 'feather':1, 'headphones':2, 'ice_cream':3, 'teapot':4, 'tiger':5, 'whale':6, 'windmill':7, 'wine_glass':8, 'zebra':9}
+    label_dict = {
+        'bird': 0,
+        'feather': 1,
+        'headphones': 2,
+        'ice_cream': 3,
+        'teapot': 4,
+        'tiger': 5,
+        'whale': 6,
+        'windmill': 7,
+        'wine_glass': 8,
+        'zebra': 9
+    }
     if train:
         paths, text_labels = np.load('{}DomainNet/split/{}_train.pkl'.format(base_dir, domain), allow_pickle=True)
     else:

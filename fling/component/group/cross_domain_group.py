@@ -8,6 +8,7 @@ from fling.utils import Logger, get_weights
 from fling.component.client import ClientTemplate
 from fling.component.group import ParameterServerGroup
 
+
 @GROUP_REGISTRY.register('cross_domain_group')
 class CrossDomainServerGroup(ParameterServerGroup):
     r"""
@@ -17,10 +18,10 @@ class CrossDomainServerGroup(ParameterServerGroup):
 
     def __init__(self, args: dict, logger: Logger):
         super(CrossDomainServerGroup, self).__init__(args, logger)
-        self.domains = args.data.domains.split(',') 
+        self.domains = args.data.domains.split(',')
         self.num_user = args.client.client_num
-        self.clients = {domain:[] for domain in self.domains}
-    
+        self.clients = {domain: [] for domain in self.domains}
+
     def initialize(self) -> None:
         r"""
         Overview:
@@ -34,7 +35,10 @@ class CrossDomainServerGroup(ParameterServerGroup):
         """
         # Step 1.
         fed_keys = get_weights(
-            self.clients[self.domains[0]][0].model, self.args.group.aggregation_parameters, return_dict=True, include_non_param=True
+            self.clients[self.domains[0]][0].model,
+            self.args.group.aggregation_parameters,
+            return_dict=True,
+            include_non_param=True
         ).keys()
 
         # Step 2.
@@ -47,7 +51,7 @@ class CrossDomainServerGroup(ParameterServerGroup):
             for k, v in sd.items():
                 if k in glob_dict.keys():
                     glob_dict[k] = v
-        
+
         self.server.glob_dict = glob_dict
 
         self.set_fed_keys()
@@ -59,9 +63,11 @@ class CrossDomainServerGroup(ParameterServerGroup):
         self.logger.logging(str(self.clients[self.domains[0]][0].model))
         self.logger.logging('All clients initialized.')
         self.logger.logging(
-            'Parameter number in each model: {:.2f}M'.format(get_params_number(self.clients[self.domains[0]][0].model) / 1e6)
+            'Parameter number in each model: {:.2f}M'.format(
+                get_params_number(self.clients[self.domains[0]][0].model) / 1e6
+            )
         )
-    
+
     def append(self, domain: str, client: ClientTemplate) -> None:
         r"""
         Overview:
@@ -73,7 +79,7 @@ class CrossDomainServerGroup(ParameterServerGroup):
             - None
         """
         self.clients[domain].append(client)
-    
+
     def aggregate(self, train_round: int, aggr_parameter_args: dict = None) -> int:
         r"""
         Overview:
@@ -88,8 +94,9 @@ class CrossDomainServerGroup(ParameterServerGroup):
         # Pick out the parameters for aggregation if needed.
         if aggr_parameter_args is not None:
             fed_keys_bak = self.clients[self.domains[0]][0].fed_keys
-            new_fed_keys = get_weights(self.clients[self.domains[0]][0].model, aggr_parameter_args,
-                                       return_dict=True, include_non_param=True).keys()
+            new_fed_keys = get_weights(
+                self.clients[self.domains[0]][0].model, aggr_parameter_args, return_dict=True, include_non_param=True
+            ).keys()
             for domain in self.domains:
                 for client in range(self.num_user):
                     self.clients[domain][client].set_fed_keys(new_fed_keys)
@@ -113,16 +120,6 @@ class CrossDomainServerGroup(ParameterServerGroup):
 
         return trans_cost
 
-    def flush(self) -> None:
-        r"""
-        Overview:
-            Reset this group and clear all server and clients.
-        Returns:
-            - None
-        """
-        self.clients = {}
-        self.server = None
-    
     def sync(self) -> None:
         r"""
         Overview:
@@ -132,9 +129,9 @@ class CrossDomainServerGroup(ParameterServerGroup):
         """
         state_dict = self.server.glob_dict
         for domain in self.domains:
-                for client in range(self.num_user):
-                    self.clients[domain][client].update_model(state_dict)
-    
+            for client in range(self.num_user):
+                self.clients[domain][client].update_model(state_dict)
+
     def set_fed_keys(self) -> None:
         r"""
         Overview:
@@ -143,7 +140,5 @@ class CrossDomainServerGroup(ParameterServerGroup):
             - None
         """
         for domain in self.domains:
-                for client in range(self.num_user):
-                    self.clients[domain][client].set_fed_keys(self.server.glob_dict.keys())
-    
-
+            for client in range(self.num_user):
+                self.clients[domain][client].set_fed_keys(self.server.glob_dict.keys())

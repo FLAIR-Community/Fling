@@ -3,7 +3,7 @@ from easydict import EasyDict
 exp_args = dict(
     data=dict(
         dataset='domainnet',
-        data_path='./data/DomainNet/',
+        data_path='D:/My_Codes/Federate-Learning/Data/DomainNet/',
         domains='clipart,infograph,painting,quickdraw,real,sketch',
         transforms=dict(
             include_default=False,
@@ -21,15 +21,17 @@ exp_args = dict(
         input_channel=3,
         class_number=10,
     ),
-    client=dict(name='cross_domain_client', client_num=2),
+    client=dict(name='cross_domain_client', client_num=1),
     server=dict(name='cross_domain_server'),
     group=dict(name='cross_domain_group', aggregation_method='avg'),
-    other=dict(test_freq=3, logging_path='./logging/domainnet_fedavg_resnet_iid')
+    other=dict(test_freq=1, logging_path='./logging/domainnet_fedavg_resnet_iid')
 )
 
 exp_args = EasyDict(exp_args)
 
 if __name__ == '__main__':
+    import sys
+    sys.path.insert(0, r'd:\\My_Codes\\TODO\\Fling')
     from fling.pipeline import cross_domain_pipeline
 
     cross_domain_pipeline(exp_args, seed=0)

@@ -8,4 +8,3 @@ from .fedprox_client import FedProxClient
 from .fedmoon_client import FedMOONClient
 from .scaffold_client import SCAFFOLDClient
 from .cross_domain_client import CrossDomainClient
-from .build_client import get_cross_domain_client

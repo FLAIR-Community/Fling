@@ -15,15 +15,3 @@ def get_client(
         test_dataset=test_dataset,
         **kwargs
     )
-def get_cross_domain_client(
-        args: dict, client_id: int, domain: str, train_dataset: Dataset, test_dataset: Dataset = None, **kwargs
-) -> ClientTemplate:
-    return CLIENT_REGISTRY.build(
-        args.client.name,
-        args=args,
-        client_id=client_id,
-        domain=domain,
-        train_dataset=train_dataset,
-        test_dataset=test_dataset,
-        **kwargs       
-)

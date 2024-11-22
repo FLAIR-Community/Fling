@@ -1,7 +1,7 @@
 import os
 import torch
 
-from fling.component.client import get_cross_domain_client
+from fling.component.client import get_client
 from fling.component.server import get_server
 from fling.component.group import get_group
 from fling.dataset import get_cross_domain_dataset
@@ -28,7 +28,6 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
     # Construct logger.
     logger = Logger(args.other.logging_path)
 
-    
     # Load dataset with domains.
     domains = args.data.domains.split(',')
     train_set = {}
@@ -37,7 +36,6 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
         train_set[domain] = get_cross_domain_dataset(args, domain, train=True)
         test_set[domain] = get_cross_domain_dataset(args, domain, train=False)
 
-
     # Split dataset into clients.
     train_sets = {}
     test_sets = {}
@@ -45,23 +43,22 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
         train_sets[domain] = data_sampling(train_set[domain], args, seed, train=True)
         test_sets[domain] = data_sampling(test_set[domain], args, seed, train=False)
 
-
     # Initialize group, clients and server.
     group = get_group(args, logger)
     group.server = get_server(args, test_dataset=test_sets)
     for domain in domains:
         for i in range(args.client.client_num):
-            group.append(domain,
-                get_cross_domain_client(
+            group.append(
+                domain,
+                get_client(
                     args=args,
-                    domain=domain,
                     client_id=i,
                     train_dataset=train_sets[domain][i],
-                    test_dataset=test_sets[domain][0]
+                    test_dataset=test_sets[domain][0],
+                    domain=domain
                 )
             )
     group.initialize()
-
 
     # Setup lr_scheduler.
     lr_scheduler = LRScheduler(base_lr=args.learn.optimizer.lr, args=args.learn.scheduler)
@@ -81,9 +78,11 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
         # Local training for each participated client and add results to the monitor.
         # Use multiprocessing for acceleration.
         train_results = launcher.launch(
-            clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)]
-                                        , lr=cur_lr, task_name='train')
-        
+            clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)],
+            lr=cur_lr,
+            task_name='train'
+        )
+
         for item in train_results:
             train_monitor.append(item)
 
@@ -94,8 +93,11 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
             test_results = launcher.launch(
-                clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)]
-                                           , task_name='test')
+                clients=[
+                    group.clients[domain][client] for domain in domains for client in range(args.client.client_num)
+                ],
+                task_name='test'
+            )
             for item in test_results:
                 test_monitor.append(item)
 
@@ -120,8 +122,11 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
             # Testing for each client and add results to the monitor
             # Use multiprocessing for acceleration.
             test_results = launcher.launch(
-                clients=[group.clients[domain][client] for domain in domains for client in range(args.client.client_num)]
-                                           , task_name='test')
+                clients=[
+                    group.clients[domain][client] for domain in domains for client in range(args.client.client_num)
+                ],
+                task_name='test'
+            )
             for item in test_results:
                 test_monitor.append(item)
 
