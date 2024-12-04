@@ -87,6 +87,7 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 Fling currently supports [DomainNet](https://ai.bu.edu/M3SDA/), with plans to extend support to additional cross-domain datasets in the future. The **flzoo/domainnet/** folder provides demos of various algorithms on DomainNet.
 
+
 | Algorithm | Reference Link                                               | Categories                                                   | Demo                                                   |
 | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
 | FedAvg    | [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf) | ![generic](https://img.shields.io/badge/-generic-brightgreen)![cross-domain](https://img.shields.io/badge/-crossdomain-blue) | python flzoo/cifar10/cifar10_fedavg_resnet_config.py   |

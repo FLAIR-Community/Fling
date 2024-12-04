@@ -20,5 +20,5 @@ def tensor_reduce(func: Callable, sequence: List[Tensor], device: str) -> Tensor
     ret = sequence[0].clone().to(device)
     for i in range(1, len(sequence)):
         ret = func(ret, sequence[i].to(device))
-    ret.to(orig_device)
+    ret = ret.to(orig_device)
     return ret
