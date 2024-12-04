@@ -70,40 +70,35 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 - Support for a variety of algorithms and datasets.
 - Support multiprocessing training on each client for better efficiency.
-- Using single GPU to simulate Federated Learning process (multi-GPU version will be released soon).
-- Strong visualization utilities. See [README](https://github.com/FLAIR-Community/Fling/tree/main/fling/utils/visualize_utils/README.md) for detailed information. There are also [demos](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/visualize_utils/demo) for reference.
+- Using single GPU to simulate Federated Learning process.
+- Strong visualization utilities. See this [README](https://github.com/FLAIR-Community/Fling/tree/main/fling/utils/visualize_utils/README.md) file for detailed information. There are also [demos](https://github.com/FLAIR-Community/Fling/blob/main/fling/utils/visualize_utils/demo) for reference.
 
 ## Supported Algorithms
 
-### Generic Federated Learning
+![generic](https://img.shields.io/badge/-generic-brightgreen) &nbsp; Generic federated learning, which finally trains a single global model for all clients.
 
-**FedAvg:** [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf)
+![personalized](https://img.shields.io/badge/-personalized-green) &nbsp; Personalized federated learning, which finally trains a personalized model for each client.
 
-**FedProx:** [Federated Optimization in Heterogeneous Networks](https://arxiv.org/pdf/1812.06127.pdf)
+![attacking](https://img.shields.io/badge/-attacking-darkgreen) &nbsp; Attacking methods, which simulate the attacking process of adversaries and test the robustness of federated learning algorithms.
 
-**FedMOON:** [Model-Contrastive Federated Learning](https://openaccess.thecvf.com/content/CVPR2021/papers/Li_Model-Contrastive_Federated_Learning_CVPR_2021_paper.pdf)
+![cross-domain](https://img.shields.io/badge/-crossdomain-blue) &nbsp; Cross-domain federated learning, which finally trains models for all clients from different domains.
 
-**SCAFFOLD:** [SCAFFOLD: Stochastic Controlled Averaging for Federated Learning ](https://arxiv.org/abs/1910.06378)
+![visualization](https://img.shields.io/badge/-visualization-yellow) &nbsp; Visualization utilities for federated learning.
 
-**FedPart:** [Why Go Full? Elevating Federated Learning Through Partial Network Updates](https://arxiv.org/abs/2410.11559)
-
-### Personalized Federated Learning
-
-**FedPer:** [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf)
-
-**FedBN:** [FedBN: Federated Learning on Non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf)
-
-**FedRoD:** [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn)
-
-**pFedSD:** [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434)
-
-**FedCAC:** [Bold but Cautious: Unlocking the Potential of Personalized Federated Learning through Cautiously Aggressive Collaboration]()
-
-### Attacking Methods
-
-**DLG:** [Deep Leakage from Gradients](https://arxiv.org/abs/1906.08935)
-
-**iDLG:** [Inverting Gradients -- How easy is it to break privacy in federated learning?](https://arxiv.org/abs/2003.14053)
+| Algorithm | Reference Link                                               | Categories                                                   | Demo                                                   |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
+| FedAvg    | [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf) | ![generic](https://img.shields.io/badge/-generic-brightgreen)![cross-domain](https://img.shields.io/badge/-crossdomain-blue) | python flzoo/cifar10/cifar10_fedavg_resnet_config.py   |
+| FedProx   | [Federated Optimization in Heterogeneous Networks](https://arxiv.org/pdf/1812.06127.pdf) | ![generic](https://img.shields.io/badge/-generic-brightgreen) | python flzoo/cifar10/cifar10_fedprox_resnet_config.py  |
+| FedMOON   | [Model-Contrastive Federated Learning](https://openaccess.thecvf.com/content/CVPR2021/papers/Li_Model-Contrastive_Federated_Learning_CVPR_2021_paper.pdf) | ![generic](https://img.shields.io/badge/-generic-brightgreen) | python flzoo/cifar10/cifar10_fedmoon_cnn_config.py     |
+| SCAFFOLD  | [SCAFFOLD: Stochastic Controlled Averaging for Federated Learning ](https://arxiv.org/abs/1910.06378) | ![generic](https://img.shields.io/badge/-generic-brightgreen) | python flzoo/cifar10/cifar10_scaffold_resnet_config.py |
+| FedPart   | [Why Go Full? Elevating Federated Learning Through Partial Network Updates](https://arxiv.org/abs/2410.11559) | ![generic](https://img.shields.io/badge/-generic-brightgreen)![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedpart_resnet8_config.py |
+| FedPer    | [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedper_resnet_config.py   |
+| FedBN     | [FedBN: Federated Learning on Non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedbn_resnet_config.py    |
+| FedRoD    | [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedrod_resnet_config.py   |
+| pFedSD    | [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_pfedsd_resnet_config.py   |
+| FedCAC    | [Bold but Cautious: Unlocking the Potential of Personalized Federated Learning through Cautiously Aggressive Collaboration](https://arxiv.org/abs/2309.11103) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedcac_resnet_config.py   |
+| DLG       | [Deep Leakage from Gradients](https://arxiv.org/abs/1906.08935) | ![attacking](https://img.shields.io/badge/-attacking-darkgreen) | python fling/utils/attack_utils/demo/demo_dlg.py       |
+| iDLG      | [Inverting Gradients -- How easy is it to break privacy in federated learning?](https://arxiv.org/abs/2003.14053) | ![attacking](https://img.shields.io/badge/-attacking-darkgreen) | python fling/utils/attack_utils/demo/demo_idlg.py      |
 
 ## Feedback and Contribution
 
@@ -112,7 +107,7 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 ## Acknowledgments
 
-Special thanks to [@kxzxvbk](https://github.com/kxzxvbk), [@chuchugloria](https://github.com/chuchugloria), [@shonnyx](https://github.com/shonnyx), [@XinghaoWu](https://github.com/XinghaoWu), 
+Special thanks to [@kxzxvbk](https://github.com/kxzxvbk), [@chuchugloria](https://github.com/chuchugloria), [@KeyGuo](https://github.com/KyeGuo), [@XinHao-96](https://github.com/XinHao-96), [@Ando233](https://github.com/Ando233), [@shonnyx](https://github.com/shonnyx).
 
 
 ## Citation
