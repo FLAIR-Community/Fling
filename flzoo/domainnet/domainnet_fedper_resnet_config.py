@@ -3,7 +3,7 @@ from easydict import EasyDict
 exp_args = dict(
     data=dict(
         dataset='domainnet',
-        data_path='./data/DomainNet/',
+        data_path='./data/',
         domains='clipart,infograph,painting,quickdraw,real,sketch',
         transforms=dict(
             include_default=False,
