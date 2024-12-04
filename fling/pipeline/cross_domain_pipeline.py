@@ -4,7 +4,7 @@ import torch
 from fling.component.client import get_client
 from fling.component.server import get_server
 from fling.component.group import get_group
-from fling.dataset import get_cross_domain_dataset
+from fling.dataset import get_dataset
 from fling.utils.data_utils import data_sampling
 from fling.utils import Logger, compile_config, VariableMonitor, LRScheduler, get_launcher
 
@@ -33,8 +33,8 @@ def cross_domain_pipeline(args: dict, seed: int = 0) -> None:
     train_set = {}
     test_set = {}
     for domain in domains:
-        train_set[domain] = get_cross_domain_dataset(args, domain, train=True)
-        test_set[domain] = get_cross_domain_dataset(args, domain, train=False)
+        train_set[domain] = get_dataset(args, train=True, domain=domain)
+        test_set[domain] = get_dataset(args, train=False, domain=domain)
 
     # Split dataset into clients.
     train_sets = {}

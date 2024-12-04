@@ -9,4 +9,3 @@ from .sogou_news import SogouNewsDataset
 from .emnist import EMNISTDataset
 from .domainnet import DomainNetDataset
 from .build_dataset import get_dataset
-from .build_dataset import get_cross_domain_dataset
