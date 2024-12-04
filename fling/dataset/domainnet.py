@@ -13,6 +13,8 @@ from fling.utils.registry_utils import DATASET_REGISTRY
 class DomainNetDataset(Dataset):
     r"""
     Implementation for DomainNet dataset. 
+    You are required to download the original data file from the website manually.
+    Details can be viewed in: https://ai.bu.edu/M3SDA/
     """
 
     def __init__(self, cfg: dict, domain: str, train: bool):

@@ -23,8 +23,15 @@ exp_args = dict(
     ),
     client=dict(name='cross_domain_client', client_num=1),
     server=dict(name='cross_domain_server'),
-    group=dict(name='cross_domain_group', aggregation_method='avg'),
-    other=dict(test_freq=3, logging_path='./logging/domainnet_fedavg_resnet_iid')
+    group=dict(name='cross_domain_group', 
+               aggregation_method='avg',
+               # Only aggregate parameters whose name does not contain the keyword "fc".
+                aggregation_parameters=dict(
+                    name='except',
+                    keywords=['fc'],
+                )
+    ),
+    other=dict(test_freq=3, logging_path='./logging/domainnet_fedper_resnet_iid')
 )
 
 exp_args = EasyDict(exp_args)
