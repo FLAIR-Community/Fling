@@ -7,4 +7,5 @@ from .imagenet import ImagenetDataset
 from .ag_news import AGNewsDataset
 from .sogou_news import SogouNewsDataset
 from .emnist import EMNISTDataset
+from .domainnet import DomainNetDataset
 from .build_dataset import get_dataset

@@ -7,3 +7,4 @@ from .fedrod_client import FedRoDClient
 from .fedprox_client import FedProxClient
 from .fedmoon_client import FedMOONClient
 from .scaffold_client import SCAFFOLDClient
+from .cross_domain_client import CrossDomainClient

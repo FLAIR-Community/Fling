@@ -81,9 +81,12 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 
 ![attacking](https://img.shields.io/badge/-attacking-darkgreen) &nbsp; Attacking methods, which simulate the attacking process of adversaries and test the robustness of federated learning algorithms.
 
-![cross-domain](https://img.shields.io/badge/-crossdomain-blue) &nbsp; Cross-domain federated learning, which finally trains models for all clients from different domains.
-
 ![visualization](https://img.shields.io/badge/-visualization-yellow) &nbsp; Visualization utilities for federated learning.
+
+![cross-domain](https://img.shields.io/badge/-crossdomain-blue) &nbsp; Cross-domain scenarios represent feature shift heterogeneity, where data from different clients originate from different domains, resulting in distinct feature distributions. 
+
+Fling currently supports [DomainNet](https://ai.bu.edu/M3SDA/), with plans to extend support to additional cross-domain datasets in the future. The **flzoo/domainnet/** folder provides demos of various algorithms on DomainNet.
+
 
 | Algorithm | Reference Link                                               | Categories                                                   | Demo                                                   |
 | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
@@ -92,8 +95,8 @@ For attacking methods, please refer to our examples in: [demo for attack](https:
 | FedMOON   | [Model-Contrastive Federated Learning](https://openaccess.thecvf.com/content/CVPR2021/papers/Li_Model-Contrastive_Federated_Learning_CVPR_2021_paper.pdf) | ![generic](https://img.shields.io/badge/-generic-brightgreen) | python flzoo/cifar10/cifar10_fedmoon_cnn_config.py     |
 | SCAFFOLD  | [SCAFFOLD: Stochastic Controlled Averaging for Federated Learning ](https://arxiv.org/abs/1910.06378) | ![generic](https://img.shields.io/badge/-generic-brightgreen) | python flzoo/cifar10/cifar10_scaffold_resnet_config.py |
 | FedPart   | [Why Go Full? Elevating Federated Learning Through Partial Network Updates](https://arxiv.org/abs/2410.11559) | ![generic](https://img.shields.io/badge/-generic-brightgreen)![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedpart_resnet8_config.py |
-| FedPer    | [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedper_resnet_config.py   |
-| FedBN     | [FedBN: Federated Learning on Non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedbn_resnet_config.py    |
+| FedPer    | [Federated Learning with Personalization Layers](https://arxiv.org/pdf/1912.00818v1.pdf) | ![personalized](https://img.shields.io/badge/-personalized-green)![cross-domain](https://img.shields.io/badge/-crossdomain-blue) | python flzoo/cifar10/cifar10_fedper_resnet_config.py   |
+| FedBN     | [FedBN: Federated Learning on Non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf) | ![personalized](https://img.shields.io/badge/-personalized-green)![cross-domain](https://img.shields.io/badge/-crossdomain-blue) | python flzoo/cifar10/cifar10_fedbn_resnet_config.py    |
 | FedRoD    | [On Bridging Generic and Personalized Federated Learning for Image Classification](https://openreview.net/pdf?id=I1hQbx10Kxn) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedrod_resnet_config.py   |
 | pFedSD    | [Personalized Edge Intelligence via Federated Self-Knowledge Distillation](https://ieeexplore.ieee.org/abstract/document/9964434) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_pfedsd_resnet_config.py   |
 | FedCAC    | [Bold but Cautious: Unlocking the Potential of Personalized Federated Learning through Cautiously Aggressive Collaboration](https://arxiv.org/abs/2309.11103) | ![personalized](https://img.shields.io/badge/-personalized-green) | python flzoo/cifar10/cifar10_fedcac_resnet_config.py   |
