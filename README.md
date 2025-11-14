@@ -110,7 +110,7 @@ Fling currently supports [DomainNet](https://ai.bu.edu/M3SDA/), with plans to ex
 
 ## Acknowledgments
 
-Special thanks to [@kxzxvbk](https://github.com/kxzxvbk), [@chuchugloria](https://github.com/chuchugloria), [@KeyGuo](https://github.com/KyeGuo), [@XinHao-96](https://github.com/XinHao-96), [@Ando233](https://github.com/Ando233), [@shonnyx](https://github.com/shonnyx).
+Special thanks to [@kxzxvbk](https://github.com/kxzxvbk), [@chuchugloria](https://github.com/chuchugloria), [@KyeGuo](https://github.com/KyeGuo), [@XinHao-96](https://github.com/XinHao-96), [@Ando233](https://github.com/Ando233), [@shonnyx](https://github.com/shonnyx).
 
 
 ## Citation
